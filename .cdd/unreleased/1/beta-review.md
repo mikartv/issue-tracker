@@ -2,6 +2,13 @@
 section_manifest:
   planned: [Header, ContractIntegrity, IssueContract, ImplementationContract, DiffContext, Findings, Verdict]
   completed: [Header, ContractIntegrity, IssueContract, ImplementationContract, DiffContext, Findings, Verdict]
+rounds:
+  - round: 1
+    verdict: REQUEST CHANGES
+    findings: [F1]
+  - round: 2
+    verdict: APPROVED
+    findings: []
 ---
 
 # β Review — Cycle 1
@@ -179,3 +186,73 @@ None (no D-level findings).
 **Implementation contract:** All 7 axes PASS.  
 **γ artifact completeness:** PASS (gamma-scaffold.md present).  
 **Merge instruction (on APPROVE after F1 fix):** `git checkout main && git merge --no-ff cycle/1 -m "feat: monorepo scaffold + docker + CI (closes issue 1)"`
+
+---
+
+# β Review — Cycle 1 — Round 2
+
+## Header
+
+**Round:** 2  
+**cycle/1 HEAD SHA:** `71f0f12beadc33acd43e04a0e0a867ada5fbe769`  
+**main base SHA:** `d5badeaebcb5daa30eee4ae9e088b5a2dfdbf2a6` (local; no remote — structural constraint per §Debt D4, consistent with R1)  
+**β identity:** `beta@issue-tracker.cdd.cnos` (re-asserted at R2 session start; verified via `git config --get user.email`)  
+**Fixed this round:** `71f0f12` — F1 (B-level, honest-claim, §Debt D2 false `@nestjs/cli` claim)
+
+---
+
+## §F1 Resolution Verification
+
+**Finding F1 (R1):** §Debt D2 falsely claimed `@nestjs/cli` is in devDependencies.
+
+**Fix (α commit `71f0f12`):** `.cdd/unreleased/1/self-coherence.md` §Debt D2 text replaced with accurate description — `@nestjs/cli` is not installed; `ts-node` is the working dev-mode runner for cycle 1.
+
+**β verification:**
+- Grepped §Debt D2 on HEAD: text now reads `"@nestjs/cli` is not installed (not in any devDependencies); `nest start --watch` is not available."
+- Matches exactly the correction β required in R1.
+- Fix-round section appended to self-coherence.md names the finding, the replacement text, and re-audit scope ("No AC, no test, no implementation file touched").
+- No implementation file touched; ACs AC1–AC10 unaffected.
+
+**F1 status: RESOLVED ✅**
+
+---
+
+## §Pre-Merge Gate
+
+| Row | Check | Result | Notes |
+|-----|-------|--------|-------|
+| 1 | Identity truth | ✅ | `git config --get user.email` → `beta@issue-tracker.cdd.cnos`; re-asserted at R2 session start before any β commit |
+| 2 | Canonical-skill freshness | ✅ (structural) | No remote configured; `git fetch --verbose origin main` not executable (same constraint as R1 §Debt D4). Skills loaded at β session start are the only available versions. No evidence of skill changes between R1 and R2. |
+| 3 | Non-destructive merge-test | ✅ | `git merge-tree $(git merge-base main cycle/1) main cycle/1` → clean, no conflicts. R2 diff is documentation-only (1 file, 17 lines, §Debt D2 text). No new SKILL.md frontmatter shipped; no `cn-cdd-verify` or `validate-skill-frontmatter.sh` in this repo surface. `npm run test:all` on HEAD: 6/6 pass (exit 0). |
+| 4 | γ artifact completeness | ✅ | `ls .cdd/unreleased/1/` confirms `gamma-scaffold.md` present. rule 3.11b: ✅ |
+
+**All four gate rows: PASS.**
+
+---
+
+## §CI Status
+
+No GitHub remote configured (structural constraint, §Debt D4). Local test run on R2 HEAD (`71f0f12`):
+
+- API: 2 suites, 4 tests — **PASS**
+- Web: 1 suite, 2 tests — **PASS**
+- Exit: 0
+
+Rule 3.10 fallback: "every workflow that runs on cycle branch" = 0 workflows (no remote). CI gate satisfied by local test run evidence, consistent with R1 treatment.
+
+---
+
+## §Verdict Round 2
+
+**Verdict:** APPROVED
+
+**Round:** 2  
+**Fixed this round:** `71f0f12` closes F1 (B-level honest-claim — §Debt D2 false `@nestjs/cli` claim)  
+**Findings count:** 0 unresolved  
+**Branch CI state:** local green (6/6 tests pass, exit 0)  
+**All 10 ACs:** PASS (unchanged from R1 — fix was documentation-only)  
+**Implementation contract:** All 7 axes PASS (unchanged)  
+**γ artifact completeness:** PASS  
+**Verdict-shape lint:** no unresolved findings; no conditional qualifier; single terminal verdict — PASS  
+
+**Merge instruction:** `git checkout main && git merge --no-ff cycle/1 -m "feat: monorepo scaffold + docker + CI (Closes #1)"`
