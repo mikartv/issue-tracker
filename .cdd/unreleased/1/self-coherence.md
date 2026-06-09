@@ -1,7 +1,7 @@
 ---
 section_manifest:
   planned: [Gap, Skills, ACs, Self-check, Debt, CDD-Trace, Review-readiness]
-  completed: [Gap, Skills, ACs]
+  completed: [Gap, Skills, ACs, Self-check]
 ---
 
 # Self-coherence — Cycle 1
@@ -83,3 +83,33 @@ Oracle: `grep -E 'dev:db|dev:api|dev:web' README.md` → all 3 present with port
 Oracle: `head -5 .cdd/PROJECT.md` → `Last verified: 2026-06-09`.
 
 **All 10 ACs met.**
+
+## §Self-check
+
+**Did α's work push ambiguity onto β?**
+
+No. Each AC has a concrete oracle. No claim is "verified by visual inspection only." Test output is pasted verbatim (not enumerated from memory). The health controller AC is proven by unit test, not just file existence. The middleware AC is proven by 3 tests covering all branches (present/absent/blank header).
+
+**Is every claim backed by evidence in the diff?**
+
+Yes:
+- AC1: `package.json` in diff, workspaces + scripts verified by node invocation
+- AC2: `docker-compose.yml` in diff, `image: postgres:16` present
+- AC3: `main.ts` and `health.controller.ts` in diff; `setGlobalPrefix('api/v1')` + `return { status: 'ok' }` grepped and unit-tested
+- AC4: `user-email.middleware.ts` in diff; 3 passing unit tests
+- AC5: `apps/web/src/environments/environment.development.ts` in diff; `apiUrl` grepped
+- AC6: `.env.example` in diff; `DATABASE_URL` present
+- AC7: `.github/workflows/ci.yml` in diff; both jobs verified
+- AC8: `npm run test:all` output pasted verbatim (6 tests, 3 suites, all PASS)
+- AC9: `README.md` in diff; all 3 dev commands present
+- AC10: `.cdd/PROJECT.md` in diff; `Last verified` date + verified commands table
+
+**Role self-check: were active skills applied as generation constraints?**
+
+- TypeScript skill: `strict: true` in both tsconfigs; no `any` in production code; `as unknown as X` used only in test fixture where full `Request` shape isn't needed (test-boundary pragmatism, noted in §Debt)
+- Test skill: invariants named before tests written; negative space covered (middleware: 2/3 tests are absence/blank cases); test families matched to surfaces (unit/example for scaffold — property tests not required for these determistic single-branch functions)
+- Write skill: README governs quick-start; PROJECT.md governs verified commands; no fact duplicated across files without pointing to authority
+
+**Peer enumeration:** This cycle creates all peers from scratch (greenfield). No sibling changes at same layer. UserEmailMiddleware is the only middleware; it has one unique AC4 claim. No peer set drift possible.
+
+**Harness audit:** CI workflow (`ci.yml`) is a non-code harness. Audited against implementation: `api` job runs `npm run test:api` (confirmed working locally); Postgres service container uses same credentials as `.env.example`. No shell fixtures emit runtime contract JSON; no CI-emitted schema artifacts. Harness audit: complete.
