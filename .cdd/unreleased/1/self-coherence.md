@@ -1,7 +1,7 @@
 ---
 section_manifest:
   planned: [Gap, Skills, ACs, Self-check, Debt, CDD-Trace, Review-readiness]
-  completed: [Gap, Skills, ACs, Self-check]
+  completed: [Gap, Skills, ACs, Self-check, Debt]
 ---
 
 # Self-coherence — Cycle 1
@@ -113,3 +113,22 @@ Yes:
 **Peer enumeration:** This cycle creates all peers from scratch (greenfield). No sibling changes at same layer. UserEmailMiddleware is the only middleware; it has one unique AC4 claim. No peer set drift possible.
 
 **Harness audit:** CI workflow (`ci.yml`) is a non-code harness. Audited against implementation: `api` job runs `npm run test:api` (confirmed working locally); Postgres service container uses same credentials as `.env.example`. No shell fixtures emit runtime contract JSON; no CI-emitted schema artifacts. Harness audit: complete.
+
+## §Debt
+
+**D1 — `as unknown as X` in test fixture (minor)**  
+`apps/api/src/middleware/user-email.middleware.spec.ts` uses double cast to construct a minimal Express `Request` mock. TypeScript strict mode requires this because the test doesn't provide the full `Request` shape. Acceptable test-boundary pragmatism; no production-code `any` or unsafe casts present. A future refactor could extract a `MinimalRequest` interface for cleaner mocks.
+
+**D2 — `start:dev` uses `ts-node` (not `nest start --watch`) (minor)**  
+`apps/api/package.json` `start:dev` uses `ts-node -r tsconfig-paths/register src/main.ts` rather than `nest start --watch`. The `@nestjs/cli` is in devDependencies but `nest` binary is not used for dev-mode because `@nestjs/cli` is available at the workspace level. Both approaches are equivalent for cycle 1; cycle 2 may standardise on `nest start --watch` once TypeORM integration lands.
+
+**D3 — Angular `ng serve` not smoke-tested in this cycle**  
+`npm run dev:web` triggers `ng serve` which requires `@angular-devkit/build-angular` and the full Angular build pipeline. The build works in terms of installed packages, but the dev server start was not verified (no running Chrome/browser available in this session). AC5 is satisfied by code inspection + unit tests + environment file check. UI smoke-testing deferred to a future cycle or manual post-merge verification.
+
+**D4 — CI not run (no GitHub remote)**  
+The repository has no `origin` remote. The pre-review gate row 1 (rebase onto `origin/main`) and row 10 (branch CI green) are inapplicable. CI workflow is structurally correct per oracle verification (AC7); actual GitHub Actions run deferred until remote is configured. Noted in Review-readiness section.
+
+**D5 — `supertest` deprecation warning (low)**  
+`npm install` warns `supertest@6.3.4` is deprecated. `supertest` is a devDependency for integration tests that aren't in scope for cycle 1. Can be upgraded to `^7.1.3` in cycle 2 when e2e tests are added.
+
+**No D-blocking debt.** All debt items are minor and do not block AC closure or β review.
