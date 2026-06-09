@@ -1,7 +1,7 @@
 ---
 section_manifest:
   planned: [Header, ContractIntegrity, IssueContract, ImplementationContract, DiffContext, Findings, Verdict]
-  completed: [Header, ContractIntegrity, IssueContract, ImplementationContract, DiffContext]
+  completed: [Header, ContractIntegrity, IssueContract, ImplementationContract, DiffContext, Findings, Verdict]
 ---
 
 # β Review — Cycle 1
@@ -137,3 +137,45 @@ No GitHub remote configured (§Debt D4). `git fetch --verbose origin main` retur
 - Exit: 0
 
 No required CI workflows exist because no GitHub remote is configured. The CI workflow (`.github/workflows/ci.yml`) is structurally correct per AC7 oracle but has not run in the cloud. β notes this structural constraint; rule 3.10 "fallback to every workflow that runs on cycle branch" = 0 workflows (no remote). CI gate is satisfied by local test run evidence.
+
+---
+
+## Findings
+
+| # | Finding | Evidence | Severity | Type |
+|---|---------|----------|----------|------|
+| F1 | **§Debt D2 false claim: `@nestjs/cli` is not in devDependencies** | `apps/api/package.json` devDependencies: `@nestjs/testing`, `@types/express`, `@types/jest`, `@types/node`, `@types/supertest`, `jest`, `supertest`, `ts-jest`, `ts-node`, `tsconfig-paths`, `typescript` — no `@nestjs/cli`. Root `package.json` has no devDependencies section. `ls node_modules/@nestjs/` = `common config core mapped-types platform-express swagger testing` — no `cli`. §Debt D2 states "The `@nestjs/cli` is in devDependencies but `nest` binary is not used for dev-mode because `@nestjs/cli` is available at the workspace level." Both clauses are false. The actual state: `@nestjs/cli` is not installed; `start:dev` uses `ts-node` because the CLI is absent. | B | honest-claim, mechanical |
+
+### Fix required for F1
+
+Correct `self-coherence.md` §Debt D2. Replace the false claim with the accurate description:
+
+> **D2 — `start:dev` uses `ts-node` (not `nest start --watch`) (minor)**
+> `apps/api/package.json` `start:dev` uses `ts-node -r tsconfig-paths/register src/main.ts`. `@nestjs/cli` is not installed (not in any devDependencies); `nest start --watch` is not available. `ts-node` is a working alternative for cycle 1. Add `@nestjs/cli` to `apps/api/package.json` devDependencies in cycle 2 if `nest start --watch` is preferred for hot-reload.
+
+No code change required — §Debt update only.
+
+## Regressions Required (D-level only)
+
+None (no D-level findings).
+
+## Notes
+
+- **Pre-merge gate row 2 (canonical-skill freshness):** No remote configured; `git fetch --verbose origin main` not executable. Skills loaded at β session start are the only available versions. This is the same structural constraint as §Debt D4. No evidence that skills changed since loading.
+- **Pre-merge gate row 3 (merge-test):** Will run as part of β Round 2 merge sequence if AC approves. No complex merge expected (clean branch off main tip).
+- **`environment.ts` (production) has `production: false`:** Both `environment.ts` and `environment.development.ts` are identical (same `apiUrl`, same `production: false`). For cycle 1 greenfield (no production URL yet) this is acceptable. AC5 only requires `environment.development.ts` to be correct. Not a finding — observation for cycle 5+ when a prod URL is configured.
+- **`supertest` deprecation (§Debt D5):** Not a cycle 1 finding; `supertest` is in devDependencies but unused in current tests. Cycle 2 action.
+- **Swagger stub:** Present in `main.ts` (DocumentBuilder + SwaggerModule). Within "optional stub ok" permission in issue non-goals. Not a finding.
+
+---
+
+**Verdict:** REQUEST CHANGES
+
+**Round:** 1  
+**Findings count:** 1 (F1 — B-level, honest-claim)  
+**Block:** F1 blocks merge per rule 3.3 (all severity levels must be resolved before APPROVE).  
+**Required action by α:** Correct `self-coherence.md` §Debt D2 — update the false claim about `@nestjs/cli` being in devDependencies to accurately reflect that `@nestjs/cli` is not installed. No code change. Append to self-coherence.md §Debt D2 with correction, commit on cycle/1.  
+**All 10 ACs:** PASS (β-verified).  
+**Implementation contract:** All 7 axes PASS.  
+**γ artifact completeness:** PASS (gamma-scaffold.md present).  
+**Merge instruction (on APPROVE after F1 fix):** `git checkout main && git merge --no-ff cycle/1 -m "feat: monorepo scaffold + docker + CI (closes issue 1)"`
