@@ -1,7 +1,7 @@
 ---
 section_manifest:
   planned: [Gap, Skills, ACs, Self-check, Debt, CDD-Trace, Review-readiness]
-  completed: [Gap, Skills, ACs, Self-check, Debt]
+  completed: [Gap, Skills, ACs, Self-check, Debt, CDD-Trace]
 ---
 
 # Self-coherence — Cycle 1
@@ -132,3 +132,29 @@ The repository has no `origin` remote. The pre-review gate row 1 (rebase onto `o
 `npm install` warns `supertest@6.3.4` is deprecated. `supertest` is a devDependency for integration tests that aren't in scope for cycle 1. Can be upgraded to `^7.1.3` in cycle 2 when e2e tests are added.
 
 **No D-blocking debt.** All debt items are minor and do not block AC closure or β review.
+
+## §CDD Trace
+
+| Step | Description | Evidence |
+|------|-------------|----------|
+| 0 | Issue selected | Issue 1 — Monorepo scaffold + Docker + CI; `cycle/1` branch |
+| 1 | Issue read | `.cdd/issues/1/ISSUE.md` — 10 ACs, non-goals, implementation contract |
+| 2 | Branch | `cycle/1` — already created by γ; α switched to it (`git switch cycle/1`) |
+| 3 | Source-of-truth docs read | `.cdd/STACK.md`, `.cdd/SCOPE.md`, `.cdd/PROJECT.md`, `.cdd/unreleased/1/gamma-scaffold.md` |
+| 4 | Skills loaded | Tier 1: CDD.md + alpha/SKILL.md; Tier 2: typescript/SKILL.md + test/SKILL.md; Tier 3: write/SKILL.md |
+| 5 | Design | Not required — implementation contract fully pinned by δ; architecture is a standard NestJS+Angular monorepo with no novel design choices |
+| 6 | Implementation | Files authored (30+ new files across `apps/api/`, `apps/web/`, root, `.github/`). Caller paths: `main.ts` → `AppModule` → `HealthModule` → `HealthController`; `AppModule` configures `UserEmailMiddleware` for all routes. Tests cover all new public surfaces. Commit: `4a5ff33` |
+| 7 | Self-coherence | This document — §Gap through §CDD Trace written incrementally, one section per commit. Commits: `f450cac` (§Gap), `ea0099a` (§Skills), `7856d3d` (§ACs), `b2fb15a` (§Self-check), `44967d8` (§Debt), current (§CDD Trace) |
+
+**Artifact enumeration (pre-review gate row 11):**  
+All α-authored files are referenced in §ACs above. New modules with non-test callers:
+- `HealthModule` → imported by `AppModule` (`app.module.ts`)
+- `UserEmailMiddleware` → applied by `AppModule` (`consumer.apply(UserEmailMiddleware).forRoutes('*')`)
+- `HealthController` → registered in `HealthModule`
+
+**Test caller trace (pre-review gate row 12):**  
+- `HealthController.check()` — called by `health.controller.spec.ts` (test) and by NestJS routing at `GET /api/v1/health` (main.ts bootstrap path)
+- `UserEmailMiddleware.use()` — called by `user-email.middleware.spec.ts` (test) and by NestJS middleware pipeline on every request
+
+**Git identity:**  
+Author email for α commits on `cycle/1`: `alpha@issue-tracker.cdd.cnos` (set via `git config user.email` at session start; verified by `git log -1 --format='%ae'`).
