@@ -10,26 +10,33 @@ Minimal internal issue tracker (projects, issues, statuses, comments). v1 scope:
 
 ## Quick start
 
-Application code lands in cycle 1+. After scaffold:
-
 ```bash
 cp .env.example .env
 npm install
-npm run dev:db    # Postgres via Docker
-npm run dev:api   # NestJS API (port 3000)
-npm run dev:web   # Angular dev server
-npm run test:all  # api + web tests
+npm run dev:db    # Start Postgres 16 via Docker (port 5432)
+npm run dev:api   # Start NestJS API in watch mode (port 3000)
+npm run dev:web   # Start Angular dev server (port 4200)
+npm run test:all  # Run api + web test suites
 ```
+
+### API endpoints
+
+- `GET /api/v1/health` → `{ "status": "ok" }`
+- Swagger UI: `http://localhost:3000/api/docs`
 
 ## Project structure
 
 ```text
 issue-tracker/
 ├── apps/
-│   ├── api/          # NestJS REST API
-│   └── web/          # Angular SPA
+│   ├── api/          # NestJS REST API (/api/v1, Swagger at /api/docs)
+│   └── web/          # Angular 17 SPA (standalone components)
 ├── .cdd/             # CDD project binding (scope, stack, issues)
+├── .github/
+│   └── workflows/
+│       └── ci.yml    # GitHub Actions: api + web test jobs
 ├── docker-compose.yml
+├── .env.example
 └── package.json      # npm workspaces root
 ```
 
