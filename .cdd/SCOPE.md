@@ -13,6 +13,7 @@ Single-team, no multi-tenant in v1.
 | Stack & conventions | `.cdd/STACK.md` | layout, versions, patterns |
 | Cycle list | `.cdd/ISSUES.md` | index only |
 | Per-cycle contract | `.cdd/issues/N/ISSUE.md` | gap, AC, non-goals for dispatch |
+| Project MCP | `.cdd/PROJECT.md` | verified repo map, build/test (updated each cycle) |
 | DB schema (from cycle 2) | `apps/api/src/migrations/` | TypeORM migrations |
 | API shape (from cycle 3) | Swagger at `/api/docs` | generated from Nest decorators |
 | UI routes (from cycle 6) | `apps/web/src/app/app.routes.ts` | |
@@ -52,10 +53,22 @@ Cycles are defined in `.cdd/ISSUES.md`.
 
 - **Auth stub:** optional request header `X-User-Email`. If absent or empty, actor is `"anonymous"`. Used for comment author and audit fields only; no enforcement beyond logging the value.
 - **Status transitions:** forward-only along `open` → `in_progress` → `done` → `closed`. Skipping steps and reverting to a previous status are rejected with `400`.
-- **Archived projects:** readable and listable; `rename` and `archive` again rejected; creating new issues in an archived project rejected with `409`.
+- **Archived projects:** readable and listable; `PATCH` rename on archived project → `409`; `POST` archive when already archived → `409`; creating new issues in an archived project → `409`.
 - **Assignee:** free-text string stored as-is; no validation beyond max length (255); nullable.
 - **Timestamps:** all stored and returned in UTC ISO-8601 (`timestamptz` in Postgres).
 - **IDs:** UUID v4 for all primary keys, exposed as strings in JSON.
+
+## Data model (v1)
+
+All entities include `id` (UUID pk), `created_at`, `updated_at` (`timestamptz`, UTC in JSON).
+
+| Entity | Fields | Constraints |
+|--------|--------|-------------|
+| **Project** | `name`, `archived` | `name` required, max 255 chars; `archived` boolean default `false` |
+| **Issue** | `project_id`, `title`, `description`, `status`, `priority`, `assignee` | `title` required, max 255; `description` nullable text; `status` / `priority` per enums above; `assignee` nullable, max 255 |
+| **Comment** | `issue_id`, `author`, `body` | `author` required, max 255; `body` required text; no `updated_at` semantics (immutable in v1) |
+
+FK: `Issue.project_id` → `Project.id`; `Comment.issue_id` → `Issue.id`.
 
 ## Definition of Done (project-level)
 
