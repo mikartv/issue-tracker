@@ -1,6 +1,6 @@
 # Issues Index
 
-Per-cycle contracts live at `.cdd/issues/N/ISSUE.md`. γ MUST NOT dispatch α without a populated contract for that cycle.
+Per-cycle contracts live at `.cdd/issues/N/ISSUE.md`. γ MUST NOT dispatch α without a populated contract for that cycle. Dispatch prompts read the local file (see `.cdd/STACK.md` §CDD dispatch) — not `gh issue view`.
 
 | ID | Title | Status | Mode | Branch | Contract |
 |----|-------|--------|------|--------|----------|
@@ -18,7 +18,7 @@ Per-cycle contracts live at `.cdd/issues/N/ISSUE.md`. γ MUST NOT dispatch α wi
 
 ## Cycle notes (non-normative)
 
-- **0:** Finalize SCOPE/STACK/ISSUES; add README skeleton; no application code.
+- **0:** Finalize SCOPE/STACK/ISSUES; README + PROJECT.md skeleton; STACK dispatch binding; no application code.
 - **1:** `apps/api` health + `apps/web` placeholder + docker + CI + `X-User-Email` middleware stub.
 - **2:** Entities: `projects`, `issues`, `comments`; no HTTP business routes yet.
 - **3–5:** REST endpoints; each cycle adds Swagger decorators for its routes.

@@ -102,6 +102,25 @@ Status and priority stored as `varchar` columns with TypeORM enum types in code.
 - ESLint + Prettier in both apps
 - Branch per cycle: `cycle/N` matching issue ID
 
+## CDD dispatch (cnos + cn-sigma)
+
+This project does **not** mirror cycles to GitHub Issues. Contracts live at `.cdd/issues/N/ISSUE.md`.
+
+γ/α/β dispatch prompts MUST reference the local file — **not** `gh issue view`:
+
+```text
+Issue: Read `.cdd/issues/N/ISSUE.md` from repo root (full contract: gap, AC, non-goals)
+Branch: cycle/N
+```
+
+Cycle artifacts on branch `cycle/N`: `.cdd/unreleased/N/` (`gamma-scaffold.md`, `alpha-prompt.md`, `beta-prompt.md`, close-outs).
+
+Project MCP: `.cdd/PROJECT.md` — verify claims against code/CI after cycle 1; update at each cycle close-out.
+
+Default **7-axis implementation contract** for dispatch: table in §Implementation contract quick reference below. Per-cycle `ISSUE.md` may override or extend; empty rows MUST be filled by δ from defaults before α dispatch.
+
+Hub: `cn-sigma` (identity/memory). Product facts stay in this repo's `.cdd/` — not in `cn-sigma/threads/`.
+
 ## CI (delivered in Issue 1)
 
 GitHub Actions workflow `.github/workflows/ci.yml`:

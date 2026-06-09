@@ -1,0 +1,29 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+
+# Build
+dist/
+out-tsc/
+coverage/
+
+# Environment
+.env
+!.env.example
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Angular
+.angular/
+apps/web/.angular/
+
+# NestJS
+apps/api/dist/
