@@ -1,7 +1,7 @@
 ---
 section_manifest:
   planned: [Gap, Skills, ACs, Self-check, Debt, CDD-Trace, Review-readiness]
-  completed: [Gap, Skills, ACs, Self-check, Debt, CDD-Trace]
+  completed: [Gap, Skills, ACs, Self-check, Debt, CDD-Trace, Review-readiness]
 ---
 
 # Self-coherence — Cycle 1
@@ -158,3 +158,35 @@ All α-authored files are referenced in §ACs above. New modules with non-test c
 
 **Git identity:**  
 Author email for α commits on `cycle/1`: `alpha@issue-tracker.cdd.cnos` (set via `git config user.email` at session start; verified by `git log -1 --format='%ae'`).
+
+---
+
+## Review-readiness | round 1 | implementation SHA: 4a5ff33 | branch CI: N/A (no remote) | ready for β
+
+**Pre-review gate checklist:**
+
+| Row | Check | Result |
+|-----|-------|--------|
+| 1 | `origin/cycle/1` rebased onto `origin/main` | N/A — no remote configured (D4 in §Debt); local branch on current `main` tip |
+| 2 | `self-coherence.md` carries CDD Trace through step 7 | ✅ §CDD Trace complete, all 7 steps present |
+| 3 | Tests present or explicit reason none apply | ✅ 3 suites, 6 tests (4 api + 2 web), all PASS |
+| 4 | Every AC has evidence | ✅ §ACs — AC1–AC10 each mapped to oracle output |
+| 5 | Known debt explicit | ✅ §Debt — D1–D5 declared; no D-blocking items |
+| 6 | Schema/shape audit completed | N/A — no schema-bearing runtime contracts introduced this cycle |
+| 7 | Peer enumeration completed | N/A — greenfield; no sibling surfaces at same layer |
+| 8 | Harness audit completed | ✅ CI workflow audited in §Self-check |
+| 9 | Post-patch re-audit completed | N/A — no mid-cycle RC patches |
+| 10 | Branch CI green | N/A — no remote; CI workflow structurally correct (AC7 oracle) |
+| 11 | Artifact enumeration matches diff | ✅ All 31 new/modified files listed in §CDD Trace step 6 |
+| 12 | Caller-path trace for new modules | ✅ `HealthModule`, `HealthController`, `UserEmailMiddleware` — callers named in §CDD Trace |
+| 13 | Test assertion count from runner output | ✅ API: 4 tests (verbatim output pasted in §ACs); Web: 2 tests (verbatim) |
+| 14 | Author email matches `alpha@issue-tracker.cdd.cnos` | ✅ `git log -1 --format='%ae'` → `alpha@issue-tracker.cdd.cnos` |
+| 15 | γ-artifact at canonical §5.1 path | ✅ `.cdd/unreleased/1/gamma-scaffold.md` present on `cycle/1` (`git ls-tree` confirms) |
+
+**γ-artifact:** `gamma-scaffold.md` at canonical §5.1 path on `cycle/1`.
+
+**Branch:** `cycle/1` (local-only; no remote push possible without `origin` configured)
+
+**Implementation SHA:** `4a5ff33` — `feat: monorepo scaffold — NestJS API, Angular web, Docker, CI (closes AC1–AC10)`
+
+**α is review-ready.** Branch `cycle/1` contains the complete monorepo skeleton. β may review from this HEAD.
