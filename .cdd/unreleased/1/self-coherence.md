@@ -120,7 +120,7 @@ Yes:
 `apps/api/src/middleware/user-email.middleware.spec.ts` uses double cast to construct a minimal Express `Request` mock. TypeScript strict mode requires this because the test doesn't provide the full `Request` shape. Acceptable test-boundary pragmatism; no production-code `any` or unsafe casts present. A future refactor could extract a `MinimalRequest` interface for cleaner mocks.
 
 **D2 — `start:dev` uses `ts-node` (not `nest start --watch`) (minor)**  
-`apps/api/package.json` `start:dev` uses `ts-node -r tsconfig-paths/register src/main.ts` rather than `nest start --watch`. The `@nestjs/cli` is in devDependencies but `nest` binary is not used for dev-mode because `@nestjs/cli` is available at the workspace level. Both approaches are equivalent for cycle 1; cycle 2 may standardise on `nest start --watch` once TypeORM integration lands.
+`apps/api/package.json` `start:dev` uses `ts-node -r tsconfig-paths/register src/main.ts`. `@nestjs/cli` is not installed (not in any devDependencies); `nest start --watch` is not available. `ts-node` is a working alternative for cycle 1. Add `@nestjs/cli` to `apps/api/package.json` devDependencies in cycle 2 if `nest start --watch` is preferred for hot-reload.
 
 **D3 — Angular `ng serve` not smoke-tested in this cycle**  
 `npm run dev:web` triggers `ng serve` which requires `@angular-devkit/build-angular` and the full Angular build pipeline. The build works in terms of installed packages, but the dev server start was not verified (no running Chrome/browser available in this session). AC5 is satisfied by code inspection + unit tests + environment file check. UI smoke-testing deferred to a future cycle or manual post-merge verification.
@@ -190,3 +190,19 @@ Author email for α commits on `cycle/1`: `alpha@issue-tracker.cdd.cnos` (set vi
 **Implementation SHA:** `4a5ff33` — `feat: monorepo scaffold — NestJS API, Angular web, Docker, CI (closes AC1–AC10)`
 
 **α is review-ready.** Branch `cycle/1` contains the complete monorepo skeleton. β may review from this HEAD.
+
+---
+
+## Fix-round | round 1 | cycle/1
+
+**β verdict:** REQUEST CHANGES (1 finding — F1, B-level, honest-claim)
+
+**Finding addressed:**
+
+| Finding | Location | Fix | Commit |
+|---------|----------|-----|--------|
+| F1 — §Debt D2 false claim: `@nestjs/cli` is not in devDependencies | `self-coherence.md` §Debt D2 | Replaced false claim ("The `@nestjs/cli` is in devDependencies but `nest` binary is not used for dev-mode because `@nestjs/cli` is available at the workspace level") with accurate description: `@nestjs/cli` is not installed; `nest start --watch` is not available; `ts-node` is the working alternative for cycle 1. | see commit on cycle/1 |
+
+**No code change required.** §Debt D2 text corrected to match the actual installed package set (`apps/api/package.json` devDependencies do not include `@nestjs/cli`; `ls node_modules/@nestjs/` confirms `cli` absent).
+
+**Re-audit scope:** F1 is a documentation-only honest-claim correction. No AC, no test, no implementation file touched. ACs AC1–AC10 remain PASS. Pre-review gate rows unchanged. No new debt introduced.
