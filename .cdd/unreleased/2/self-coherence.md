@@ -239,3 +239,31 @@ All new files are declared in this §CDD Trace or §ACs:
 - `.cdd/PROJECT.md` — Step 7a ✓
 - `.cdd/unreleased/2/self-coherence.md` — Step 7 (this file) ✓
 
+---
+
+## Review-readiness | round 1 | implementation SHA: 3e5f907 | branch CI: 7/7 local at 2026-06-10 | ready for β
+
+**Pre-review gate:**
+
+| Row | Check | Status |
+|-----|-------|--------|
+| 1 | cycle/2 rebased onto main (merge-base = `d9450a5` = HEAD of main; no drift) | ✓ |
+| 2 | self-coherence.md carries CDD Trace through step 7 | ✓ |
+| 3 | Tests present: 3 suites, 7 tests | ✓ |
+| 4 | Every AC has evidence | ✓ |
+| 5 | Known debt explicit (§Debt, 6 items) | ✓ |
+| 6 | Schema/shape audit: migration SQL, AppModule, DataSource, and integration test all import the same `InitialSchema20260610000000` class | ✓ |
+| 7 | Peer enumeration: Project/Issue/Comment — all 3 updated | ✓ |
+| 8 | Harness audit: no shell/CI harnesses emit schema; CI runs `npm run test:api` via ts-jest which imports entities/migration directly | ✓ |
+| 9 | Post-patch re-audit: TypeScript is the only language in diff; `tsc --noEmit` exits 0 | ✓ |
+| 10 | Tests: `7 passed, 7 total` (run 2026-06-10 locally with `DATABASE_URL=postgresql://issue_tracker:issue_tracker@localhost:5432/issue_tracker`) | ✓ (local; no cloud CI — see D-CY2-2) |
+| 11 | Artifact enumeration matches diff: 11 files in §CDD Trace Step 6 / §ACs | ✓ |
+| 12 | Caller-path trace: `app.module.ts` (line 9–11) and `data-source.ts` (line 5–8) import all 3 entities + migration; integration test imports all 4 | ✓ |
+| 13 | Test runner output pasted verbatim in §ACs AC5 | ✓ |
+| 14 | Author email: all commits `alpha@issue-tracker.cdd.cnos` (verified `git log --format='%ae'` for all 10 α commits) | ✓ |
+| 15 | γ-artifact at canonical §5.1 path: `.cdd/unreleased/2/gamma-scaffold.md` present on branch | ✓ |
+
+**Note on row 10 (transient):** No origin remote exists; CI runs locally only. Branch CI state = local test suite, `DATABASE_URL` matches `.github/workflows/ci.yml` service container definition. Cloud CI verification deferred (D-CY2-2).
+
+**Branch:** `cycle/2` — ready for β review.
+
