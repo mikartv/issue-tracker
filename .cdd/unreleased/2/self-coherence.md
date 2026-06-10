@@ -207,3 +207,35 @@ TypeORM 0.3.x emits `INSERT ... VALUES (DEFAULT, ...)` for `@PrimaryGeneratedCol
 
 α exits after review-readiness signal per bounded dispatch model. `alpha-closeout.md` will be written at close-out re-dispatch after β merge. This is noted as known debt per `alpha/SKILL.md` §2.8.
 
+---
+
+## §CDD Trace
+
+| Step | Description | Evidence |
+|------|-------------|----------|
+| Step 0 | Role identity configured | `git config user.email "alpha@issue-tracker.cdd.cnos"` set at session start |
+| Step 1 | Branch checked out | `cycle/2` — local branch, already at HEAD after γ scaffold; no origin remote |
+| Step 2 | Issue and artifacts read | `.cdd/issues/2/ISSUE.md`, `.cdd/SCOPE.md`, `.cdd/STACK.md`, `.cdd/PROJECT.md`, `.cdd/unreleased/2/gamma-scaffold.md` all read before coding |
+| Step 3 | Skills loaded | Tier 1: alpha/SKILL.md; Tier 3: write/SKILL.md, typescript/SKILL.md, test/SKILL.md |
+| Step 4 | Gap identified | Cycle 1 has no persistence; gap is TypeORM entities + migration + wiring. §Gap committed `dfd1bfa`. |
+| Step 5 | Design decisions documented | Comment.updated_at absent; FK CASCADE; no ORM relations in cycle 2; uuid_generate_v4() DB default; integration test strategy. §Design committed `d5808d4`. |
+| Step 6 | Implementation produced | Commits `0afd33a` (main implementation) + `3e5f907` (fix uuid default + assignee type). Files: `entities/project.entity.ts`, `entities/issue.entity.ts`, `entities/comment.entity.ts`, `migrations/20260610000000-InitialSchema.ts`, `data-source.ts`, `app.module.ts`, `apps/api/package.json`, `package-lock.json`, `migration.integration.spec.ts`. Caller paths: `app.module.ts` → entities + migration; `data-source.ts` → entities + migration; integration test → entities + migration. |
+| Step 7 | Self-coherence written incrementally | §Gap `dfd1bfa`, §Design `d5808d4`, §Skills `81877d9`, §ACs `8ad85f3`, §Self-check `4998ffa`, §Debt `159663d` |
+| Step 7a | PROJECT.md updated | Commit `81366a2`: Last verified date, test counts, migrations entry, cycle 2 decisions |
+| Step 7b | Tests verified | `DATABASE_URL=... npm run test:api` → 7 passed, 0 failed, 3 suites |
+
+**Branch diff from main** (`git diff --stat origin/main..HEAD` — local repo, compared against `main`):
+
+All new files are declared in this §CDD Trace or §ACs:
+- `apps/api/src/entities/project.entity.ts` — AC1 ✓
+- `apps/api/src/entities/issue.entity.ts` — AC1, AC2 ✓
+- `apps/api/src/entities/comment.entity.ts` — AC1, AC2 ✓
+- `apps/api/src/migrations/20260610000000-InitialSchema.ts` — AC3, Step 6 ✓
+- `apps/api/src/data-source.ts` — AC4, Step 6 ✓
+- `apps/api/src/migration.integration.spec.ts` — AC5, Step 6 ✓
+- `apps/api/src/app.module.ts` — AC3 (synchronize:false in AppModule), Step 6 ✓
+- `apps/api/package.json` — AC4 (migration scripts), AC1 (new runtime deps) ✓
+- `package-lock.json` — updated by npm install ✓
+- `.cdd/PROJECT.md` — Step 7a ✓
+- `.cdd/unreleased/2/self-coherence.md` — Step 7 (this file) ✓
+
