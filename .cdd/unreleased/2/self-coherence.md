@@ -142,3 +142,40 @@ Time:        1.225 s
 
 **Status: PASS**
 
+---
+
+## §Self-check
+
+### Did α push ambiguity onto β?
+
+No. All design decisions (Comment.updated_at absent, FK CASCADE, no ORM relations, uuid_generate_v4() in migration) are documented in §Design before implementation commits. The rationale for each decision is explicit. β does not need to rediscover them.
+
+### Is every claim backed by evidence in the diff?
+
+- AC1 entity fields: each field name and decorator is verifiable in `apps/api/src/entities/*.entity.ts`
+- AC3 synchronize:false: three `grep synchronize` hits, all `false`
+- AC4 scripts: both keys present in `apps/api/package.json`
+- AC5 test passing: `7 passed` output pasted verbatim in §ACs
+- AC6 no business routes: `grep` command returns empty, verifiable by re-running
+
+### Implementation contract compliance
+
+Every implementation-contract axis from the dispatch:
+- Language TypeScript strict: `apps/api/tsconfig.json` has `"strict": true`, `"emitDecoratorMetadata": true`, `"experimentalDecorators": true` — unchanged from cycle 1 (no patching needed) ✓
+- Package scoping `apps/api/src/entities/` and `apps/api/src/migrations/` only: new dirs are exactly those two + `apps/api/src/data-source.ts` at src root ✓
+- Existing-binary disposition (extend cycle-1 scaffold): `app.module.ts` modified (TypeOrmModule added); health module and cycle-1 test files not modified ✓
+- Runtime dependencies `typeorm@^0.3`, `@nestjs/typeorm@^10`, `pg@^8`: all three added to `apps/api/package.json` dependencies ✓
+- JSON/wire contract preservation N/A: `GET /api/v1/health` response `{ status: "ok" }` not changed ✓
+
+### Peer enumeration
+
+Single entity family (Project/Issue/Comment). All three are updated in one migration and one DataSource config. No stale peer.
+
+### Harness audit
+
+Migration SQL is the only schema-bearing artifact. Consumers:
+- `AppDataSource` (data-source.ts) — imports migration class directly ✓
+- `AppModule` TypeOrmModule — imports migration class directly ✓
+- Integration test DataSource — imports migration class directly ✓
+- No shell harnesses or CI fixtures emit schema — CI workflow uses `npm run test:api` which imports the entities/migration via ts-jest ✓
+
