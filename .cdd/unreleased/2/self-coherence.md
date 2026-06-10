@@ -43,3 +43,21 @@ No `@ManyToOne` / `@OneToMany` decorators in this cycle. FK column properties (`
 
 The AC5 integration test (`apps/api/src/migration.integration.spec.ts`) creates its own DataSource (not via NestJS), calls `runMigrations()` in `beforeAll`, inserts one fixture row per entity, asserts round-trip fields, then calls `undoLastMigration()` in `afterAll` to revert and leave the database clean. This is idempotent: if a prior run failed without cleanup, the next run re-detects migration state from the tracking table and behaves correctly.
 
+---
+
+## §Skills
+
+### Tier 1 (CDD lifecycle)
+
+- `cnos.cdd/skills/cdd/alpha/SKILL.md` — α role contract; artifact order, incremental self-coherence, pre-review gate
+
+### Tier 2 (always-applicable engineering)
+
+Not separately enumerated — Tier 2 bundle defaults applied as authoring constraints.
+
+### Tier 3 (issue-specific)
+
+- `cnos.core/skills/write/SKILL.md` — prose authoring: self-coherence sections written with one governing question per document, fact stated once, front-loaded point
+- `cnos.eng/skills/eng/typescript/SKILL.md` — TypeScript strict; explicit `type:` on all `@Column` decorators to avoid reflect-metadata `Object` inference; `!:` definite-assignment assertions on entity properties; no `any`; no unchecked `as`
+- `cnos.eng/skills/eng/test/SKILL.md` — invariant-first test design; integration-depth evidence for round-trip claim; positive and negative cases; `'updated_at' in found` instead of a double-cast to prove absence
+
