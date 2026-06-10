@@ -61,3 +61,84 @@ Not separately enumerated — Tier 2 bundle defaults applied as authoring constr
 - `cnos.eng/skills/eng/typescript/SKILL.md` — TypeScript strict; explicit `type:` on all `@Column` decorators to avoid reflect-metadata `Object` inference; `!:` definite-assignment assertions on entity properties; no `any`; no unchecked `as`
 - `cnos.eng/skills/eng/test/SKILL.md` — invariant-first test design; integration-depth evidence for round-trip claim; positive and negative cases; `'updated_at' in found` instead of a double-cast to prove absence
 
+---
+
+## §ACs
+
+Per-AC oracles run against branch HEAD `3e5f907` (implementation commit; fix commit stacked on top).
+
+### AC1 — Entities Project, Issue, Comment with fields per SCOPE §Data model
+
+**Oracle:** Read entity files; cross-reference against SCOPE §Data model (v1).
+
+**Evidence:**
+- `apps/api/src/entities/project.entity.ts`: `@Entity()` class `Project`; `@PrimaryGeneratedColumn('uuid') id!: string`; `@Column({ length: 255 }) name!: string`; `@Column({ default: false }) archived!: boolean`; `@CreateDateColumn({ type: 'timestamptz' }) created_at!: Date`; `@UpdateDateColumn({ type: 'timestamptz' }) updated_at!: Date` ✓
+- `apps/api/src/entities/issue.entity.ts`: `@Entity()` class `Issue`; UUID pk; `project_id: string` (`@Column({ type: 'uuid' })`); `title: string` (length 255); `description: string | null` (type: text, nullable); `status: IssueStatus` (varchar enum, default: 'open'); `priority: IssuePriority` (varchar enum, default: 'medium'); `assignee: string | null` (varchar 255, nullable); `created_at`, `updated_at` timestamptz ✓
+- `apps/api/src/entities/comment.entity.ts`: `@Entity()` class `Comment`; UUID pk; `issue_id: string` (type: uuid); `author: string` (length 255); `body: string` (type: text); `created_at` timestamptz; **no `updated_at`** per design decision D1 ✓
+- Enum values: `IssueStatus { OPEN='open', IN_PROGRESS='in_progress', DONE='done', CLOSED='closed' }` ✓; `IssuePriority { LOW='low', MEDIUM='medium', HIGH='high', CRITICAL='critical' }` ✓
+- All PKs `@PrimaryGeneratedColumn('uuid')` ✓; all timestamps `timestamptz` ✓; enums stored as `varchar` ✓
+
+**Status: PASS**
+
+### AC2 — Project.archived boolean default false; FK Issue.project_id → Project.id; FK Comment.issue_id → Issue.id
+
+**Oracle:** Read entity files for column defaults and FK column declarations; read migration for FK constraints.
+
+**Evidence:**
+- `Project.archived`: `@Column({ default: false }) archived!: boolean` ✓
+- `Issue.project_id`: `@Column({ type: 'uuid' }) project_id!: string` + migration FK `ALTER TABLE "issue" ADD CONSTRAINT "FK_issue_project" FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE` ✓
+- `Comment.issue_id`: `@Column({ type: 'uuid' }) issue_id!: string` + migration FK `ALTER TABLE "comment" ADD CONSTRAINT "FK_comment_issue" FOREIGN KEY ("issue_id") REFERENCES "issue"("id") ON DELETE CASCADE` ✓
+
+**Status: PASS**
+
+### AC3 — Initial migration in apps/api/src/migrations/; synchronize: false
+
+**Oracle:** `ls apps/api/src/migrations/`; `grep synchronize apps/api/src/app.module.ts apps/api/src/data-source.ts apps/api/src/migration.integration.spec.ts`.
+
+**Evidence:**
+- `ls apps/api/src/migrations/` → `20260610000000-InitialSchema.ts` ✓
+- `grep synchronize` → `apps/api/src/data-source.ts:1` hit (`synchronize: false`); `apps/api/src/app.module.ts:1` hit (`synchronize: false`); integration test also uses `synchronize: false` ✓
+- No `synchronize: true` anywhere in the codebase (`grep -r "synchronize: true" apps/api/src/` → no matches) ✓
+
+**Status: PASS**
+
+### AC4 — npm scripts migration:run and migration:revert in apps/api
+
+**Oracle:** `cat apps/api/package.json | jq '.scripts["migration:run"], .scripts["migration:revert"]'`
+
+**Evidence:**
+- `"migration:run": "typeorm-ts-node-commonjs migration:run -d src/data-source.ts"` ✓
+- `"migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/data-source.ts"` ✓
+- Both scripts point to `src/data-source.ts` (the exported `AppDataSource`) ✓
+
+**Status: PASS**
+
+### AC5 — Integration test: run migrations against test DB, insert fixture per entity, assert round-trip
+
+**Oracle:** `DATABASE_URL=postgresql://issue_tracker:issue_tracker@localhost:5432/issue_tracker npm run test:api` → all tests pass.
+
+**Evidence:**
+```
+PASS src/migration.integration.spec.ts
+PASS src/health/health.controller.spec.ts
+PASS src/middleware/user-email.middleware.spec.ts
+
+Test Suites: 3 passed, 3 total
+Tests:       7 passed, 7 total
+Time:        1.225 s
+```
+- `Migration round-trip › round-trips a Project fixture` — saves `{name, archived}`, finds by id, asserts all fields including `created_at`/`updated_at` as Date ✓
+- `Migration round-trip › round-trips an Issue fixture` — saves with all fields including `project_id`, `status=open`, `priority=medium`, `assignee=null`; reads back; asserts round-trip ✓
+- `Migration round-trip › round-trips a Comment fixture` — saves with `issue_id`, `author`, `body`; reads back; asserts fields; confirms `'updated_at' in found === false` ✓
+- `afterAll` calls `undoLastMigration()` + `destroy()` — database left clean ✓
+
+**Status: PASS**
+
+### AC6 — No HTTP routes for business CRUD; GET /api/v1/health remains the only route
+
+**Oracle:** `grep -rn '@Controller\|@Get\|@Post\|@Put\|@Patch\|@Delete' apps/api/src/ | grep -v health.controller`
+
+**Evidence:** Command returns no output — only `health.controller.ts` contains HTTP route decorators. No project, issue, or comment controllers exist. ✓
+
+**Status: PASS**
+
