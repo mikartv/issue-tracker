@@ -5,7 +5,7 @@ Per-cycle contracts live at `.cdd/issues/N/ISSUE.md`. γ MUST NOT dispatch α wi
 | ID | Title | Status | Mode | Branch | Contract |
 |----|-------|--------|------|--------|----------|
 | 0 | Bootstrap docs + README skeleton | open | design-and-build | cycle/0 | `.cdd/issues/0/ISSUE.md` |
-| 1 | Monorepo scaffold + Docker + CI | open | design-and-build | cycle/1 | `.cdd/issues/1/ISSUE.md` |
+| 1 | Monorepo scaffold + Docker + CI | closed | design-and-build | cycle/1 | `.cdd/issues/1/ISSUE.md` |
 | 2 | DB schema + migrations | open | design-and-build | cycle/2 | `.cdd/issues/2/ISSUE.md` |
 | 3 | Projects API | open | design-and-build | cycle/3 | `.cdd/issues/3/ISSUE.md` |
 | 4 | Issues API + status rules | open | design-and-build | cycle/4 | `.cdd/issues/4/ISSUE.md` |
