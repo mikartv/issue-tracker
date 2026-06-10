@@ -40,7 +40,7 @@ export class Issue {
   @Column({ type: 'varchar', enum: IssuePriority, default: IssuePriority.MEDIUM })
   priority!: IssuePriority;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   assignee!: string | null;
 
   @CreateDateColumn({ type: 'timestamptz' })

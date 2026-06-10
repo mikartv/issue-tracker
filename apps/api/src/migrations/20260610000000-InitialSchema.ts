@@ -4,9 +4,11 @@ export class InitialSchema20260610000000 implements MigrationInterface {
   name = 'InitialSchema20260610000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
+
     await queryRunner.query(`
       CREATE TABLE "project" (
-        "id" uuid NOT NULL,
+        "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "name" character varying(255) NOT NULL,
         "archived" boolean NOT NULL DEFAULT false,
         "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
@@ -17,7 +19,7 @@ export class InitialSchema20260610000000 implements MigrationInterface {
 
     await queryRunner.query(`
       CREATE TABLE "issue" (
-        "id" uuid NOT NULL,
+        "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "project_id" uuid NOT NULL,
         "title" character varying(255) NOT NULL,
         "description" text,
@@ -32,7 +34,7 @@ export class InitialSchema20260610000000 implements MigrationInterface {
 
     await queryRunner.query(`
       CREATE TABLE "comment" (
-        "id" uuid NOT NULL,
+        "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "issue_id" uuid NOT NULL,
         "author" character varying(255) NOT NULL,
         "body" text NOT NULL,
