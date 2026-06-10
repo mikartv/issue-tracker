@@ -179,3 +179,31 @@ Migration SQL is the only schema-bearing artifact. Consumers:
 - Integration test DataSource — imports migration class directly ✓
 - No shell harnesses or CI fixtures emit schema — CI workflow uses `npm run test:api` which imports the entities/migration via ts-jest ✓
 
+---
+
+## §Debt
+
+### D-CY2-1 (carry-forward from cycle 1): `as unknown as X` cast in user-email.middleware.spec.ts
+
+Unchanged from cycle 1 D1. Out of scope for this cycle.
+
+### D-CY2-2 (carry-forward from cycle 1): No GitHub remote; cloud CI not yet executed
+
+Cycle 2 commits are local only (no origin remote). CI was not run against a hosted runner. AC5 was verified locally with `docker compose up -d db`. The `DATABASE_URL` used matches the CI service container definition in `.github/workflows/ci.yml`, so parity is expected but not yet proven on a hosted runner.
+
+### D-CY2-3 (carry-forward from cycle 1): supertest@6.3.4 deprecation warning
+
+Deferred until e2e tests land.
+
+### D-CY2-4: ORM-level @ManyToOne / @OneToMany relations absent
+
+FK constraints are enforced at DB level via migration SQL. No `@ManyToOne` / `@OneToMany` / `@JoinColumn` decorators exist on the entities. Business modules in cycles 3–5 will add relation decorators when route handlers need `.relations` loading. This is intentional for cycle 2, documented in §Design D3.
+
+### D-CY2-5: uuid_generate_v4() database DEFAULT vs application-side generation
+
+TypeORM 0.3.x emits `INSERT ... VALUES (DEFAULT, ...)` for `@PrimaryGeneratedColumn('uuid')` in Postgres, relying on a database-level DEFAULT. The migration includes `DEFAULT uuid_generate_v4()` and `CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`. If the DB user lacks `CREATE EXTENSION` privilege in some deployment environments, migration will fail. This is not a v1 concern (single-team Docker Compose local + CI setup), but worth noting for future hardened deployments.
+
+### D-CY2-6 (provisional close-out)
+
+α exits after review-readiness signal per bounded dispatch model. `alpha-closeout.md` will be written at close-out re-dispatch after β merge. This is noted as known debt per `alpha/SKILL.md` §2.8.
+
