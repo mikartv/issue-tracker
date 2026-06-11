@@ -1,6 +1,6 @@
 # Project MCP — issue-tracker
 
-**Last verified:** 2026-06-10 (cycle 2 — TypeORM entities + migration + integration test; `npm run test:api` 7 tests pass)  
+**Last verified:** 2026-06-11 (cycle 3 — Projects API: module, controller, service, DTOs, unit + e2e tests; `npm run test:api` 25 tests pass)  
 **Verify with:** `npm run test:all` (from repo root)
 
 ## Build / run / test
@@ -11,14 +11,14 @@
 | `npm run dev:db` | Start Postgres 16 via Docker (`docker compose up -d db`) | ✅ configured |
 | `npm run dev:api` | NestJS watch mode (`ts-node src/main.ts`) | ✅ configured |
 | `npm run dev:web` | Angular dev server (`ng serve`) | ✅ configured |
-| `npm run test:all` | api + web test suites | ✅ `9 tests passed` (cycle 2) |
-| `npm run test:api` | API tests only (Jest) | ✅ `7 tests passed` (cycle 2) |
+| `npm run test:all` | api + web test suites | ✅ `27 tests passed` (cycle 3) |
+| `npm run test:api` | API tests only (Jest) | ✅ `25 tests passed` (cycle 3) |
 | `npm run test:web` | Web tests only (Jest via jest-preset-angular) | ✅ `2 tests passed` |
 
-Sample output from `npm run test:all` (cycle 2):
+Sample output from `npm run test:all` (cycle 3):
 ```
-Test Suites: 3 passed, 3 total (api)
-Tests:       7 passed, 7 total (api)
+Test Suites: 5 passed, 5 total (api)
+Tests:       25 passed, 25 total (api)
 Test Suites: 1 passed, 1 total (web)
 Tests:       2 passed, 2 total (web)
 ```
@@ -30,6 +30,7 @@ Tests:       2 passed, 2 total (web)
 | `apps/api/` | NestJS REST API (`/api/v1`, Swagger at `/api/docs`) |
 | `apps/api/src/health/` | Health check endpoint (`GET /api/v1/health`) |
 | `apps/api/src/middleware/` | `UserEmailMiddleware` — sets `req.userEmail` from `X-User-Email` |
+| `apps/api/src/projects/` | Projects module: create, list, rename, archive (cycle 3) |
 | `apps/web/` | Angular 17 SPA (standalone components) |
 | `apps/web/src/environments/` | Angular environment files |
 | `docker-compose.yml` | Postgres 16 service (`db`) |
@@ -45,6 +46,7 @@ Tests:       2 passed, 2 total (web)
 | Surface | Entry | Cycle |
 |---------|-------|-------|
 | API | `apps/api/src/main.ts` | 1 ✅ |
+| Projects API | `apps/api/src/projects/projects.controller.ts` | 3 ✅ |
 | Web | `apps/web/src/main.ts` | 1 ✅ |
 | Migrations | `apps/api/src/migrations/20260610000000-InitialSchema.ts` | 2 ✅ |
 
@@ -69,8 +71,12 @@ See `.cdd/STACK.md`. Branch per cycle: `cycle/N`. Cycle artifacts: `.cdd/unrelea
 
 - 2026-06-10: Cycle 2 — TypeORM persistence layer. Entities Project/Issue/Comment. Initial migration with uuid-ossp extension, FK CASCADE constraints. AppModule wired with TypeOrmModule.forRootAsync; synchronize: false. Integration test proves migration round-trip.
 
+## Decisions (append-only, short) — cycle 3
+
+- 2026-06-11: Cycle 3 — Projects HTTP API. NestJS `ProjectsModule` with controller, service, two DTOs (create/update). Four routes: POST /projects (201), GET /projects (200), PATCH /projects/:id (200/404/409), POST /projects/:id/archive (200/404/409). Global ValidationPipe + class-validator on DTOs. Swagger via @ApiTags/@ApiResponse decorators. Unit tests mock TypeORM repository; e2e tests use real Postgres with supertest. 25 API tests pass.
+
 ## Known unknowns / debt
 
 - CORS vs Angular dev proxy — decided in cycle 6.
-- Business modules (projects/issues/comments) — cycles 3–5.
-- ORM-level @ManyToOne/@OneToMany relations — deferred to cycle 3 (no consumer in cycle 2).
+- Business modules (issues/comments) — cycles 4–5.
+- ORM-level @ManyToOne/@OneToMany relations — deferred (D-CY2-4); Projects API does not load related issues.
