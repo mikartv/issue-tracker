@@ -158,3 +158,42 @@ Time:        1.981 s
 **E2e test file:** `apps/api/src/projects/projects.e2e.spec.ts` — 10 cases. Supertest against live NestJS app + real Postgres. Covers: POST 201, POST 400 (×2), GET 200, PATCH 200/404/409, archive 200/409/404.  
 **Invariants proven:** archived project cannot be renamed (409); archived project cannot be archived again (409); unknown id returns 404.  
 **Status:** ✅ met — exit 0, 25/25 pass
+
+---
+
+## §Self-check
+
+**Did α push ambiguity onto β?** No. All 7 ACs have concrete test evidence. The test runner output is literal (not manually enumerated). AC6 Swagger coverage is verifiable from the decorator declarations in the controller.
+
+**Is every claim backed by evidence in the diff?**
+
+| Claim | Evidence artifact |
+|-------|------------------|
+| POST /api/v1/projects → 201 | `projects.e2e.spec.ts` line 57 |
+| GET /api/v1/projects → 200 + array | `projects.e2e.spec.ts` line 88 |
+| PATCH → 404 on unknown id | `projects.e2e.spec.ts` line 129 |
+| PATCH → 409 on archived | `projects.e2e.spec.ts` line 136 |
+| POST archive → 200 + archived: true | `projects.e2e.spec.ts` line 154 |
+| POST archive → 409 on repeat | `projects.e2e.spec.ts` line 168 |
+| POST archive → 404 on unknown id | `projects.e2e.spec.ts` line 183 |
+| ValidationPipe → 400 | `projects.e2e.spec.ts` lines 71, 78 |
+| Swagger decorators present | `projects.controller.ts` lines 15–55 |
+| Service mock covers all paths | `projects.service.spec.ts` 7 cases |
+| D-CY2-4 not touched | `entities/project.entity.ts` unchanged (verified: no diff to entities/) |
+
+**Peer enumeration:** this change is additive. No existing route family was modified. No sibling modules/controllers exist for the `projects` endpoint family. Peer enumeration passes vacuously (no peers to update).
+
+**Harness audit:** no schema-bearing contract changed; only new NestJS module + DTOs added. Existing migrations, entities, data-source.ts are unmodified. Harness audit not required.
+
+**Intra-doc repetition:** `projects.e2e.spec.ts` filename reference appears in §Skills (corrected from `e2e-spec.ts` to `e2e.spec.ts` after rename) and §ACs. Consistent.
+
+**Caller-path trace:** `ProjectsModule` is imported into `AppModule` (`apps/api/src/app.module.ts`); all four routes are reachable from `main.ts` via `AppModule`. Non-test caller exists: `AppModule` line 5 (`import { ProjectsModule }`) and line 30 (`ProjectsModule` in imports array).
+
+**Implementation contract compliance:**
+- Language: TypeScript strict — ✅ (all files pass tsconfig strict)
+- CLI integration target: N/A — ✅ (no `cn` subcommand added)
+- Package scoping: new files in `apps/api/src/projects/` only; `app.module.ts` modified — ✅
+- Existing-binary disposition: health/, middleware/, entities/, migrations/, data-source.ts, main.ts untouched — ✅
+- Runtime dependencies: no new deps added — ✅
+- JSON/wire contract: `/api/v1` prefix (global in main.ts); error shape via NestJS defaults; UUID string IDs; UTC ISO-8601 timestamps — ✅
+- Backward-compat: additive only; `GET /api/v1/health` unchanged — ✅
