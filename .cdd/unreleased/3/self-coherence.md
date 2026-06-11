@@ -154,7 +154,7 @@ Snapshots:   0 total
 Time:        1.981 s
 ```
 
-**Unit test file:** `apps/api/src/projects/projects.service.spec.ts` — 7 cases across `create`, `findAll`, `rename` (3 cases), `archive` (3 cases). Uses `getRepositoryToken(Project)` mock.  
+**Unit test file:** `apps/api/src/projects/projects.service.spec.ts` — 8 cases across `create`, `findAll`, `rename` (3 cases), `archive` (3 cases). Uses `getRepositoryToken(Project)` mock.  
 **E2e test file:** `apps/api/src/projects/projects.e2e.spec.ts` — 10 cases. Supertest against live NestJS app + real Postgres. Covers: POST 201, POST 400 (×2), GET 200, PATCH 200/404/409, archive 200/409/404.  
 **Invariants proven:** archived project cannot be renamed (409); archived project cannot be archived again (409); unknown id returns 404.  
 **Status:** ✅ met — exit 0, 25/25 pass
@@ -178,7 +178,7 @@ Time:        1.981 s
 | POST archive → 404 on unknown id | `projects.e2e.spec.ts` line 183 |
 | ValidationPipe → 400 | `projects.e2e.spec.ts` lines 71, 78 |
 | Swagger decorators present | `projects.controller.ts` lines 15–55 |
-| Service mock covers all paths | `projects.service.spec.ts` 7 cases |
+| Service mock covers all paths | `projects.service.spec.ts` 8 cases |
 | D-CY2-4 not touched | `entities/project.entity.ts` unchanged (verified: no diff to entities/) |
 
 **Peer enumeration:** this change is additive. No existing route family was modified. No sibling modules/controllers exist for the `projects` endpoint family. Peer enumeration passes vacuously (no peers to update).
@@ -294,3 +294,22 @@ Run immediately before §Review-readiness commit. See §Review-readiness.
 **γ-artifact:** canonical §5.1 path — `.cdd/unreleased/3/gamma-scaffold.md` present on `cycle/3`.
 
 **Summary:** All 7 ACs met with test evidence. 25 tests pass locally. Branch is on `cycle/3`, 11 commits ahead of `main`. No open ambiguities. Ready for β review.
+
+---
+
+## Fix-round | round 1
+
+**β finding addressed:** F1 — honest-claim mis-count (`projects.service.spec.ts` "7 cases" → "8 cases").
+
+| Site | Location | Change |
+|------|----------|--------|
+| §ACs AC7 unit test file line | `self-coherence.md` line 157 | "7 cases" → "8 cases" |
+| §Self-check claim-evidence table | `self-coherence.md` line 181 | "7 cases" → "8 cases" |
+
+**Arithmetic:** 1 (`create`) + 1 (`findAll`) + 3 (`rename`) + 3 (`archive`) = 8. The runner total of 25 (7 pre-existing + 8 service + 10 e2e) was already correct; only the per-file description was wrong.
+
+**Intra-doc grep:** `grep "7 cases" self-coherence.md` → 0 hits after fix. `grep "8 cases" self-coherence.md` → 2 hits (both sites updated).
+
+**Scope:** documentation only — no code or test changes.
+
+**Re-audit:** F1 is the sole finding. All ACs remain met; runner output (25/25) unchanged. No new surfaces affected.
