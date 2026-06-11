@@ -267,3 +267,17 @@ All new files are declared in this §CDD Trace or §ACs:
 
 **Branch:** `cycle/2` — ready for β review.
 
+---
+
+## Fix-round | round 1
+
+**Finding addressed:** F1 (C, honest-claim) — §Design D4 claimed a runtime guard in `data-source.ts` that did not exist.
+
+**Option chosen:** Option A — implement the guard.
+
+**Fix:** `apps/api/src/data-source.ts` — extracted `process.env['DATABASE_URL']` into `const dbUrl`; added `if (!dbUrl) throw new Error('DATABASE_URL environment variable is required')` before the `new DataSource(...)` call; `url` field now uses `dbUrl`. The D4 claim ("runtime guard that throws a named error if absent") is now accurate.
+
+**Re-audit scope:** Single file changed (`data-source.ts`). No AC oracles affected — AC3 checks `synchronize: false` (unchanged), AC4 checks npm scripts (unchanged), AC5 integration test creates its own DataSource from process.env directly (unchanged). §Design D4 claim is now consistent with code. No peer surfaces affected. No new debt introduced.
+
+**Commit SHA:** (see commit on cycle/2 — Fix-round 1)
+
