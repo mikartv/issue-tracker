@@ -1,6 +1,6 @@
 # Project MCP — issue-tracker
 
-**Last verified:** 2026-06-09 (cycle 1 — scaffold complete; `npm run test:all` passes locally)  
+**Last verified:** 2026-06-10 (cycle 2 — TypeORM entities + migration + integration test; `npm run test:api` 7 tests pass)  
 **Verify with:** `npm run test:all` (from repo root)
 
 ## Build / run / test
@@ -11,14 +11,14 @@
 | `npm run dev:db` | Start Postgres 16 via Docker (`docker compose up -d db`) | ✅ configured |
 | `npm run dev:api` | NestJS watch mode (`ts-node src/main.ts`) | ✅ configured |
 | `npm run dev:web` | Angular dev server (`ng serve`) | ✅ configured |
-| `npm run test:all` | api + web test suites | ✅ `6 tests passed` |
-| `npm run test:api` | API tests only (Jest) | ✅ `4 tests passed` |
+| `npm run test:all` | api + web test suites | ✅ `9 tests passed` (cycle 2) |
+| `npm run test:api` | API tests only (Jest) | ✅ `7 tests passed` (cycle 2) |
 | `npm run test:web` | Web tests only (Jest via jest-preset-angular) | ✅ `2 tests passed` |
 
-Sample output from `npm run test:all` (cycle 1):
+Sample output from `npm run test:all` (cycle 2):
 ```
-Test Suites: 2 passed, 2 total (api)
-Tests:       4 passed, 4 total (api)
+Test Suites: 3 passed, 3 total (api)
+Tests:       7 passed, 7 total (api)
 Test Suites: 1 passed, 1 total (web)
 Tests:       2 passed, 2 total (web)
 ```
@@ -46,7 +46,7 @@ Tests:       2 passed, 2 total (web)
 |---------|-------|-------|
 | API | `apps/api/src/main.ts` | 1 ✅ |
 | Web | `apps/web/src/main.ts` | 1 ✅ |
-| Migrations | `apps/api/src/migrations/` | 2 |
+| Migrations | `apps/api/src/migrations/20260610000000-InitialSchema.ts` | 2 ✅ |
 
 ## CI / local parity
 
@@ -65,8 +65,12 @@ See `.cdd/STACK.md`. Branch per cycle: `cycle/N`. Cycle artifacts: `.cdd/unrelea
 - 2026-06-09: Greenfield; contracts in `.cdd/` before code. Issues local (not GitHub Issues). Hub: cn-sigma.
 - 2026-06-09: Cycle 1 — monorepo scaffold delivered. npm workspaces root with `apps/api` (NestJS 10) and `apps/web` (Angular 17). Jest in both apps (ts-jest for API, jest-preset-angular for web). Tests pass locally.
 
+## Decisions (append-only, short) — cycle 2
+
+- 2026-06-10: Cycle 2 — TypeORM persistence layer. Entities Project/Issue/Comment. Initial migration with uuid-ossp extension, FK CASCADE constraints. AppModule wired with TypeOrmModule.forRootAsync; synchronize: false. Integration test proves migration round-trip.
+
 ## Known unknowns / debt
 
 - CORS vs Angular dev proxy — decided in cycle 6.
-- TypeORM integration and DB connection — cycle 2.
 - Business modules (projects/issues/comments) — cycles 3–5.
+- ORM-level @ManyToOne/@OneToMany relations — deferred to cycle 3 (no consumer in cycle 2).
