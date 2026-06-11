@@ -46,3 +46,28 @@ The `name` field is required in `UpdateProjectDto` (same validators as `CreatePr
 ### Decision 6 — E2e test isolation
 
 The e2e test creates a standalone NestJS app with only `ProjectsModule` and a direct TypeORM connection. The test uses `beforeAll` to run migrations (idempotent via the migrations table) and `afterEach` to delete all rows in the `project` table. This ensures test isolation without undoing the migration schema between cases.
+
+---
+
+## §Skills
+
+**Tier 1 (CDD lifecycle):**
+- `cnos.cdd/skills/cdd/alpha/SKILL.md` — α role: artifact order, self-coherence, pre-review gate, peer enumeration rules
+- CDD.md (canonical lifecycle) — loaded by reference in the α skill load order
+
+**Tier 2 (always-applicable engineering):**
+- `cnos.core/skills/write/SKILL.md` — applied to self-coherence.md: one fact per section, front-loaded points, no filler
+
+**Tier 3 (issue-specific):**
+- `cnos.eng/skills/eng/typescript/SKILL.md` — TypeScript strict mode, NestJS decorators, class-validator patterns, no `any`, explicit error policy
+- `cnos.eng/skills/eng/test/SKILL.md` — invariant-first test design, negative space mandatory, e2e for lifecycle truth
+
+**Applied constraints from loaded skills:**
+
+| Skill | Applied constraint | Where it shows in the diff |
+|-------|--------------------|---------------------------|
+| typescript | strict mode; no `any`; explicit error policy via NestJS built-in exceptions | all `.ts` files under `projects/` |
+| typescript | external boundary validation via class-validator (not raw `as` cast) | DTOs with `@IsString`, `@IsNotEmpty`, `@MaxLength` |
+| test | negative space mandatory | service spec: 404 + 409 cases; e2e: archived-rename → 409, archive-again → 409, unknown id → 404 |
+| test | invariant-first: "archived project must not be renamed or re-archived" | `rename` + `archive` service methods; e2e cases |
+| test | e2e for lifecycle truth (real DB, no mock for integration path) | `projects.e2e-spec.ts` with supertest + Postgres |
