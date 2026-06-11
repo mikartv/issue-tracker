@@ -2,6 +2,7 @@ import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { HealthModule } from './health/health.module';
+import { ProjectsModule } from './projects/projects.module';
 import { UserEmailMiddleware } from './middleware/user-email.middleware';
 import { Project } from './entities/project.entity';
 import { Issue } from './entities/issue.entity';
@@ -26,6 +27,7 @@ import { InitialSchema20260610000000 } from './migrations/20260610000000-Initial
       }),
     }),
     HealthModule,
+    ProjectsModule,
   ],
 })
 export class AppModule implements NestModule {
