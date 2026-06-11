@@ -197,3 +197,21 @@ Time:        1.981 s
 - Runtime dependencies: no new deps added — ✅
 - JSON/wire contract: `/api/v1` prefix (global in main.ts); error shape via NestJS defaults; UUID string IDs; UTC ISO-8601 timestamps — ✅
 - Backward-compat: additive only; `GET /api/v1/health` unchanged — ✅
+
+---
+
+## §Debt
+
+**Carried forward (unchanged from cycle 2):**
+
+- **D-CY2-1:** `as unknown as X` cast in `user-email.middleware.spec.ts` — not touched this cycle; still present.
+- **D-CY2-2:** No GitHub remote; cloud CI not executed. `npm run test:api` passes locally but cannot be verified on GitHub Actions. Pre-review gate row 10 (branch CI green) is partially met: local pass only.
+- **D-CY2-3:** `supertest@6.3.4` deprecation warning — checked: `npm run test:api` output shows no deprecation warning for this cycle's test run (no warning lines in output). No new D-CY3-x entry needed.
+- **D-CY2-4:** No `@ManyToOne`/`@OneToMany` decorators on entities — intentionally deferred; Projects API does not need relation loading; `project.entity.ts` unchanged.
+
+**New debt from cycle 3:**
+
+- **D-CY3-1:** E2e test file renamed from `projects.e2e-spec.ts` to `projects.e2e.spec.ts` — γ scaffold named `projects.e2e-spec.ts`; Jest testRegex `.*\.spec\.ts$` requires `.spec.ts` suffix; file renamed to match. Self-coherence §ACs references updated. No functional impact; naming deviates from γ scaffold by intent.
+- **D-CY3-2:** `supertest` default import (`import supertest from 'supertest'`) required instead of namespace import (`import * as supertest`) due to `esModuleInterop: true` + module type. The `@types/supertest@6.x` type declaration exports the function as default. No runtime issue; type-system artifact from supertest v6 typings.
+
+**Pre-review gate provisional close-out:** α will not be re-dispatched for close-out in this session. `alpha-closeout.md` will be written at re-dispatch time (standard path per alpha SKILL.md §2.8). This is expected; no additional debt.
