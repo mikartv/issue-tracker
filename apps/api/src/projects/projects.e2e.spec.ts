@@ -3,7 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import * as supertest from 'supertest';
+import supertest from 'supertest';
 import { DataSource } from 'typeorm';
 import { Comment } from '../entities/comment.entity';
 import { Issue } from '../entities/issue.entity';
@@ -43,13 +43,21 @@ describe('Projects E2E', () => {
 
   afterAll(async () => {
     if (dataSource?.isInitialized) {
-      await dataSource.getRepository(Project).delete({});
+      await dataSource
+        .getRepository(Project)
+        .createQueryBuilder()
+        .delete()
+        .execute();
     }
     await app?.close();
   });
 
   afterEach(async () => {
-    await dataSource.getRepository(Project).delete({});
+    await dataSource
+      .getRepository(Project)
+      .createQueryBuilder()
+      .delete()
+      .execute();
   });
 
   describe('POST /api/v1/projects', () => {
