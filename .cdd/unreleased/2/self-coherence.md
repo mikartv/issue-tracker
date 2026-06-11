@@ -279,5 +279,5 @@ All new files are declared in this §CDD Trace or §ACs:
 
 **Re-audit scope:** Single file changed (`data-source.ts`). No AC oracles affected — AC3 checks `synchronize: false` (unchanged), AC4 checks npm scripts (unchanged), AC5 integration test creates its own DataSource from process.env directly (unchanged). §Design D4 claim is now consistent with code. No peer surfaces affected. No new debt introduced.
 
-**Commit SHA:** (see commit on cycle/2 — Fix-round 1)
+**Commit SHA:** `0c12c93`
 
