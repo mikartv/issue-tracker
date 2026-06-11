@@ -149,3 +149,39 @@ None.
 - Round 1 verdict is RC solely for F1 (honest-claim mis-count). All ACs met, all implementation contract axes confirmed, zero behavioral incoherence.
 - Fix: update `self-coherence.md` §ACs AC7 ("7 cases" → "8 cases") and §Self-check claim-evidence table ("7 cases" → "8 cases"). Two occurrences.
 - After F1 is fixed, β will APPROVE in R2 with no additional review scope needed.
+
+---
+
+## Round 2
+
+**Verdict:** APPROVED
+
+**Round:** 2  
+**Fixed this round:** `2a20b49` closes F1 (honest-claim mis-count — "7 cases" → "8 cases" at two sites in self-coherence.md)  
+**Branch CI state:** local pass only — 25/25 tests, no GitHub remote (D-CY2-2 carried debt)  
+**Merge instruction:** `git checkout main && git merge --no-ff cycle/3 -m "feat: projects API (closes issue 3)"`
+
+### F1 closure verification
+
+α fixed both sites in `2a20b49`:
+- `self-coherence.md` line 157 (§ACs AC7): "8 cases across `create`, `findAll`, `rename` (3 cases), `archive` (3 cases)" ✅
+- `self-coherence.md` line 181 (§Self-check table): "`projects.service.spec.ts` 8 cases" ✅
+
+Grep-verified: `grep "7 cases" self-coherence.md` → zero hits on factual claim sites. Residual occurrences of "7 cases" at lines 302–311 are within the fix-round description (before/after documentation, not claims). Correct.
+
+Fix-round section appended at §Fix-round | round 1 (lines 300–316). Arithmetic confirmed: 1 + 1 + 3 + 3 = 8. ✅
+
+### Pre-merge gate (row 1 re-verified)
+
+| Row | Check | Result |
+|-----|-------|--------|
+| 1 | Identity truth | ✅ `git config user.email` → `beta@issue-tracker.cdd.cnos` |
+| 2 | Canonical-skill freshness | ✅ local-only repo; no remote; no concurrent pushes possible |
+| 3 | Non-destructive merge-test | ✅ clean merge; 14 files; zero unmerged paths; worktree torn down |
+| 4 | γ artifact completeness | ✅ `.cdd/unreleased/3/gamma-scaffold.md` present on cycle/3 |
+
+### Search-space closure
+
+All issue ACs met. All implementation contract axes confirmed (R1 §2.1). F1 was the sole finding. F1 is now fixed. No remaining findings at any severity. No open blockers.
+
+APPROVED closes the search space: no incoherence found in the issue contract, diff structure, implementation behavior, or documentation after fix application.
