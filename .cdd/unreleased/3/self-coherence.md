@@ -266,3 +266,31 @@ Committed in `self-coherence.md §Design` (SHA `ea7c914`). Six decisions documen
 
 **Step 7 — Pre-review gate**  
 Run immediately before §Review-readiness commit. See §Review-readiness.
+
+---
+
+## §Review-readiness | round 1 | base SHA: af9543a | implementation SHA: 9988672 | branch CI: local pass at 2026-06-11 | ready for β
+
+**Pre-review gate — all rows:**
+
+| Row | Check | Result |
+|-----|-------|--------|
+| 1 | `cycle/3` rebased onto current `main` HEAD | ✅ merge-base = main HEAD `af9543a` (observed 2026-06-11; main did not advance during α session) |
+| 2 | `self-coherence.md` carries CDD Trace through step 7 | ✅ §CDD Trace present (SHA `9988672`) |
+| 3 | Tests present | ✅ unit test + e2e test files created |
+| 4 | Every AC has evidence | ✅ §ACs: all 7 with evidence |
+| 5 | Known debt explicit | ✅ §Debt: D-CY2-1 thru D-CY2-4 carried; D-CY3-1, D-CY3-2 new |
+| 6 | Schema/shape audit | ✅ not required — no schema-bearing contract changed |
+| 7 | Peer enumeration | ✅ not required — additive change; no existing route family modified |
+| 8 | Harness audit | ✅ not required — no schema-bearing contract changed |
+| 9 | Polyglot re-audit | ✅ TypeScript only; `npm run test:api` passes; no shell/YAML/Markdown surfaces changed |
+| 10 | Branch CI green | ⚠️ local only — no GitHub remote (D-CY2-2); `npm run test:api` exits 0, 25/25 pass locally |
+| 11 | Artifact enumeration matches diff | ✅ all 10 files in §CDD Trace step 6 table |
+| 12 | Caller-path trace for new modules | ✅ `ProjectsModule` → `AppModule`; all routes reachable from `main.ts` |
+| 13 | Test assertion count from runner | ✅ 25 tests (runner output in §ACs AC7) |
+| 14 | Commit author email | ✅ all α commits: `alpha@issue-tracker.cdd.cnos` |
+| 15 | γ-artifact at canonical §5.1 path | ✅ `git ls-tree cycle/3 .cdd/unreleased/3/gamma-scaffold.md` → present |
+
+**γ-artifact:** canonical §5.1 path — `.cdd/unreleased/3/gamma-scaffold.md` present on `cycle/3`.
+
+**Summary:** All 7 ACs met with test evidence. 25 tests pass locally. Branch is on `cycle/3`, 11 commits ahead of `main`. No open ambiguities. Ready for β review.
