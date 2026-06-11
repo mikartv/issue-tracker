@@ -70,4 +70,91 @@ The e2e test creates a standalone NestJS app with only `ProjectsModule` and a di
 | typescript | external boundary validation via class-validator (not raw `as` cast) | DTOs with `@IsString`, `@IsNotEmpty`, `@MaxLength` |
 | test | negative space mandatory | service spec: 404 + 409 cases; e2e: archived-rename → 409, archive-again → 409, unknown id → 404 |
 | test | invariant-first: "archived project must not be renamed or re-archived" | `rename` + `archive` service methods; e2e cases |
-| test | e2e for lifecycle truth (real DB, no mock for integration path) | `projects.e2e-spec.ts` with supertest + Postgres |
+| test | e2e for lifecycle truth (real DB, no mock for integration path) | `projects.e2e.spec.ts` with supertest + Postgres |
+
+---
+
+## §ACs
+
+Per-AC oracles run against branch HEAD (implementation SHA `4761dcf`).
+
+Test runner output reference: `npm run test:api` — 5 suites, 25 tests, 0 failures.
+
+### AC1 — `POST /api/v1/projects` → 201 + project object
+
+**Evidence:** `projects.e2e.spec.ts` `201 — creates and returns a project`  
+**Verified:** status 201; body has `id` (UUID string), `name: "My Project"`, `archived: false`, `created_at`, `updated_at`.  
+**Implementation:** `ProjectsController.create()` → `ProjectsService.create()` → `projectRepository.save()`.  
+**Status:** ✅ met
+
+### AC2 — `GET /api/v1/projects` → 200 + array including archived flag
+
+**Evidence:** `projects.e2e.spec.ts` `200 — lists all projects including archived`  
+**Verified:** status 200; response is array; creates 1 active + 1 archived project, both appear; archived entry has `archived: true`.  
+**Implementation:** `ProjectsController.findAll()` → `ProjectsService.findAll()` → `projectRepository.find()` (no filter — includes all).  
+**Status:** ✅ met
+
+### AC3 — `PATCH /api/v1/projects/:id` — rename; 404 if missing; 409 if archived
+
+**Evidence:**
+- `projects.e2e.spec.ts` `200 — renames an active project`
+- `projects.e2e.spec.ts` `404 — unknown id`
+- `projects.e2e.spec.ts` `409 — archived project cannot be renamed`
+
+**Verified:** 200 + renamed body; 404 for unknown UUID; 409 for archived project.  
+**Implementation:** `ProjectsController.rename()` → `ProjectsService.rename()` — throws `NotFoundException` (→ 404) or `ConflictException` (→ 409).  
+**Unit test coverage:** `projects.service.spec.ts` `rename` suite — 3 cases (success, 404, 409).  
+**Status:** ✅ met
+
+### AC4 — `POST /api/v1/projects/:id/archive` — sets archived=true; 404 if missing; 409 if already archived
+
+**Evidence:**
+- `projects.e2e.spec.ts` `200 — archives an active project`
+- `projects.e2e.spec.ts` `409 — already archived project`
+- `projects.e2e.spec.ts` `404 — unknown id`
+
+**Verified:** 200 + body has `archived: true`; 409 on repeat; 404 for unknown UUID.  
+**Implementation:** `@Post(':id/archive')` with `@HttpCode(200)` → `ProjectsService.archive()`.  
+**Unit test coverage:** `projects.service.spec.ts` `archive` suite — 3 cases (success, 404, 409).  
+**Status:** ✅ met
+
+### AC5 — Validation errors → 400 with STACK error shape
+
+**Evidence:**
+- `projects.e2e.spec.ts` `400 — rejects empty body`
+- `projects.e2e.spec.ts` `400 — rejects empty name`
+
+**Verified:** 400 returned on missing `name` and on `name: ""`.  
+**Implementation:** `CreateProjectDto` with `@IsString()`, `@IsNotEmpty()`, `@MaxLength(255)`. Global `ValidationPipe` (whitelist + forbidNonWhitelisted) in `main.ts` lines 12–16. NestJS default error shape: `{ statusCode, message, error }` — no custom envelope.  
+**Status:** ✅ met
+
+### AC6 — Swagger documents all project routes
+
+**Evidence:**  
+`ProjectsController` has:
+- `@ApiTags('projects')` on the class
+- `@ApiBody({ type: CreateProjectDto })` on POST `/projects` and PATCH `/:id`
+- `@ApiResponse({ status: 201, ... })` on POST `/projects`
+- `@ApiResponse({ status: 200, ... })` on GET `/projects`, PATCH `/:id`, POST `/:id/archive`
+- `@ApiResponse({ status: 400, ... })` on POST `/projects` and PATCH `/:id`
+- `@ApiResponse({ status: 404, ... })` on PATCH `/:id` and POST `/:id/archive`
+- `@ApiResponse({ status: 409, ... })` on PATCH `/:id` and POST `/:id/archive`
+
+All 4 routes are registered in `ProjectsModule`, imported into `AppModule`. Swagger at `/api/docs` will include all 4 routes.  
+**Status:** ✅ met
+
+### AC7 — Unit tests (service) + e2e tests (supertest + test DB)
+
+**Evidence:** `npm run test:api` with `DATABASE_URL=postgresql://issue_tracker:issue_tracker@localhost:5432/issue_tracker`
+
+```
+Test Suites: 5 passed, 5 total
+Tests:       25 passed, 25 total
+Snapshots:   0 total
+Time:        1.981 s
+```
+
+**Unit test file:** `apps/api/src/projects/projects.service.spec.ts` — 7 cases across `create`, `findAll`, `rename` (3 cases), `archive` (3 cases). Uses `getRepositoryToken(Project)` mock.  
+**E2e test file:** `apps/api/src/projects/projects.e2e.spec.ts` — 10 cases. Supertest against live NestJS app + real Postgres. Covers: POST 201, POST 400 (×2), GET 200, PATCH 200/404/409, archive 200/409/404.  
+**Invariants proven:** archived project cannot be renamed (409); archived project cannot be archived again (409); unknown id returns 404.  
+**Status:** ✅ met — exit 0, 25/25 pass
