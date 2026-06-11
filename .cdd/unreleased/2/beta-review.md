@@ -1,6 +1,6 @@
 <!-- section-manifest
 planned: [Verdict, Contract Integrity, Issue Contract, Findings, Notes]
-completed: [Verdict, Contract Integrity, Issue Contract, Implementation Contract, Findings, CI Status, Notes]
+completed: [Verdict, Contract Integrity, Issue Contract, Implementation Contract, Findings, CI Status, Notes, Round2]
 -->
 
 # β Review — Cycle 2 | DB schema + migrations
@@ -141,3 +141,64 @@ F2 (ci-status, B-severity) is deferred per D-CY2-2. It does not block APPROVE on
 ### Round 2 scope
 
 β will narrow Round 2 to F1 only. If α delivers Option A or B, β will re-read the affected surface (`data-source.ts` or `self-coherence.md §Design D4`) and verify the fix closes the gap. No other surfaces need re-review.
+
+---
+
+# β Review — Cycle 2 | Round 2 (Narrow)
+
+**Verdict:** APPROVED
+
+**Round:** 2  
+**Fixed this round:** `0c12c93` closes F1; `b20f874` stamps fix-round SHA in self-coherence.md  
+**Branch CI state:** provisional (local only — no origin remote; see F2/D-CY2-2 carried from R1)  
+**Review base:** `main` @ `d9450a59` · `cycle/2` @ `b20f874` (HEAD, fix-round commit)
+
+---
+
+## §F1 Verification
+
+**Finding:** §Design D4 claimed a runtime guard in `data-source.ts` that the code did not implement.
+
+**Fix (Option A — implement the guard):** commit `0c12c93`.
+
+**Evidence — `apps/api/src/data-source.ts` lines 8–11:**
+```typescript
+const dbUrl = process.env['DATABASE_URL'];
+if (!dbUrl) {
+  throw new Error('DATABASE_URL environment variable is required');
+}
+```
+`url` field in `new DataSource(...)` now uses `dbUrl` (line 15). The D4 claim — *"DATABASE_URL is read from process.env with a runtime guard that throws a named error if absent, making misconfiguration explicit"* — is now accurate.
+
+**Collateral check:** No other file in the diff touches `data-source.ts` consumers (`app.module.ts`, `migration.integration.spec.ts`). The integration test creates its own DataSource using `process.env['DATABASE_URL']` directly (not via AppDataSource), so the guard does not affect AC5 test execution. `synchronize: false` on line 18 is unchanged. AC3 and AC4 are unaffected.
+
+**F1 status: RESOLVED.**
+
+---
+
+## §Pre-merge Gate
+
+| Row | Check | Status |
+|-----|-------|--------|
+| 1 | Identity truth: `git config user.email` → `beta@issue-tracker.cdd.cnos` | ✓ (re-asserted after worktree identity leak from merge-test; leak caught, corrected) |
+| 2 | Canonical-skill freshness: no origin remote; local `main` @ `d9450a59` matches R1 review base; no drift | ✓ (contingent — no remote refresh possible) |
+| 3 | Non-destructive merge-test: clean merge in throwaway worktree; zero conflicts; zero unmerged paths; `npm run build` (tsc -p tsconfig.build.json) exits 0 on merge tree | ✓ |
+| 4 | γ artifact completeness: `.cdd/unreleased/2/gamma-scaffold.md` present (verified R1) | ✓ |
+
+**Note row 1:** Worktree removed via `git worktree remove --force` leaked `beta-merge-test@issue-tracker.cdd.cnos` into shared `.git/config`. This is the identity-leak failure mode named in `beta/SKILL.md` pre-merge gate row 1 (cycle #301 O8). β re-asserted `beta@issue-tracker.cdd.cnos` before merge. The worktree identity config was written with `git config --local` inside the worktree, but removal of the worktree directory caused git to fall back to the shared config. Lesson: assert identity after worktree teardown, not just before.
+
+---
+
+## §F2 Disposition (carry-forward)
+
+F2 (B-severity, ci-status) carries forward from R1 unchanged. No hosted CI is possible without an origin remote; this is a structural project constraint documented at D-CY2-2. Per review rule 3.3 exception ("finding requires a design decision outside issue scope → deferred by design scope"), F2 does not block APPROVED. The finding is registered for the post-release assessment. D-CY2-2 in self-coherence.md §Debt serves as the deferral record.
+
+---
+
+## §Merge Instruction
+
+```bash
+git checkout main && git merge --no-ff cycle/2 -m "feat: typeorm entities + migrations (closes issue 2)"
+```
+
+Closes Issue 2. β executes this merge; δ owns the release boundary (tag, deploy).
