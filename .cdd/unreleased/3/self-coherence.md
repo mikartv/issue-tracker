@@ -215,3 +215,54 @@ Time:        1.981 s
 - **D-CY3-2:** `supertest` default import (`import supertest from 'supertest'`) required instead of namespace import (`import * as supertest`) due to `esModuleInterop: true` + module type. The `@types/supertest@6.x` type declaration exports the function as default. No runtime issue; type-system artifact from supertest v6 typings.
 
 **Pre-review gate provisional close-out:** α will not be re-dispatched for close-out in this session. `alpha-closeout.md` will be written at re-dispatch time (standard path per alpha SKILL.md §2.8). This is expected; no additional debt.
+
+---
+
+## §CDD Trace
+
+**Step 0 — Dispatch intake**  
+Branch `cycle/3` received. Already on branch (no origin; local-only repo per D-CY2-2). Git identity set: `alpha@issue-tracker.cdd.cnos`.
+
+**Step 1 — Issue read**  
+`.cdd/issues/3/ISSUE.md` read in full. 7 ACs identified. Non-goals noted.
+
+**Step 2 — Skill load**  
+Tier 1: alpha/SKILL.md. Tier 2: write/SKILL.md. Tier 3: typescript/SKILL.md, test/SKILL.md.
+
+**Step 3 — Source-of-truth reads**  
+`.cdd/SCOPE.md`, `.cdd/STACK.md`, `.cdd/PROJECT.md`, `.cdd/unreleased/3/gamma-scaffold.md` all read before implementation.
+
+**Step 4 — Design**  
+Committed in `self-coherence.md §Design` (SHA `ea7c914`). Six decisions documented. Plan: not required (straightforward implementation sequencing).
+
+**Step 5 — Tests + code + docs**
+
+| SHA | Artifact |
+|-----|---------|
+| `4b1ced7` | `apps/api/src/projects/` (5 new files: module, controller, service, 2 DTOs); `projects.service.spec.ts`; `projects.e2e-spec.ts`; `app.module.ts` modified |
+| `5c85c80` | `projects.e2e-spec.ts` → `projects.e2e.spec.ts` (Jest testRegex fix) |
+| `926c274` | e2e cleanup fix: `createQueryBuilder().delete()` replaces `delete({})` |
+| `4761dcf` | `.cdd/PROJECT.md` updated |
+
+**Step 6 — All new files in diff**
+
+| File | Status | Mentioned in |
+|------|--------|-------------|
+| `apps/api/src/projects/dto/create-project.dto.ts` | new | §ACs AC1/AC5 |
+| `apps/api/src/projects/dto/update-project.dto.ts` | new | §ACs AC3 |
+| `apps/api/src/projects/projects.controller.ts` | new | §ACs AC1–AC6; caller in AppModule |
+| `apps/api/src/projects/projects.service.ts` | new | §ACs all; unit test covers all methods |
+| `apps/api/src/projects/projects.module.ts` | new | §ACs AC6; caller: AppModule |
+| `apps/api/src/projects/projects.service.spec.ts` | new | §ACs AC7 |
+| `apps/api/src/projects/projects.e2e.spec.ts` | new | §ACs AC7 |
+| `apps/api/src/app.module.ts` | modified | §Self-check caller-path trace |
+| `.cdd/PROJECT.md` | modified | §Self-check |
+| `.cdd/unreleased/3/self-coherence.md` | new (this file) | — |
+
+**Caller-path trace for new modules:**
+- `ProjectsModule` → imported by `AppModule` (`app.module.ts` line 5 + line 30)
+- `ProjectsController`, `ProjectsService` → wired inside `ProjectsModule` (module.ts lines 8–9)
+- All four routes reachable from `main.ts` via `AppModule`
+
+**Step 7 — Pre-review gate**  
+Run immediately before §Review-readiness commit. See §Review-readiness.
