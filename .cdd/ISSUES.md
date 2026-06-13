@@ -10,7 +10,7 @@ Per-cycle contracts live at `.cdd/issues/N/ISSUE.md`. γ MUST NOT dispatch α wi
 | 3 | Projects API | closed | design-and-build | cycle/3 | `.cdd/issues/3/ISSUE.md` |
 | 4 | Issues API + status rules | closed | design-and-build | cycle/4 | `.cdd/issues/4/ISSUE.md` |
 | 5 | Comments API | closed | design-and-build | cycle/5 | `.cdd/issues/5/ISSUE.md` |
-| 6 | Angular shell + API client | open | design-and-build | cycle/6 | `.cdd/issues/6/ISSUE.md` |
+| 6 | Angular shell + API client | closed | design-and-build | cycle/6 | `.cdd/issues/6/ISSUE.md` |
 | 7 | Issue list + project views (Material) | open | design-and-build | cycle/7 | `.cdd/issues/7/ISSUE.md` |
 | 8 | Issue detail + comments UI | open | design-and-build | cycle/8 | `.cdd/issues/8/ISSUE.md` |
 | 9 | Create/edit issue flows | open | design-and-build | cycle/9 | `.cdd/issues/9/ISSUE.md` |
