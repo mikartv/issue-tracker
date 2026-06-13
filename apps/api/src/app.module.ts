@@ -1,6 +1,7 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CommentsModule } from './comments/comments.module';
 import { HealthModule } from './health/health.module';
 import { IssuesModule } from './issues/issues.module';
 import { ProjectsModule } from './projects/projects.module';
@@ -30,6 +31,7 @@ import { InitialSchema20260610000000 } from './migrations/20260610000000-Initial
     HealthModule,
     ProjectsModule,
     IssuesModule,
+    CommentsModule,
   ],
 })
 export class AppModule implements NestModule {
