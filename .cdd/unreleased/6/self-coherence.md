@@ -83,3 +83,51 @@ Per-AC oracles run against implementation SHA `c3b5943`.
 1. Placeholder components start with `loading = true` but never resolve. A real data-fetch will be wired in cycles 7–9 (declared non-goal in issue #6).
 2. `X-User-Email` auth header is not yet sent; README documents this as an optional future stub (declared non-goal in issue #6).
 3. `app.enableCors()` uses the NestJS default (all origins, all methods). A restricted CORS policy (origin whitelist) should be added before production deployment, but is out of scope for local dev.
+
+---
+
+## §CDD Trace
+
+### Step 1 — Issue received and read
+Issue #6 read in full: gap, 6 ACs, non-goals, closure criterion. γ scaffold (`gamma-scaffold.md`) read. All named artifacts loaded before coding.
+
+### Step 2 — Branch
+`cycle/6` checked out as dispatched. Branch created by γ (commit `de1ff9f`). α did not create a new branch.
+
+### Step 3 — Active skills
+Tier 1: `alpha/SKILL.md`, `CDD.md`. Tier 2: TypeScript strict, Angular 17, jest-preset-angular. Tier 3: HttpClient, NestJS CORS.
+
+### Step 4 — Design
+Not required. Issue scope is additive and fully specified: 3 routes, 1 service, 3 components, 1 CORS/proxy choice. No architectural ambiguity.
+
+### Step 5 — Plan
+Not required. Implementation ordering is unambiguous: types/service → components → routes → providers → connectivity → tests → docs.
+
+### Step 6 — Artifacts produced
+
+All new files added in commit `c3b5943`:
+
+| File | Purpose | AC |
+|------|---------|-----|
+| `apps/web/src/app/api/api.service.ts` | Typed HttpClient wrapper; `getProjects`, `getIssues`, `getIssue`; `environment.apiUrl` base | AC2 |
+| `apps/web/src/app/api/api.service.spec.ts` | 4 unit tests via `provideHttpClientTesting` | AC5 |
+| `apps/web/src/app/projects/projects-list.component.ts` | Standalone; `@if (loading)` / `@else if (error)` / `@else` | AC1, AC4 |
+| `apps/web/src/app/projects/project-issues.component.ts` | Standalone; loading + error states | AC1, AC4 |
+| `apps/web/src/app/issues/issue-detail.component.ts` | Standalone; loading + error states | AC1, AC4 |
+
+Modified files:
+
+| File | Change | AC |
+|------|--------|-----|
+| `apps/web/src/app/app.routes.ts` | 3 routes replacing empty array | AC1 |
+| `apps/web/src/main.ts` | `provideHttpClient()` added to providers | AC2 |
+| `apps/api/src/main.ts` | `app.enableCors()` before `app.listen` | AC3 |
+| `README.md` | Dev connectivity section: startup sequence, CORS rationale, auth stub note | AC3 |
+
+CDD-dir files (on branch, not new implementation):
+- `.cdd/unreleased/6/gamma-scaffold.md` — written by γ
+- `.cdd/unreleased/6/alpha-prompt.md`, `beta-prompt.md` — written by γ
+- `.cdd/unreleased/6/self-coherence.md` — this file (α)
+
+### Step 7 — Self-coherence
+Sections §Gap, §Skills, §ACs, §Self-check, §Debt written and committed incrementally. Every AC mapped to file+line evidence. No ambiguity pushed to β.
