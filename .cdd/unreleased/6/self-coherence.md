@@ -72,3 +72,14 @@ Per-AC oracles run against implementation SHA `c3b5943`.
 - `ProjectIssuesComponent` — registered at `'projects/:projectId/issues'`
 - `IssueDetailComponent` — registered at `'issues/:issueId'`
 - All 3 components are reachable via `app.routes.ts` → `provideRouter(routes)` in `main.ts`
+
+---
+
+## §Debt
+
+**No blocking debt.** All 6 ACs are fully satisfied.
+
+**Known non-blocking items:**
+1. Placeholder components start with `loading = true` but never resolve. A real data-fetch will be wired in cycles 7–9 (declared non-goal in issue #6).
+2. `X-User-Email` auth header is not yet sent; README documents this as an optional future stub (declared non-goal in issue #6).
+3. `app.enableCors()` uses the NestJS default (all origins, all methods). A restricted CORS policy (origin whitelist) should be added before production deployment, but is out of scope for local dev.
