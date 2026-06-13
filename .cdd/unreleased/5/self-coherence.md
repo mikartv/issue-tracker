@@ -70,3 +70,16 @@ Per-AC oracles run against branch HEAD `a580530` (implementation commit).
 | D-CY5-1 (new) | `alpha-closeout.md` is provisional — written at review-readiness time before β verdict. Per α SKILL §2.8 provisional close-out fallback. | `.cdd/unreleased/5/alpha-closeout.md` |
 
 No other debt introduced this cycle.
+
+## §CDD Trace
+
+| Step | Description | Status |
+|------|-------------|--------|
+| 0 | Issue filed | ✅ `.cdd/issues/5/ISSUE.md` |
+| 1 | γ selects issue | ✅ gamma-scaffold.md: sequence rule, no P0 override |
+| 2 | γ creates cycle branch `cycle/5` | ✅ branch `cycle/5` exists; dispatched on it |
+| 3 | γ writes scaffold artifacts | ✅ `.cdd/unreleased/5/gamma-scaffold.md`, `alpha-prompt.md`, `beta-prompt.md` |
+| 4 | α dispatch intake + skill load | ✅ SKILL.md loaded; STACK.md, SCOPE.md, ISSUE.md, gamma-scaffold.md read before coding |
+| 5 | Design | Not required — issue is additive completion of a partially-scaffolded feature (entity + migration already exist); route shape and AC contract are fully specified in ISSUE.md and gamma-scaffold.md; no incoherence to name |
+| 6 | Implementation artifacts | ✅ `apps/api/src/comments/comments.module.ts` (new); `comments.controller.ts` (new); `comments.service.ts` (new); `dto/create-comment.dto.ts` (new); `comments.service.spec.ts` (new); `comments.e2e.spec.ts` (new); `apps/api/src/app.module.ts` (modified — CommentsModule added); `.cdd/PROJECT.md` (modified — cycle 5 row, test counts, entry point). Caller path: `CommentsController` (non-test caller of `CommentsService`) is wired through `CommentsModule` and imported by `AppModule`. |
+| 7 | Self-coherence | ✅ This file — §Gap, §Skills, §ACs, §Self-check, §Debt, §CDD Trace complete |
