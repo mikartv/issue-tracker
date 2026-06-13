@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import type { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
@@ -21,6 +21,14 @@ export interface Issue {
   assignee: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface Comment {
+  id: string;
+  issue_id: string;
+  author: string;
+  body: string;
+  created_at: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -47,5 +55,20 @@ export class ApiService {
 
   getIssue(issueId: string): Observable<Issue> {
     return this.http.get<Issue>(`${this.base}/issues/${issueId}`);
+  }
+
+  getComments(issueId: string): Observable<Comment[]> {
+    return this.http.get<Comment[]>(`${this.base}/issues/${issueId}/comments`);
+  }
+
+  addComment(issueId: string, body: string, userEmail?: string): Observable<Comment> {
+    const options = userEmail
+      ? { headers: new HttpHeaders({ 'X-User-Email': userEmail }) }
+      : {};
+    return this.http.post<Comment>(`${this.base}/issues/${issueId}/comments`, { body }, options);
+  }
+
+  updateIssueStatus(issueId: string, status: string): Observable<Issue> {
+    return this.http.post<Issue>(`${this.base}/issues/${issueId}/status`, { status });
   }
 }
