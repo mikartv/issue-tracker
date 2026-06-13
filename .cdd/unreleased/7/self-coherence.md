@@ -123,4 +123,26 @@ Per-AC oracles run against branch HEAD `73b6621`.
 | 4 | Plan | Not required — single Angular module scope; linear implementation order; no inter-module dependencies |
 | 5 | Tests | `apps/web/src/app/projects/projects-list.component.spec.ts` (new); `apps/web/src/app/projects/project-issues.component.spec.ts` (new); 12 web tests, 4 suites |
 | 6 | Code + Docs | `apps/web/angular.json` (styles entry); `apps/web/package.json` (Material deps); `apps/web/src/styles.css` (new — theme import); `apps/web/src/main.ts` (provideAnimations); `apps/web/src/app/api/api.service.ts` (createProject, archiveProject); `apps/web/src/app/projects/projects-list.component.ts` (full replacement); `apps/web/src/app/projects/project-issues.component.ts` (full replacement). All files committed at `73b6621`. New methods in ApiService have non-test callers: `createProject` ← `projects-list.component.ts` createProject(); `archiveProject` ← `projects-list.component.ts` archiveProject(). |
-| 7 | Self-coherence | This file; §Gap, §Skills, §ACs, §Self-check, §Debt, §CDD Trace completed; §Review-readiness to follow |
+| 7 | Self-coherence | This file; §Gap, §Skills, §ACs, §Self-check, §Debt, §CDD Trace completed; §Review-readiness follows |
+
+---
+
+## §Review-readiness | round 1 | base SHA: 1c6d3bd | implementation SHA: 73b6621 | local CI: green at 16:48 UTC | ready for β
+
+| Row | Gate | Status | Notes |
+|-----|------|--------|-------|
+| 1 | cycle branch rebased onto origin/main | N/A | No `origin` remote exists; repo is local-only. `main` is at `1c6d3bd`; `cycle/7` branched from that point at γ-scaffold (`c39acb9`). No drift possible. |
+| 2 | self-coherence.md carries CDD Trace through step 7 | ✓ | §CDD Trace present in this file, steps 0–7 complete |
+| 3 | tests present | ✓ | 12 web tests (4 suites), 76 API tests (9 suites); both exit 0 |
+| 4 | every AC has evidence | ✓ | §ACs table maps all 6 ACs to concrete file + evidence |
+| 5 | known debt explicit | ✓ | §Debt table: 3 items (no remote CI, no manual browser verification, alpha-closeout.md deferred) |
+| 6 | schema/shape audit | N/A | UI-only additive change; no schema-bearing contract modified |
+| 7 | peer enumeration | ✓ | Peer set: `projects-list.component.ts`, `project-issues.component.ts`, `api.service.ts` — all updated. `issue-detail.component.ts` explicitly exempt (cycle 8 scope). |
+| 8 | harness audit | N/A | No schema-bearing contract changed |
+| 9 | post-patch re-audit (polyglot) | ✓ | Diff languages: TypeScript, CSS, JSON. TypeScript: `npm run test:all` exits 0 (88 tests). CSS: no executable toolchain; declarations reviewed. JSON: `package.json`/`angular.json` valid (parsed by build toolchain). |
+| 10 | branch CI green | ✓ (local) | `npm run test:all` at 16:48 UTC: API 76/76 passed; web 12/12 passed. No remote CI infrastructure (local-only repo). β may await CI if provisioned before merge. |
+| 11 | artifact enumeration matches diff | ✓ | All 14 files in `git diff --stat main..HEAD` accounted for: γ artifacts (3 files) — out of α scope, noted; `self-coherence.md` — §CDD Trace step 7; implementation files (10 files) — §ACs §Material Setup Evidence §ApiService Extension Evidence; `package-lock.json` — §Self-check ambiguity table. |
+| 12 | caller-path trace for new modules | ✓ | `ApiService.createProject` ← `projects-list.component.ts` `createProject()` method. `ApiService.archiveProject` ← `projects-list.component.ts` `archiveProject()` method. Spec files called by Jest test runner. |
+| 13 | test assertion count from runner output | ✓ | Actual runner output: API: `Test Suites: 9 passed, 9 total / Tests: 76 passed, 76 total`; Web: `Test Suites: 4 passed, 4 total / Tests: 12 passed, 12 total` |
+| 14 | α commit author email | ✓ | `git log -1 --format='%ae' HEAD` → `alpha@issue-tracker.cdd.cnos` |
+| 15 | γ-artifact presence | ✓ | `.cdd/unreleased/7/gamma-scaffold.md` present on local `cycle/7` branch (committed at `c39acb9`). No `origin` remote; presence verified via `ls .cdd/unreleased/7/`. §5.1 canonical dispatch path satisfied. |
