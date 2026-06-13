@@ -46,3 +46,18 @@ Per-AC oracles run against branch HEAD `a580530` (implementation commit).
 | AC4 | ✅ | `UserEmailMiddleware` (globally applied in `app.module.ts`) sets `req.userEmail = "anonymous"` when header absent. Controller reads `req.userEmail` via `@Req() req: RequestWithUserEmail`. e2e: `201 — author is "anonymous" when X-User-Email header is absent` passes. |
 | AC5 | ✅ | `@ApiTags('comments')` on controller class; `@ApiBody` on POST; `@ApiResponse` with 201/400/404 on POST and 200/404 on GET in `comments.controller.ts`. |
 | AC6 | ✅ | Unit spec: 7 tests in `comments.service.spec.ts` (create with email, create anonymous, create 404, findByIssue ordered, findByIssue empty, findByIssue 404). e2e spec: 7 tests in `comments.e2e.spec.ts`. All 76 API tests pass (`Test Suites: 9, Tests: 76`). |
+
+## §Self-check
+
+**Did α push ambiguity onto β?** No.
+
+- Every AC is mapped to concrete evidence (file, line, test name, runner output).
+- The author-sourcing contract (`req.userEmail` from middleware, not raw header read) is implemented as specified; no new header-reading logic was added.
+- The controller uses `@Req() req: RequestWithUserEmail` imported from `../middleware/user-email.middleware` exactly as the dispatch requires.
+- Column-based queries are used throughout (no `@ManyToOne` added), consistent with D-CY2-4 carried debt.
+- Both `create` and `findByIssue` guard on issue existence before acting — 404 path is covered in both unit and e2e tests.
+- No new npm packages were added; `--runInBand` already present.
+- `CommentsModule` is added to `app.module.ts` imports — the only required modification to that file.
+- `CommentsModule` exports `CommentsService` (available for future consumers, not required by this cycle's ACs).
+
+**Are all claims backed by evidence in the diff?** Yes — test runner output (`76 passed, 76 total`) is the authoritative assertion count, not manual enumeration.
