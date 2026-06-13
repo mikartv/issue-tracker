@@ -83,3 +83,25 @@ No other debt introduced this cycle.
 | 5 | Design | Not required — issue is additive completion of a partially-scaffolded feature (entity + migration already exist); route shape and AC contract are fully specified in ISSUE.md and gamma-scaffold.md; no incoherence to name |
 | 6 | Implementation artifacts | ✅ `apps/api/src/comments/comments.module.ts` (new); `comments.controller.ts` (new); `comments.service.ts` (new); `dto/create-comment.dto.ts` (new); `comments.service.spec.ts` (new); `comments.e2e.spec.ts` (new); `apps/api/src/app.module.ts` (modified — CommentsModule added); `.cdd/PROJECT.md` (modified — cycle 5 row, test counts, entry point). Caller path: `CommentsController` (non-test caller of `CommentsService`) is wired through `CommentsModule` and imported by `AppModule`. |
 | 7 | Self-coherence | ✅ This file — §Gap, §Skills, §ACs, §Self-check, §Debt, §CDD Trace complete |
+
+## Pre-review Gate
+
+| Row | Check | Result |
+|-----|-------|--------|
+| 1 | Branch rebased onto current `origin/main` | No remote configured in this environment; branch was created from `main` at dispatch (γ-scaffold commit `d3649e4`); no `origin/main` drift observable. Noted as CI/remote unavailable — see row 10. |
+| 2 | `self-coherence.md` carries CDD Trace through step 7 | ✅ §CDD Trace steps 0–7 complete above |
+| 3 | Tests present | ✅ `comments.service.spec.ts` (7 unit) + `comments.e2e.spec.ts` (7 e2e) |
+| 4 | Every AC has evidence | ✅ §ACs table: all 6 ACs mapped to file/line/test |
+| 5 | Known debt explicit | ✅ §Debt: D-CY2-4 (carried) + D-CY5-1 (provisional close-out) |
+| 6 | Schema/shape audit | N/A — no schema-bearing parser or manifest shape changed; `Comment` entity unchanged; `CreateCommentDto` is new, not a modification |
+| 7 | Peer enumeration | ✅ Change is purely additive (new module + one app.module.ts import); no family of sibling routes modified; no peer set requires enumeration beyond what gamma-scaffold.md already documented |
+| 8 | Harness audit | N/A — no schema-bearing contract changed |
+| 9 | Post-patch re-audit | N/A — no mid-cycle β RC received |
+| 10 | Branch CI green | No remote/CI available in this environment. Tests green locally: `Test Suites: 9 passed, 9 total; Tests: 76 passed, 76 total` (run at review-readiness time). β MUST wait for CI green on head commit before merge. |
+| 11 | Artifact enumeration matches diff | ✅ Diff (from γ-scaffold base): 6 new `apps/api/src/comments/` files + `app.module.ts` + `PROJECT.md` + `self-coherence.md` + γ-authored artifacts (`gamma-scaffold.md`, `alpha-prompt.md`, `beta-prompt.md`). All α-authored files mentioned in §ACs or §CDD Trace step 6. γ artifacts are γ-authored — not α scope. |
+| 12 | Caller-path trace for new modules | ✅ `CommentsController` is the non-test caller of `CommentsService` (wired in `CommentsModule`). `CommentsModule` is imported by `AppModule` (`app.module.ts:5,33`). Call site: `CommentsController.create` → `CommentsService.create`; `CommentsController.findByIssue` → `CommentsService.findByIssue`. |
+| 13 | Test assertion count from runner | ✅ Actual runner output: `Tests: 76 passed, 76 total` (pasted above) |
+| 14 | α commit author email | ✅ `git log -1 --format='%ae' HEAD` → `alpha@issue-tracker.cdd.cnos` |
+| 15 | γ-artifact at §5.1 canonical path | ✅ `git cat-file -e HEAD:.cdd/unreleased/5/gamma-scaffold.md` → EXISTS. γ-artifact at canonical §5.1 path. |
+
+## §Review-readiness | round 1 | implementation SHA: a580530 | base SHA: d3649e4 | branch CI: green locally (76/76); remote CI unavailable — β must wait for CI green before merge | ready for β
