@@ -1,6 +1,6 @@
 # Project MCP — issue-tracker
 
-**Last verified:** 2026-06-11 (cycle 4 — Issues API: module, controller, service, 3 DTOs, unit + e2e tests; `npm run test:api` 62 tests pass)  
+**Last verified:** 2026-06-13 (cycle 5 — Comments API: module, controller, service, DTO, unit + e2e tests; `npm run test:api` 76 tests pass)  
 **Verify with:** `npm run test:all` (from repo root)
 
 ## Build / run / test
@@ -11,14 +11,14 @@
 | `npm run dev:db` | Start Postgres 16 via Docker (`docker compose up -d db`) | ✅ configured |
 | `npm run dev:api` | NestJS watch mode (`ts-node src/main.ts`) | ✅ configured |
 | `npm run dev:web` | Angular dev server (`ng serve`) | ✅ configured |
-| `npm run test:all` | api + web test suites | ✅ `64 tests passed` (cycle 4: 62 api + 2 web) |
-| `npm run test:api` | API tests only (Jest) | ✅ `62 tests passed` (cycle 4) |
+| `npm run test:all` | api + web test suites | ✅ `78 tests passed` (cycle 5: 76 api + 2 web) |
+| `npm run test:api` | API tests only (Jest) | ✅ `76 tests passed` (cycle 5) |
 | `npm run test:web` | Web tests only (Jest via jest-preset-angular) | ✅ `2 tests passed` |
 
-Sample output from `npm run test:all` (cycle 4):
+Sample output from `npm run test:all` (cycle 5):
 ```
-Test Suites: 7 passed, 7 total (api)
-Tests:       62 passed, 62 total (api)
+Test Suites: 9 passed, 9 total (api)
+Tests:       76 passed, 76 total (api)
 Test Suites: 1 passed, 1 total (web)
 Tests:       2 passed, 2 total (web)
 ```
@@ -32,6 +32,7 @@ Tests:       2 passed, 2 total (web)
 | `apps/api/src/middleware/` | `UserEmailMiddleware` — sets `req.userEmail` from `X-User-Email` |
 | `apps/api/src/projects/` | Projects module: create, list, rename, archive (cycle 3) |
 | `apps/api/src/issues/` | Issues module: create, list-by-project, get, patch, status-transition (cycle 4) |
+| `apps/api/src/comments/` | Comments module: create + list comments per issue, author from `X-User-Email` (cycle 5) |
 | `apps/web/` | Angular 17 SPA (standalone components) |
 | `apps/web/src/environments/` | Angular environment files |
 | `docker-compose.yml` | Postgres 16 service (`db`) |
@@ -49,6 +50,7 @@ Tests:       2 passed, 2 total (web)
 | API | `apps/api/src/main.ts` | 1 ✅ |
 | Projects API | `apps/api/src/projects/projects.controller.ts` | 3 ✅ |
 | Issues API | `apps/api/src/issues/issues.controller.ts` | 4 ✅ |
+| Comments API | `apps/api/src/comments/comments.controller.ts` | 5 ✅ |
 | Web | `apps/web/src/main.ts` | 1 ✅ |
 | Migrations | `apps/api/src/migrations/20260610000000-InitialSchema.ts` | 2 ✅ |
 
@@ -80,6 +82,10 @@ See `.cdd/STACK.md`. Branch per cycle: `cycle/N`. Cycle artifacts: `.cdd/unrelea
 ## Decisions (append-only, short) — cycle 4
 
 - 2026-06-11: Cycle 4 — Issues HTTP API. NestJS `IssuesModule` with one controller (empty prefix), service, three DTOs (create/update/update-status). Five routes: POST /projects/:projectId/issues (201/404/409), GET /projects/:projectId/issues (200), GET /issues/:id (200/404), PATCH /issues/:id (200/400/404), POST /issues/:id/status (200/400/404). Status transitions enforced via constant `TRANSITIONS` map; skips, reverts, same-status, and transitions from `closed` all return 400. Archived-project guard in service (loads Project repo). `--runInBand` added to `jest` script to prevent e2e races on shared Postgres. 62 API tests pass (25 pre-existing + 17 new unit + 20 new e2e).
+
+## Decisions (append-only, short) — cycle 5
+
+- 2026-06-13: Cycle 5 — Comments HTTP API. NestJS `CommentsModule` with one controller (empty prefix), service, one DTO (create). Two routes: POST /issues/:issueId/comments (201/400/404), GET /issues/:issueId/comments (200/404). Author sourced from `req.userEmail` (set by global `UserEmailMiddleware`); absent/empty header → "anonymous". Comments ordered by `created_at ASC`. 76 API tests pass (62 pre-existing + 14 new: 7 unit + 7 e2e).
 
 ## Known unknowns / debt
 
