@@ -33,6 +33,14 @@ export class ApiService {
     return this.http.get<Project[]>(`${this.base}/projects`);
   }
 
+  createProject(name: string): Observable<Project> {
+    return this.http.post<Project>(`${this.base}/projects`, { name });
+  }
+
+  archiveProject(id: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/projects/${id}/archive`, {});
+  }
+
   getIssues(projectId: string): Observable<Issue[]> {
     return this.http.get<Issue[]>(`${this.base}/projects/${projectId}/issues`);
   }
