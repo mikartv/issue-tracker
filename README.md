@@ -40,6 +40,28 @@ issue-tracker/
 └── package.json      # npm workspaces root
 ```
 
+## Dev connectivity — CORS (cycle 6)
+
+The Angular SPA (`apps/web`, port 4200) calls the NestJS API (`apps/api`, port 3000) directly using the absolute base URL `environment.apiUrl = 'http://localhost:3000/api/v1'`. Because the two servers run on different ports, the browser enforces the same-origin policy.
+
+**Chosen approach: CORS.** `app.enableCors()` is called in `apps/api/src/main.ts` (before `app.listen`), which instructs NestJS/Express to emit the `Access-Control-Allow-Origin: *` header. This allows the Angular dev server on port 4200 to receive API responses.
+
+A dev proxy (`proxy.conf.json`) was not used because it requires the Angular app to use a relative API URL (`/api/v1`), but `environments/environment.ts` is immutable and carries an absolute URL; changing it would violate the cycle-6 implementation contract.
+
+### Startup sequence
+
+```bash
+npm run dev:db    # PostgreSQL 16 via Docker (port 5432)
+npm run dev:api   # NestJS API — watch mode (port 3000)
+npm run dev:web   # Angular dev server (port 4200)
+```
+
+Open `http://localhost:4200` and navigate to `/projects`, `/projects/:projectId/issues`, or `/issues/:issueId`.
+
+### Auth header stub
+
+Future cycles will pass `X-User-Email: <email>` as an HTTP header for request attribution. The `ApiService` does not send this header yet; see `.cdd/issues/` for the planned cycle.
+
 ## CDD cycles
 
 Development follows coherence-driven development (CDD) with hub `cn-sigma`. Cycle list and contracts:
