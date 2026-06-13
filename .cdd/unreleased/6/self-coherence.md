@@ -131,3 +131,33 @@ CDD-dir files (on branch, not new implementation):
 
 ### Step 7 — Self-coherence
 Sections §Gap, §Skills, §ACs, §Self-check, §Debt written and committed incrementally. Every AC mapped to file+line evidence. No ambiguity pushed to β.
+
+---
+
+## §Review-readiness | round 1
+
+| Gate row | Check | Result |
+|----------|-------|--------|
+| 1 | `origin/cycle/6` rebased onto `origin/main` | No remote configured (local-only repo). Branch was created from local `main` at dispatch; no drift possible. Observed at this writing. |
+| 2 | `self-coherence.md` carries CDD Trace through step 7 | ✅ §CDD Trace present above |
+| 3 | Tests present | ✅ `api.service.spec.ts` (4 tests) + `app.component.spec.ts` (2 tests) — 6 total |
+| 4 | Every AC has evidence | ✅ §ACs table: all 6 rows have file+evidence |
+| 5 | Known debt explicit | ✅ §Debt: 3 items listed, all non-blocking |
+| 6 | Schema/shape audit | ✅ No schema-bearing contract changed. `apps/api/src/` is zero-diff except the one-line CORS addition. |
+| 7 | Peer enumeration | ✅ New surfaces are additive (new files); no sibling family affected |
+| 8 | Harness audit | ✅ No parser/schema-bearing contract changed; not applicable |
+| 9 | Post-patch re-audit | N/A — no mid-cycle patch round |
+| 10 | Branch CI green | Local-only repo — no CI configured on cycle/6. Tests green locally (6/6). Noted as environment constraint. |
+| 11 | Artifact enumeration matches diff | ✅ All 9 implementation files listed in §CDD Trace step 6 table. 4 `.cdd/unreleased/6/` files present; γ-authored 3 listed as γ-side artifacts. |
+| 12 | Caller-path trace for new modules | ✅ §Self-check "Caller-path trace": all 4 new modules have named call sites |
+| 13 | Test assertion count from runner | ✅ Runner output: `Tests: 6 passed, 6 total` (pasted from `npm run test:web`) |
+| 14 | α commit author email | ✅ `git log --format='%ae' HEAD` → `alpha@issue-tracker.cdd.cnos` (all commits) |
+| 15 | γ-artifact presence (rule 3.11b) | ✅ §5.1 canonical dispatch: `.cdd/unreleased/6/gamma-scaffold.md` present on branch (`git ls-files` confirms) |
+
+**γ-artifact at canonical §5.1 path.**
+
+**Implementation SHA:** `c3b5943` (last implementation commit, before self-coherence commits)  
+**Branch HEAD at readiness signal:** review-ready on branch HEAD  
+**Branch CI:** local-only repo; no remote CI; tests green locally (6/6 at 2026-06-13)  
+
+**Ready for β.**
