@@ -61,3 +61,12 @@ Per-AC oracles run against branch HEAD `a580530` (implementation commit).
 - `CommentsModule` exports `CommentsService` (available for future consumers, not required by this cycle's ACs).
 
 **Are all claims backed by evidence in the diff?** Yes — test runner output (`76 passed, 76 total`) is the authoritative assertion count, not manual enumeration.
+
+## §Debt
+
+| ID | Description | Scope |
+|----|-------------|-------|
+| D-CY2-4 (carried) | No `@ManyToOne`/`@OneToMany` ORM relation decorators on `Comment.issue_id`. Column-based queries used throughout — consistent with existing pattern in `issues.service.ts`. Deferred by design to a future cycle. | `apps/api/src/entities/comment.entity.ts`, `comments.service.ts` |
+| D-CY5-1 (new) | `alpha-closeout.md` is provisional — written at review-readiness time before β verdict. Per α SKILL §2.8 provisional close-out fallback. | `.cdd/unreleased/5/alpha-closeout.md` |
+
+No other debt introduced this cycle.
