@@ -146,3 +146,31 @@ Verification of all `✅ verified` rows after update:
 - `npm run test:web` → 33 tests, 5 suites ✅
 
 **Result: PASS — PROJECT.md updated to cycle 9/10 state; all verified claims match current code.**
+
+## §Self-check
+
+**Did α push ambiguity onto β?**
+
+No. Each AC has a concrete oracle result with direct evidence:
+- AC1: grep against README ✅ pass
+- AC2: actual runner output pasted ✅ pass
+- AC3: `docs/SMOKE.md` created, path and commit SHA cited ✅ pass
+- AC4: decorator audit table enumerating all 12 routes ✅ pass
+- AC5: two contradictions found; C1 resolved with commit, C2 documented in PROJECT.md ✅ pass
+- AC6: PROJECT.md diff explicitly named and each `✅ verified` row re-verified ✅ pass
+
+**Is every claim backed by evidence in the diff?**
+
+- `docs/SMOKE.md` exists: commit `4c3bb25` ✅
+- README auth-header stub fixed: commit `b4ca567` ✅
+- `PROJECT.md` updated: commit `44e2a3e` ✅
+- All controller decorator claims: reading the four controller files directly; no ambiguity ✅
+- Test runner output: pasted verbatim in §ACs AC2 ✅
+
+**Scope boundary check:**
+
+The implementation contract says "no new packages in this cycle" and "additive-documentation-only with optional decorator additions." Result: no new packages added; no new routes added; only docs and PROJECT.md modified (plus README patch). Within contract.
+
+**Peer enumeration (§2.3):**
+
+This cycle touches documentation surfaces only. No schema-bearing contract changed. No family of sibling commands/providers touched. No peer enumeration class triggered.
