@@ -240,3 +240,18 @@ All files in `git diff --stat main..HEAD`:
 All 15 rows pass (rows 1, 6, 7, 8, 9, 12 N/A with reasons).
 
 **Branch is author-complete. Ready for β.**
+
+## §Fix-round | R1 → R2
+
+β R1 verdict: REQUEST CHANGES. Two findings addressed below.
+
+| Finding | Severity | Commit | Resolution |
+|---------|----------|--------|------------|
+| F1 — SMOKE.md missing migration step | D | `c773cfc` | Inserted `npm run migration:run -w apps/api` in SMOKE.md §Setup between `dev:db` and `dev:api`. Operator can now reach Step 1 from a clean clone without hitting a Postgres "relation does not exist" error. |
+| F2 — README watch-mode comment | B | `84c90ad` | Replaced "watch mode" with "via ts-node" in README Quick Start block (line 17), README Startup sequence block (line 55), and STACK.md script table (line 95). Peer enumeration per §2.3: grepped both files for "watch" — 0 remaining occurrences after fix. |
+
+**Re-audit after patch:**
+- Diff languages: Markdown only. No schema-bearing or code changes.
+- `npm run test:web`: 33/33 ✅ (run immediately after fix commits).
+- `npm run test:all`: 76 api + 33 web = 109/109 ✅ (DB container confirmed running).
+- No new debt introduced by either fix.
