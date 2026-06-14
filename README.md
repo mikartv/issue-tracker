@@ -60,7 +60,7 @@ Open `http://localhost:4200` and navigate to `/projects`, `/projects/:projectId/
 
 ### Auth header stub
 
-Future cycles will pass `X-User-Email: <email>` as an HTTP header for request attribution. The `ApiService` does not send this header yet; see `.cdd/issues/` for the planned cycle.
+The optional `X-User-Email: <email>` header sets the request actor. If absent or empty, the API defaults to `"anonymous"`. `ApiService.addComment()` passes this header when the caller supplies a user email; other methods omit it (actor logged as `"anonymous"`).
 
 ## CDD cycles
 
