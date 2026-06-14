@@ -211,4 +211,58 @@ describe('ApiService', () => {
     expect(req.request.body).toEqual({ status });
     req.flush(mockIssue);
   });
+
+  it('createIssue() calls POST /api/v1/projects/:projectId/issues with dto; returns Issue', () => {
+    const projectId = 'proj-1';
+    const dto = { title: 'New Issue', priority: 'medium' };
+    const mockIssue: Issue = {
+      id: 'issue-new',
+      project_id: projectId,
+      title: 'New Issue',
+      description: null,
+      status: 'open',
+      priority: 'medium',
+      assignee: null,
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+    };
+
+    service.createIssue(projectId, dto).subscribe((issue) => {
+      expect(issue).toEqual(mockIssue);
+    });
+
+    const req = httpMock.expectOne(
+      `http://localhost:3000/api/v1/projects/${projectId}/issues`,
+    );
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(dto);
+    req.flush(mockIssue);
+  });
+
+  it('updateIssue() calls PATCH /api/v1/issues/:issueId with dto; returns Issue', () => {
+    const issueId = 'issue-1';
+    const dto = { title: 'Updated Title', priority: 'high' };
+    const mockIssue: Issue = {
+      id: issueId,
+      project_id: 'proj-1',
+      title: 'Updated Title',
+      description: null,
+      status: 'open',
+      priority: 'high',
+      assignee: null,
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-02T00:00:00Z',
+    };
+
+    service.updateIssue(issueId, dto).subscribe((issue) => {
+      expect(issue).toEqual(mockIssue);
+    });
+
+    const req = httpMock.expectOne(
+      `http://localhost:3000/api/v1/issues/${issueId}`,
+    );
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual(dto);
+    req.flush(mockIssue);
+  });
 });
