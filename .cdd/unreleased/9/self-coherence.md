@@ -1,3 +1,18 @@
+## §Skills
+
+**Tier 1:**
+- `CDD.md` — canonical lifecycle and role contract
+- `alpha/SKILL.md` — α role surface (this file)
+
+**Tier 2:**
+- `eng/typescript` — TypeScript authoring constraints (strict mode, type safety)
+- `eng/angular` — Angular 17 standalone components, OnPush CD, template syntax
+
+**Tier 3 (issue-specific):**
+- None declared in issue; implementation contract fully specifies technology (Angular 17 + Angular Material, TypeScript strict)
+
+---
+
 ## §Gap
 
 **Issue:** #9 — Create/edit issue flows  
