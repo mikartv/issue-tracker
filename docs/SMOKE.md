@@ -12,8 +12,9 @@ Operator-runnable manual checklist. Follow from a clean clone; no chat context r
 ```bash
 cp .env.example .env
 npm install
-npm run dev:db      # Starts Postgres 16 via Docker (port 5432)
-npm run dev:api     # Starts NestJS API via ts-node (port 3000)
+npm run dev:db                       # Starts Postgres 16 via Docker (port 5432)
+npm run migration:run -w apps/api    # Run DB migrations (required before first API start)
+npm run dev:api                      # Starts NestJS API via ts-node (port 3000)
 ```
 
 Wait for the API to print `Application is running on: http://[::1]:3000` before continuing.
