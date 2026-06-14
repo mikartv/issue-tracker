@@ -71,4 +71,18 @@ export class ApiService {
   updateIssueStatus(issueId: string, status: string): Observable<Issue> {
     return this.http.post<Issue>(`${this.base}/issues/${issueId}/status`, { status });
   }
+
+  createIssue(
+    projectId: string,
+    dto: { title: string; description?: string; priority?: string; assignee?: string },
+  ): Observable<Issue> {
+    return this.http.post<Issue>(`${this.base}/projects/${projectId}/issues`, dto);
+  }
+
+  updateIssue(
+    issueId: string,
+    dto: { title?: string; description?: string; priority?: string; assignee?: string },
+  ): Observable<Issue> {
+    return this.http.patch<Issue>(`${this.base}/issues/${issueId}`, dto);
+  }
 }
