@@ -1,3 +1,27 @@
+## §Review-readiness | round 1 | implementation SHA: aa088c8 | branch CI: green (33/33, local) | ready for β
+
+### Pre-review gate
+
+| Row | Check | Status |
+|-----|-------|--------|
+| 1 | `cycle/9` base = `75b080e` (main HEAD); no drift — branch is on current main | ✅ |
+| 2 | `self-coherence.md` carries CDD Trace through step 7 | ✅ |
+| 3 | Tests present; 10 new test cases | ✅ |
+| 4 | Every AC has evidence (§ACs table) | ✅ |
+| 5 | Known debt explicit (§Debt — 4 items) | ✅ |
+| 6 | No schema-bearing contract changed (no API files touched) | N/A |
+| 7 | No claim touches a family-of-surfaces requiring peer enumeration beyond γ-scaffold §"Peer Enumeration" already completed | ✅ |
+| 8 | No schema-bearing harness audit required | N/A |
+| 9 | No mid-cycle patch; re-audit not applicable | N/A |
+| 10 | `npm run test:web` → 33 passed, 0 failed at HEAD `a84ee24` | ✅ |
+| 11 | All 10 diff files explicitly mentioned in §Files (6 α-authored implementation files + 3 γ-authored scaffold files + self-coherence) | ✅ |
+| 12 | New module callers: `createIssue` ← `submitCreate()` in `project-issues.component.ts`; `updateIssue` ← `saveEdit()` in `issue-detail.component.ts` | ✅ |
+| 13 | Test assertion count from runner: 33 (pasted from actual output above) | ✅ |
+| 14 | `git log -1 --format='%ae' HEAD` → `alpha@issue-tracker.cdd.cnos` | ✅ |
+| 15 | γ-artifact at canonical §5.1 path: `.cdd/unreleased/9/gamma-scaffold.md` present on branch | ✅ |
+
+---
+
 ## §Skills
 
 **Tier 1:**
