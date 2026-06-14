@@ -13,6 +13,26 @@
 
 ---
 
+## §Self-check
+
+**Git identity:** `git config user.email` → `alpha@issue-tracker.cdd.cnos` ✅  
+**Last commit author email:** `git log -1 --format='%ae' HEAD` → `alpha@issue-tracker.cdd.cnos` ✅
+
+**Did α push ambiguity onto β?**  
+No. All 6 ACs have concrete evidence (test pass + diff). The archived-project detection approach (409 → `projectArchived`) is fully implemented and tested, not deferred. The edit-mode template structure (view/edit toggle, success message placement) matches the dispatch spec exactly.
+
+**Is every claim backed by evidence in the diff?**  
+Yes. Each AC row in §ACs names either a specific method/property in the diff or a passing test case. No claim asserts more than the diff delivers.
+
+**Constraint compliance:**
+- No files under `apps/api/` were modified ✅
+- `apps/web/src/app/app.routes.ts` not modified ✅
+- No NgModules introduced; all components remain standalone ✅
+- `ProjectIssuesComponent` existing table functionality preserved ✅
+- `IssueDetailComponent` existing comment and status functionality preserved (comments section outside edit toggle; `moveToNextStatus` unchanged) ✅
+
+---
+
 ## §ACs
 
 | AC | Met? | Evidence |
