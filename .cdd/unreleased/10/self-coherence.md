@@ -185,3 +185,32 @@ This cycle touches documentation surfaces only. No schema-bearing contract chang
 
 **Known debt from prior cycles carried forward:**
 - ORM-level `@ManyToOne`/`@OneToMany` relations — deferred (D-CY2-4); issues loaded by `project_id` column directly.
+
+## §CDD Trace
+
+| Step | Description | Status |
+|------|-------------|--------|
+| 0 | Issue exists | `.cdd/issues/10/ISSUE.md` ✅ |
+| 1 | γ scaffold | `.cdd/unreleased/10/gamma-scaffold.md` ✅ (commit `c2c4b7d`) |
+| 2 | Branch created | `cycle/10` (local, no remote) ✅ |
+| 3 | α dispatch received | `alpha-prompt.md` read; identity `alpha@issue-tracker.cdd.cnos` configured ✅ |
+| 4 | Gap analysis | §Gap: documentation-and-verification cycle; surfaces: `docs/SMOKE.md`, `README.md`, controller decorators, `.cdd/PROJECT.md` ✅ |
+| 5 | Mode and skills loaded | Tier 1: CDD.md + alpha/SKILL.md; Tier 2: eng/typescript (implicit); design=not required; plan=not required ✅ |
+| 6 | Implementation artifacts | See file inventory below ✅ |
+| 7 | Self-coherence (this document) | AC-by-AC evidence, self-check, debt, CDD Trace ✅ |
+
+### Step 6 — File inventory
+
+All files in `git diff --stat main..HEAD`:
+
+| File | Role | AC | Caller |
+|------|------|----|--------|
+| `docs/SMOKE.md` | New — operator smoke checklist | AC3 | Operator-runnable directly; no code caller |
+| `README.md` | Modified — auth-header stub text corrected | AC5 (C1) | End-user documentation surface |
+| `.cdd/PROJECT.md` | Modified — cycle 9 state: test counts, component map, routes, decisions | AC6 | `γ/β` reference surface (MCP); operator |
+| `.cdd/unreleased/10/self-coherence.md` | New — primary α branch artifact | All ACs | β reads for review |
+| `.cdd/unreleased/10/gamma-scaffold.md` | γ-authored (commit `c2c4b7d`) — not an α artifact | — | — |
+| `.cdd/unreleased/10/alpha-prompt.md` | γ-authored (commit `c2c4b7d`) — dispatch artifact | — | — |
+| `.cdd/unreleased/10/beta-prompt.md` | γ-authored (commit `c2c4b7d`) — dispatch artifact | — | — |
+
+α-authored files in diff: `docs/SMOKE.md`, `README.md`, `.cdd/PROJECT.md`, `.cdd/unreleased/10/self-coherence.md` (4 files). γ-authored files in diff: 3 (scaffold artifacts from commit `c2c4b7d`). No α-authored files are undeclared.
