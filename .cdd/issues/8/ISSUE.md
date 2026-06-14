@@ -1,7 +1,7 @@
 # Issue 8 — Issue detail + comments UI
 
 **Mode:** design-and-build  
-**Status:** open  
+**Status:** closed  
 **Branch:** cycle/8
 
 ## Problem
