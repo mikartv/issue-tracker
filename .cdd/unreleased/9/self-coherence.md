@@ -13,6 +13,20 @@
 
 ---
 
+## §Debt
+
+1. **Non-409 create errors replace table view** — when `submitCreate()` fails with a non-409 error, the shared `error` property is set. The template's `@else if (error)` block then shows the error and hides the table and form. UX is suboptimal; a separate `createError` property would show the error inline without hiding the table. Deferred as v1 behavior; the issue has no AC for this case.
+
+2. **Edit success message persists across reloads** — `editSuccessMessage` is cleared only when `enterEditMode()` is called next, not on route navigation or page reload. Adequate for v1.
+
+3. **Reactive forms not used** — template-driven binding with `[value]` + `(input)` event handlers is used throughout, consistent with the existing `IssueDetailComponent` comment form pattern. Reactive forms (FormGroup/FormControl) would give more structured validation but were not required by the issue.
+
+4. **α close-out provisional** — per `alpha/SKILL.md` §2.8, α close-out is written after β approval. No `alpha-closeout.md` is authored at review-readiness time. This is the standard path for bounded dispatch; close-out will be written on re-dispatch after β merge.
+
+No AC is unmet. No required peer or harness enumeration was skipped (this change touches no schema-bearing parser or shared harness; peer enumeration was done for the two new ApiService methods and all three component files as specified by γ-scaffold §"Surfaces γ Expects α to Touch").
+
+---
+
 ## §Self-check
 
 **Git identity:** `git config user.email` → `alpha@issue-tracker.cdd.cnos` ✅  
