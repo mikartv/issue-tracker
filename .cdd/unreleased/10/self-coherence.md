@@ -174,3 +174,14 @@ The implementation contract says "no new packages in this cycle" and "additive-d
 **Peer enumeration (§2.3):**
 
 This cycle touches documentation surfaces only. No schema-bearing contract changed. No family of sibling commands/providers touched. No peer enumeration class triggered.
+
+## §Debt
+
+1. **`dev:api` description imprecision** — STACK.md and README describe `dev:api` as "watch mode"; actual script is `ts-node` (no auto-reload). Noted in PROJECT.md §Known unknowns. No functional impact; requires a `nodemon`/`nest start --watch` change if auto-reload is desired (out of scope until a future cycle adds it as a requirement).
+
+2. **`docs/SMOKE.md` is manual, not automated** — AC3 allows either a manual checklist or a supertest smoke spec. This cycle delivers the manual checklist. A supertest e2e smoke spec at `apps/api/test/smoke.e2e.spec.ts` would provide CI-runnable validation; deferred to a future cycle when CI smoke is prioritized.
+
+3. **Provisional close-out** — bounded-dispatch model: α exits after review-readiness signal; `alpha-closeout.md` written at re-dispatch time per §2.8. This is process-expected, not a defect.
+
+**Known debt from prior cycles carried forward:**
+- ORM-level `@ManyToOne`/`@OneToMany` relations — deferred (D-CY2-4); issues loaded by `project_id` column directly.
