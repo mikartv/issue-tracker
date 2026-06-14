@@ -1,7 +1,7 @@
 # Issue 9 — Create/edit issue flows
 
 **Mode:** design-and-build  
-**Status:** open  
+**Status:** closed  
 **Branch:** cycle/9
 
 ## Problem
