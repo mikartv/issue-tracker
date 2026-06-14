@@ -13,6 +13,54 @@
 
 ---
 
+## §Files Changed
+
+| File | Δ lines | Notes |
+|------|---------|-------|
+| `apps/web/src/app/api/api.service.ts` | +14 | `createIssue()` and `updateIssue()` methods |
+| `apps/web/src/app/projects/project-issues.component.ts` | +122 | Create-issue form, state, submit logic, event handlers |
+| `apps/web/src/app/issues/issue-detail.component.ts` | +115 | Edit mode, edit state, save/cancel, event handlers |
+| `apps/web/src/app/api/api.service.spec.ts` | +54 | 2 new tests |
+| `apps/web/src/app/projects/project-issues.component.spec.ts` | +82 | 4 new tests |
+| `apps/web/src/app/issues/issue-detail.component.spec.ts` | +70 | 4 new tests + mock type update |
+| `.cdd/unreleased/9/self-coherence.md` | +68 (and growing) | This file |
+
+γ-authored artifacts on branch (not α-authored): `alpha-prompt.md`, `beta-prompt.md`, `gamma-scaffold.md`.
+
+---
+
+## §Test Counts
+
+`npm run test:web` before cycle 9: **23 tests** (5 suites)  
+`npm run test:web` after cycle 9: **33 tests** (5 suites)  
+Delta: +10 tests
+
+Actual runner output (last run at HEAD `8e3d434`):
+```
+Tests:       33 passed, 33 total
+Test Suites: 5 passed, 5 total
+Time:        1.642 s
+```
+
+---
+
+## §CDD Trace
+
+| Step | Action | Artifact |
+|------|--------|---------|
+| 0 | Dispatch received; loaded `alpha/SKILL.md`, `CDD.md` | — |
+| 1 | Configured git identity: `alpha@issue-tracker.cdd.cnos` | — |
+| 2 | Checked out `cycle/9` (already on branch) | — |
+| 3 | Read `ISSUE.md`, `gamma-scaffold.md`; enumerated all artifacts named in issue + scaffold | — |
+| 4 | Gap analysis: `createIssue`/`updateIssue` absent from `ApiService`; create form absent from `ProjectIssuesComponent`; edit mode absent from `IssueDetailComponent` — matches γ-scaffold peer enumeration | — |
+| 5 | Mode confirmed: `design-and-build`; design not required (ACs fully bounded; API endpoints exist) | — |
+| 6 | Implemented in artifact order: ApiService → ProjectIssuesComponent → IssueDetailComponent → specs | `apps/web/…` (6 files); callers: `submitCreate()` calls `api.createIssue()`; `saveEdit()` calls `api.updateIssue()`; both have non-test callers in component templates |
+| 7 | Self-coherence written incrementally (§Gap, §Skills, §ACs, §Self-check, §Debt, §Files, §Tests, §CDD Trace) | `.cdd/unreleased/9/self-coherence.md` |
+
+Implementation SHA (last non-self-coherence commit): `aa088c8`
+
+---
+
 ## §Debt
 
 1. **Non-409 create errors replace table view** — when `submitCreate()` fails with a non-409 error, the shared `error` property is set. The template's `@else if (error)` block then shows the error and hides the table and form. UX is suboptimal; a separate `createError` property would show the error inline without hiding the table. Deferred as v1 behavior; the issue has no AC for this case.
