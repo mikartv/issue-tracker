@@ -1,6 +1,6 @@
 # Project MCP — issue-tracker
 
-**Last verified:** 2026-06-13 (cycle 5 — Comments API: module, controller, service, DTO, unit + e2e tests; `npm run test:api` 76 tests pass)  
+**Last verified:** 2026-06-14 (cycle 10 — integration smoke + README polish; `npm run test:all` 109 tests pass: 76 api + 33 web)  
 **Verify with:** `npm run test:all` (from repo root)
 
 ## Build / run / test
@@ -9,18 +9,18 @@
 |---------|---------|--------|
 | `npm install` | Install all workspace deps | ✅ verified |
 | `npm run dev:db` | Start Postgres 16 via Docker (`docker compose up -d db`) | ✅ configured |
-| `npm run dev:api` | NestJS watch mode (`ts-node src/main.ts`) | ✅ configured |
+| `npm run dev:api` | NestJS via ts-node (`ts-node -r tsconfig-paths/register src/main.ts`) — no auto-reload | ✅ configured |
 | `npm run dev:web` | Angular dev server (`ng serve`) | ✅ configured |
-| `npm run test:all` | api + web test suites | ✅ `78 tests passed` (cycle 5: 76 api + 2 web) |
-| `npm run test:api` | API tests only (Jest) | ✅ `76 tests passed` (cycle 5) |
-| `npm run test:web` | Web tests only (Jest via jest-preset-angular) | ✅ `2 tests passed` |
+| `npm run test:all` | api + web test suites | ✅ `109 tests passed` (cycle 10: 76 api + 33 web) |
+| `npm run test:api` | API tests only (Jest) | ✅ `76 tests passed` (9 suites) |
+| `npm run test:web` | Web tests only (Jest via jest-preset-angular) | ✅ `33 tests passed` (5 suites) |
 
-Sample output from `npm run test:all` (cycle 5):
+Sample output from `npm run test:all` (cycle 10):
 ```
 Test Suites: 9 passed, 9 total (api)
 Tests:       76 passed, 76 total (api)
-Test Suites: 1 passed, 1 total (web)
-Tests:       2 passed, 2 total (web)
+Test Suites: 5 passed, 5 total (web)
+Tests:       33 passed, 33 total (web)
 ```
 
 ## Repo map
@@ -29,12 +29,17 @@ Tests:       2 passed, 2 total (web)
 |------|------|
 | `apps/api/` | NestJS REST API (`/api/v1`, Swagger at `/api/docs`) |
 | `apps/api/src/health/` | Health check endpoint (`GET /api/v1/health`) |
-| `apps/api/src/middleware/` | `UserEmailMiddleware` — sets `req.userEmail` from `X-User-Email` |
+| `apps/api/src/middleware/` | `UserEmailMiddleware` — sets `req.userEmail` from `X-User-Email` header |
 | `apps/api/src/projects/` | Projects module: create, list, rename, archive (cycle 3) |
 | `apps/api/src/issues/` | Issues module: create, list-by-project, get, patch, status-transition (cycle 4) |
 | `apps/api/src/comments/` | Comments module: create + list comments per issue, author from `X-User-Email` (cycle 5) |
-| `apps/web/` | Angular 17 SPA (standalone components) |
-| `apps/web/src/environments/` | Angular environment files |
+| `apps/web/` | Angular 17 SPA (standalone components, Angular Material from cycle 7) |
+| `apps/web/src/app/api/api.service.ts` | HTTP client — typed wrappers for all v1 routes (cycle 6) |
+| `apps/web/src/app/projects/projects-list.component.ts` | Project list view with create + archive actions (cycle 7, Angular Material) |
+| `apps/web/src/app/projects/project-issues.component.ts` | Issue list for a project with create-issue form (cycle 7+9, Angular Material) |
+| `apps/web/src/app/issues/issue-detail.component.ts` | Issue detail, comments, add-comment form, status transitions, edit (cycles 8–9) |
+| `apps/web/src/environments/` | Angular environment files (`apiUrl = http://localhost:3000/api/v1`) |
+| `docs/SMOKE.md` | Operator-runnable manual smoke checklist (cycle 10) |
 | `docker-compose.yml` | Postgres 16 service (`db`) |
 | `.env.example` | `DATABASE_URL` template |
 | `.github/workflows/ci.yml` | CI: api job (Postgres service) + web job on Node 20 |
@@ -52,7 +57,17 @@ Tests:       2 passed, 2 total (web)
 | Issues API | `apps/api/src/issues/issues.controller.ts` | 4 ✅ |
 | Comments API | `apps/api/src/comments/comments.controller.ts` | 5 ✅ |
 | Web | `apps/web/src/main.ts` | 1 ✅ |
+| Web routes | `apps/web/src/app/app.routes.ts` | 6 ✅ |
+| Web HTTP client | `apps/web/src/app/api/api.service.ts` | 6 ✅ |
 | Migrations | `apps/api/src/migrations/20260610000000-InitialSchema.ts` | 2 ✅ |
+
+## Angular routes
+
+| Route | Component | Cycle |
+|-------|-----------|-------|
+| `/projects` | `ProjectsListComponent` | 6 ✅ |
+| `/projects/:projectId/issues` | `ProjectIssuesComponent` | 7 ✅ |
+| `/issues/:issueId` | `IssueDetailComponent` | 8 ✅ |
 
 ## CI / local parity
 
@@ -87,8 +102,23 @@ See `.cdd/STACK.md`. Branch per cycle: `cycle/N`. Cycle artifacts: `.cdd/unrelea
 
 - 2026-06-13: Cycle 5 — Comments HTTP API. NestJS `CommentsModule` with one controller (empty prefix), service, one DTO (create). Two routes: POST /issues/:issueId/comments (201/400/404), GET /issues/:issueId/comments (200/404). Author sourced from `req.userEmail` (set by global `UserEmailMiddleware`); absent/empty header → "anonymous". Comments ordered by `created_at ASC`. 76 API tests pass (62 pre-existing + 14 new: 7 unit + 7 e2e).
 
+## Decisions (append-only, short) — cycle 6
+
+- 2026-06-13: Cycle 6 — Angular SPA shell + typed HTTP client. `ApiService` with typed wrappers for all v1 routes. Three placeholder Angular standalone components (`ProjectsListComponent`, `ProjectIssuesComponent`, `IssueDetailComponent`) wired to routes. CORS enabled in `main.ts` (`app.enableCors()`); dev proxy not used because `environments/environment.ts` carries an absolute URL, making proxy inoperative. 6 web tests pass.
+
+## Decisions (append-only, short) — cycle 7
+
+- 2026-06-13: Cycle 7 — Issue list + project views with Angular Material. `ProjectsListComponent` and `ProjectIssuesComponent` wired with `@angular/material` components (MatCard, MatButton, MatFormField, MatList). `ApiService` gained `createProject`, `archiveProject` methods. 12 web tests pass (6 pre-existing + 6 new).
+
+## Decisions (append-only, short) — cycle 8
+
+- 2026-06-14: Cycle 8 — Issue detail + comments UI. New `IssueDetailComponent` replacing 22-line stub; full issue detail, comment list, add-comment form (sends `X-User-Email` header), and forward-only status transitions (button-absent approach for closed status). `ApiService` gained `getComments`, `addComment`, `updateIssueStatus` methods and `Comment` interface. 23 web tests pass (12 pre-existing + 11 new).
+
+## Decisions (append-only, short) — cycle 9
+
+- 2026-06-14: Cycle 9 — Create/edit issue flows. Create-issue form added to `ProjectIssuesComponent`; inline edit form added to `IssueDetailComponent` (title, description, priority, assignee). `ApiService` gained `createIssue`, `updateIssue` methods. Template-driven form binding (`[value]` + `(input)`) consistent with pre-existing comment form. 33 web tests pass (23 pre-existing + 10 new).
+
 ## Known unknowns / debt
 
-- CORS vs Angular dev proxy — decided in cycle 6.
-- Business modules (comments) — cycle 5.
 - ORM-level @ManyToOne/@OneToMany relations — deferred (D-CY2-4); issues loaded by project_id column directly.
+- `dev:api` script uses ts-node (no auto-reload); description "watch mode" in STACK.md is imprecise — noted in cycle 10 AC5 audit, no functional impact.
