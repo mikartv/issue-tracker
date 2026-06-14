@@ -12,6 +12,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { ApiService, type Issue, type Comment } from '../api/api.service';
 
 const NEXT_STATUS: Record<string, string | null> = {
@@ -32,6 +33,7 @@ const NEXT_STATUS: Record<string, string | null> = {
     MatButtonModule,
     MatInputModule,
     MatFormFieldModule,
+    MatSelectModule,
   ],
   template: `
     @if (loading) {
@@ -42,17 +44,48 @@ const NEXT_STATUS: Record<string, string | null> = {
       <p class="error">Error: {{ error }}</p>
     } @else if (issue) {
       <div class="container">
-        <h2>{{ issue.title }}</h2>
-        <p><strong>Description:</strong> {{ issue.description ?? '—' }}</p>
-        <p><strong>Status:</strong> {{ issue.status }}</p>
-        <p><strong>Priority:</strong> {{ issue.priority }}</p>
-        <p><strong>Assignee:</strong> {{ issue.assignee ?? '—' }}</p>
-        <p>
-          <a [routerLink]="['/projects', issue.project_id, 'issues']">Back to project issues</a>
-        </p>
+        @if (!editMode) {
+          <h2>{{ issue.title }}</h2>
+          <p><strong>Description:</strong> {{ issue.description ?? '—' }}</p>
+          <p><strong>Status:</strong> {{ issue.status }}</p>
+          <p><strong>Priority:</strong> {{ issue.priority }}</p>
+          <p><strong>Assignee:</strong> {{ issue.assignee ?? '—' }}</p>
+          <p>
+            <a [routerLink]="['/projects', issue.project_id, 'issues']">Back to project issues</a>
+          </p>
 
-        @if (nextStatus) {
-          <button mat-raised-button (click)="moveToNextStatus()">Move to {{ nextStatus }}</button>
+          @if (nextStatus) {
+            <button mat-raised-button (click)="moveToNextStatus()">Move to {{ nextStatus }}</button>
+          }
+          <button mat-raised-button (click)="enterEditMode()">Edit</button>
+
+          @if (editSuccessMessage) {
+            <p class="success">{{ editSuccessMessage }}</p>
+          }
+        } @else {
+          <h3>Edit Issue</h3>
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Title</mat-label>
+            <input matInput [value]="editTitle" (input)="onEditTitleChange($event)" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Description</mat-label>
+            <textarea matInput [value]="editDescription" (input)="onEditDescriptionChange($event)" rows="3"></textarea>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Priority</mat-label>
+            <mat-select [value]="editPriority" (selectionChange)="editPriority = $event.value">
+              @for (p of priorities; track p) {
+                <mat-option [value]="p">{{ p }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Assignee</mat-label>
+            <input matInput [value]="editAssignee" (input)="onEditAssigneeChange($event)" />
+          </mat-form-field>
+          <button mat-raised-button color="primary" [disabled]="!editTitle.trim()" (click)="saveEdit()">Save</button>
+          <button mat-button (click)="cancelEdit()">Cancel</button>
         }
 
         <h3>Comments</h3>
@@ -84,6 +117,7 @@ const NEXT_STATUS: Record<string, string | null> = {
     `
       .container { padding: 16px; max-width: 800px; }
       .error { color: #c00; }
+      .success { color: #0a0; }
       .comment-list { list-style: none; padding: 0; }
       .comment-item { border-bottom: 1px solid #eee; padding: 8px 0; }
       .form-field { display: block; width: 100%; margin-top: 8px; }
@@ -102,6 +136,15 @@ export class IssueDetailComponent implements OnInit {
   error: string | null = null;
   commentBody = '';
   userEmail = '';
+
+  editMode = false;
+  editTitle = '';
+  editDescription = '';
+  editPriority = '';
+  editAssignee = '';
+  editSuccessMessage = '';
+
+  readonly priorities = ['low', 'medium', 'high', 'critical'];
 
   get nextStatus(): string | null {
     return this.issue ? (NEXT_STATUS[this.issue.status] ?? null) : null;
@@ -151,6 +194,44 @@ export class IssueDetailComponent implements OnInit {
     });
   }
 
+  enterEditMode(): void {
+    if (!this.issue) return;
+    this.editSuccessMessage = '';
+    this.editTitle = this.issue.title;
+    this.editDescription = this.issue.description ?? '';
+    this.editPriority = this.issue.priority;
+    this.editAssignee = this.issue.assignee ?? '';
+    this.editMode = true;
+    this.cdr.markForCheck();
+  }
+
+  cancelEdit(): void {
+    this.editMode = false;
+    this.cdr.markForCheck();
+  }
+
+  saveEdit(): void {
+    if (!this.issue) return;
+    const issueId = this.issue.id;
+    this.api.updateIssue(issueId, {
+      title: this.editTitle,
+      description: this.editDescription || undefined,
+      priority: this.editPriority,
+      assignee: this.editAssignee || undefined,
+    }).subscribe({
+      next: () => {
+        this.editSuccessMessage = 'Issue saved';
+        this.editMode = false;
+        this.cdr.markForCheck();
+        this.loadIssue(issueId);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.error = err.message ?? 'Failed to save issue';
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
   submitComment(): void {
     if (!this.issue) return;
     const issueId = this.issue.id;
@@ -172,6 +253,18 @@ export class IssueDetailComponent implements OnInit {
 
   onCommentChange(event: Event): void {
     this.commentBody = (event.target as HTMLTextAreaElement).value;
+  }
+
+  onEditTitleChange(event: Event): void {
+    this.editTitle = (event.target as HTMLInputElement).value;
+  }
+
+  onEditDescriptionChange(event: Event): void {
+    this.editDescription = (event.target as HTMLTextAreaElement).value;
+  }
+
+  onEditAssigneeChange(event: Event): void {
+    this.editAssignee = (event.target as HTMLInputElement).value;
   }
 
   formatDate(dateStr: string): string {

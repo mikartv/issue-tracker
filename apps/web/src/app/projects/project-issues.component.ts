@@ -9,13 +9,24 @@ import { ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
 import { ApiService, type Issue } from '../api/api.service';
 
 @Component({
   selector: 'app-project-issues',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatProgressSpinnerModule, MatTableModule],
+  imports: [
+    MatProgressSpinnerModule,
+    MatTableModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSelectModule,
+  ],
   template: `
     <div class="container">
       <h2>Issues</h2>
@@ -44,6 +55,44 @@ import { ApiService, type Issue } from '../api/api.service';
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
         </table>
+
+        <div class="create-section">
+          <h3>Create Issue</h3>
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Title *</mat-label>
+            <input matInput [value]="newTitle" (input)="onNewTitleChange($event)" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Description</mat-label>
+            <textarea matInput [value]="newDescription" (input)="onNewDescriptionChange($event)" rows="3"></textarea>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Priority</mat-label>
+            <mat-select [value]="newPriority" (selectionChange)="newPriority = $event.value">
+              @for (p of priorities; track p) {
+                <mat-option [value]="p">{{ p }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Assignee</mat-label>
+            <input matInput [value]="newAssignee" (input)="onNewAssigneeChange($event)" />
+          </mat-form-field>
+          @if (projectArchived) {
+            <p class="error">Project is archived — cannot create issues</p>
+          }
+          @if (successMessage) {
+            <p class="success">{{ successMessage }}</p>
+          }
+          <button
+            mat-raised-button
+            color="primary"
+            [disabled]="!newTitle.trim() || projectArchived"
+            (click)="submitCreate()"
+          >
+            Create Issue
+          </button>
+        </div>
       }
     </div>
   `,
@@ -59,6 +108,17 @@ import { ApiService, type Issue } from '../api/api.service';
       .error {
         color: #c00;
       }
+      .success {
+        color: #0a0;
+      }
+      .create-section {
+        margin-top: 24px;
+      }
+      .form-field {
+        display: block;
+        width: 100%;
+        margin-top: 8px;
+      }
     `,
   ],
 })
@@ -72,10 +132,23 @@ export class ProjectIssuesComponent implements OnInit {
   error: string | null = null;
   readonly displayedColumns = ['status', 'priority', 'title'];
 
-  ngOnInit(): void {
-    const projectId = this.route.snapshot.paramMap.get('projectId') ?? '';
+  projectId = '';
+  newTitle = '';
+  newDescription = '';
+  newPriority = 'medium';
+  newAssignee = '';
+  projectArchived = false;
+  successMessage = '';
 
-    this.api.getIssues(projectId).subscribe({
+  readonly priorities = ['low', 'medium', 'high', 'critical'];
+
+  ngOnInit(): void {
+    this.projectId = this.route.snapshot.paramMap.get('projectId') ?? '';
+    this.loadIssues();
+  }
+
+  private loadIssues(): void {
+    this.api.getIssues(this.projectId).subscribe({
       next: (issues) => {
         this.issues = issues;
         this.loading = false;
@@ -87,5 +160,48 @@ export class ProjectIssuesComponent implements OnInit {
         this.cdr.markForCheck();
       },
     });
+  }
+
+  submitCreate(): void {
+    this.successMessage = '';
+    const dto: { title: string; description?: string; priority?: string; assignee?: string } = {
+      title: this.newTitle,
+      priority: this.newPriority,
+    };
+    if (this.newDescription.trim()) dto.description = this.newDescription;
+    if (this.newAssignee.trim()) dto.assignee = this.newAssignee;
+
+    this.api.createIssue(this.projectId, dto).subscribe({
+      next: () => {
+        this.successMessage = 'Issue created';
+        this.newTitle = '';
+        this.newDescription = '';
+        this.newPriority = 'medium';
+        this.newAssignee = '';
+        this.loadIssues();
+        this.cdr.markForCheck();
+      },
+      error: (err: HttpErrorResponse) => {
+        if (err.status === 409) {
+          this.projectArchived = true;
+          this.successMessage = '';
+        } else {
+          this.error = err.message ?? 'Failed to create issue';
+        }
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  onNewTitleChange(event: Event): void {
+    this.newTitle = (event.target as HTMLInputElement).value;
+  }
+
+  onNewDescriptionChange(event: Event): void {
+    this.newDescription = (event.target as HTMLTextAreaElement).value;
+  }
+
+  onNewAssigneeChange(event: Event): void {
+    this.newAssignee = (event.target as HTMLInputElement).value;
   }
 }

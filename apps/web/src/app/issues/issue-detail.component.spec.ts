@@ -52,6 +52,7 @@ type ApiMock = {
   getComments: jest.Mock;
   addComment: jest.Mock;
   updateIssueStatus: jest.Mock;
+  updateIssue: jest.Mock;
 };
 
 function buildApiMock(issueOverride?: Partial<Issue>): ApiMock {
@@ -60,6 +61,7 @@ function buildApiMock(issueOverride?: Partial<Issue>): ApiMock {
     getComments: jest.fn().mockReturnValue(of(mockComments)),
     addComment: jest.fn().mockReturnValue(of(mockComments[0])),
     updateIssueStatus: jest.fn().mockReturnValue(of(mockIssue)),
+    updateIssue: jest.fn().mockReturnValue(of(mockIssue)),
   };
 }
 
@@ -164,6 +166,7 @@ describe('IssueDetailComponent', () => {
       getComments: jest.fn().mockReturnValue(of([])),
       addComment: jest.fn(),
       updateIssueStatus: jest.fn(),
+      updateIssue: jest.fn(),
     };
 
     await setup(notFoundMock);
@@ -171,5 +174,72 @@ describe('IssueDetailComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Issue not found');
+  });
+
+  it('AC2a: edit button present in view mode; clicking it renders edit form fields', async () => {
+    await setup();
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    const buttons = Array.from(el.querySelectorAll<HTMLButtonElement>('button'));
+    const editBtn = buttons.find((b) => b.textContent?.trim() === 'Edit');
+    expect(editBtn).toBeDefined();
+
+    editBtn!.click();
+    fixture.detectChanges();
+
+    const matFields = el.querySelectorAll('mat-form-field');
+    expect(matFields.length).toBeGreaterThan(0);
+    // Edit form is visible; view title is hidden
+    expect(el.querySelector('h3')?.textContent).toContain('Edit Issue');
+  });
+
+  it('AC2b: fill title and click save — updateIssue is called with new title', async () => {
+    await setup();
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    component.enterEditMode();
+    component.editTitle = 'Updated Title';
+    fixture.detectChanges();
+
+    component.saveEdit();
+
+    expect(apiMock.updateIssue).toHaveBeenCalledWith(
+      ISSUE_ID,
+      expect.objectContaining({ title: 'Updated Title' }),
+    );
+  });
+
+  it('AC4: save button is disabled when edit title is empty', async () => {
+    await setup();
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    component.enterEditMode();
+    component.editTitle = '';
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    const buttons = Array.from(el.querySelectorAll<HTMLButtonElement>('button'));
+    const saveBtn = buttons.find((b) => b.textContent?.trim() === 'Save');
+    expect(saveBtn?.disabled).toBe(true);
+  });
+
+  it('AC6: edit — success message appears in view mode after successful save', async () => {
+    await setup();
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    component.enterEditMode();
+    component.editTitle = 'New Title';
+    fixture.detectChanges();
+
+    component.saveEdit();
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Issue saved');
   });
 });
