@@ -121,4 +121,4 @@ See `.cdd/STACK.md`. Branch per cycle: `cycle/N`. Cycle artifacts: `.cdd/unrelea
 ## Known unknowns / debt
 
 - ORM-level @ManyToOne/@OneToMany relations — deferred (D-CY2-4); issues loaded by project_id column directly.
-- `dev:api` script uses ts-node (no auto-reload); description "watch mode" in STACK.md is imprecise — noted in cycle 10 AC5 audit, no functional impact.
+- `dev:api` script uses ts-node (no auto-reload). Description imprecision ("watch mode") in STACK.md and README corrected in cycle 10 F2.
