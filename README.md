@@ -14,7 +14,7 @@ Minimal internal issue tracker (projects, issues, statuses, comments). v1 scope:
 cp .env.example .env
 npm install
 npm run dev:db    # Start Postgres 16 via Docker (port 5432)
-npm run dev:api   # Start NestJS API in watch mode (port 3000)
+npm run dev:api   # Start NestJS API via ts-node (port 3000)
 npm run dev:web   # Start Angular dev server (port 4200)
 npm run test:all  # Run api + web test suites
 ```
@@ -52,7 +52,7 @@ A dev proxy (`proxy.conf.json`) was not used because it requires the Angular app
 
 ```bash
 npm run dev:db    # PostgreSQL 16 via Docker (port 5432)
-npm run dev:api   # NestJS API — watch mode (port 3000)
+npm run dev:api   # NestJS API via ts-node (port 3000)
 npm run dev:web   # Angular dev server (port 4200)
 ```
 
