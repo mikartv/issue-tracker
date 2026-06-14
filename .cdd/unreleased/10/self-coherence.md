@@ -255,3 +255,29 @@ All 15 rows pass (rows 1, 6, 7, 8, 9, 12 N/A with reasons).
 - `npm run test:web`: 33/33 ✅ (run immediately after fix commits).
 - `npm run test:all`: 76 api + 33 web = 109/109 ✅ (DB container confirmed running).
 - No new debt introduced by either fix.
+
+## §Review-readiness | round 2 | implementation SHA: 1d87a31 | branch CI: local-only — npm run test:all exit 0 (109 tests, 0 failures) | ready for β
+
+### Pre-review gate (R2)
+
+| Row | Check | Result |
+|-----|-------|--------|
+| 1 | Cycle branch rebased onto `origin/main` | N/A — local-only repo; no remote configured. No drift possible. |
+| 2 | `self-coherence.md` carries CDD Trace through step 7 + fix-round section | ✅ All sections present: §Gap, §Skills, §ACs, §Self-check, §Debt, §CDD Trace, §Fix-round. |
+| 3 | Tests present or explicit reason none apply | ✅ Documentation-only cycle. `npm run test:all`: 109 tests, 0 failures (post-fix run). |
+| 4 | Every AC has evidence | ✅ §ACs AC1–AC6 unchanged; F1 fixes AC3 gap; F2 resolves AC5 C2 imprecision. |
+| 5 | Known debt explicit | ✅ §Debt items unchanged. F1 and F2 close the β findings; no new debt added. |
+| 6 | Schema / shape audit | N/A — no schema-bearing contract changed. |
+| 7 | Peer enumeration | ✅ F2 fix: grepped README and STACK.md for "watch" — 0 hits after fix. Three peer occurrences found and fixed (README ×2, STACK.md ×1). |
+| 8 | Harness audit | N/A — no schema-bearing contract changed. |
+| 9 | Post-patch re-audit (all languages) | ✅ Diff languages: Markdown only. All Markdown surfaces verified. |
+| 10 | Branch CI green | Local-only repo. `npm run test:all` exit 0: 76 api + 33 web = 109/109, 0 failures (run 2026-06-14 after fix commits). |
+| 11 | Artifact enumeration matches diff | ✅ All files in `git diff --stat main..HEAD` declared: `docs/SMOKE.md`, `README.md`, `.cdd/STACK.md`, `.cdd/PROJECT.md`, `.cdd/unreleased/10/self-coherence.md` (α-authored); γ-authored 3 scaffold files. |
+| 12 | Caller-path trace for new modules | N/A — no new code modules or functions added. |
+| 13 | Test assertion count from runner output | ✅ `npm run test:all`: "Tests: 76 passed, 76 total (api)" + "Tests: 33 passed, 33 total (web)" = 109 total. |
+| 14 | α commit author email | ✅ Fix-round commits `c773cfc`, `84c90ad`, `1d87a31` all carry `alpha@issue-tracker.cdd.cnos`. |
+| 15 | γ-artifact presence | ✅ §5.1 canonical dispatch: `.cdd/unreleased/10/gamma-scaffold.md` present on `cycle/10` at commit `c2c4b7d`. |
+
+All 15 rows pass (rows 1, 6, 8, 12 N/A with reasons).
+
+**Branch is author-complete. Ready for β.**
