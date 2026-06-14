@@ -281,3 +281,42 @@ All 15 rows pass (rows 1, 6, 7, 8, 9, 12 N/A with reasons).
 All 15 rows pass (rows 1, 6, 8, 12 N/A with reasons).
 
 **Branch is author-complete. Ready for β.**
+
+## §Fix-round | R2 → R3
+
+β R2 verdict: REQUEST CHANGES. One finding addressed below.
+
+| Finding | Severity | Commit | Resolution |
+|---------|----------|--------|------------|
+| F3 — PROJECT.md §Known unknowns stale debt note | B | `501a474` | Replaced stale note at `.cdd/PROJECT.md:124`. Old text stated STACK.md "watch mode" description was imprecise; `84c90ad` had already corrected it. New text: "Description imprecision ('watch mode') in STACK.md and README corrected in cycle 10 F2." Peer enumeration per §2.3: `grep -n "watch" .cdd/PROJECT.md .cdd/STACK.md README.md` — 0 stale claims; single hit in PROJECT.md:124 is the resolution note itself (accurate). |
+
+**Re-audit after patch:**
+- Diff languages: Markdown only. No schema-bearing or code changes.
+- No test suite changes; 109/109 unchanged.
+- No new debt introduced.
+
+## §Review-readiness | round 3 | implementation SHA: 501a474 | branch CI: local-only — npm run test:all exit 0 (109 tests, 0 failures) | ready for β
+
+### Pre-review gate (R3)
+
+| Row | Check | Result |
+|-----|-------|--------|
+| 1 | Cycle branch rebased onto `origin/main` | N/A — local-only repo; no remote configured. No drift possible. |
+| 2 | `self-coherence.md` carries CDD Trace through step 7 + fix-round sections | ✅ All sections present: §Gap, §Skills, §ACs, §Self-check, §Debt, §CDD Trace, §Fix-round R1→R2, §Fix-round R2→R3. |
+| 3 | Tests present or explicit reason none apply | ✅ Documentation-only cycle. `npm run test:all`: 109 tests, 0 failures. |
+| 4 | Every AC has evidence | ✅ §ACs AC1–AC6 unchanged; F3 fix completes AC5 (C2 resolution note now accurate). |
+| 5 | Known debt explicit | ✅ §Debt items unchanged. F3 closes the β R2 finding; no new debt added. |
+| 6 | Schema / shape audit | N/A — no schema-bearing contract changed. |
+| 7 | Peer enumeration | ✅ F3 fix: `grep -n "watch" .cdd/PROJECT.md .cdd/STACK.md README.md` — 0 stale claims across all three surfaces. |
+| 8 | Harness audit | N/A — no schema-bearing contract changed. |
+| 9 | Post-patch re-audit (all languages) | ✅ Diff languages: Markdown only. All Markdown surfaces verified. |
+| 10 | Branch CI green | Local-only repo. `npm run test:all` exit 0: 109/109, 0 failures (no code changes since R2 run). |
+| 11 | Artifact enumeration matches diff | ✅ All files in `git diff --stat main..HEAD` declared: `docs/SMOKE.md`, `README.md`, `.cdd/STACK.md`, `.cdd/PROJECT.md`, `.cdd/unreleased/10/self-coherence.md` (α-authored); γ-authored 3 scaffold files. |
+| 12 | Caller-path trace for new modules | N/A — no new code modules or functions added. |
+| 13 | Test assertion count from runner output | ✅ `npm run test:all`: 76 api + 33 web = 109 total; runner output in §ACs AC2. |
+| 14 | α commit author email | ✅ Fix-round commit `501a474` carries `alpha@issue-tracker.cdd.cnos`. All α commits on branch verified. |
+| 15 | γ-artifact presence | ✅ §5.1 canonical dispatch: `.cdd/unreleased/10/gamma-scaffold.md` present on `cycle/10` at commit `c2c4b7d`. |
+
+All 15 rows pass (rows 1, 6, 8, 12 N/A with reasons).
+
+**Branch is author-complete. Ready for β.**
