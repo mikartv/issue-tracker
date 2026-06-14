@@ -214,3 +214,29 @@ All files in `git diff --stat main..HEAD`:
 | `.cdd/unreleased/10/beta-prompt.md` | γ-authored (commit `c2c4b7d`) — dispatch artifact | — | — |
 
 α-authored files in diff: `docs/SMOKE.md`, `README.md`, `.cdd/PROJECT.md`, `.cdd/unreleased/10/self-coherence.md` (4 files). γ-authored files in diff: 3 (scaffold artifacts from commit `c2c4b7d`). No α-authored files are undeclared.
+
+## §Review-readiness | round 1 | implementation SHA: de33024 | branch CI: local-only — npm run test:all exit 0 (109 tests, 0 failures) | ready for β
+
+### Pre-review gate
+
+| Row | Check | Result |
+|-----|-------|--------|
+| 1 | Cycle branch rebased onto `origin/main` | N/A — local-only repo; no remote configured. Branch `cycle/10` based on `main` at γ dispatch; no remote main has advanced. Equivalent: `git log main..HEAD` shows only cycle-10 commits; `git log HEAD..main` shows 0 commits — no drift. |
+| 2 | `self-coherence.md` carries CDD Trace through step 7 | ✅ Sections §Gap, §Skills, §ACs, §Self-check, §Debt, §CDD Trace all present. Step 7 = self-coherence completed. |
+| 3 | Tests present or explicit reason none apply | ✅ Documentation-only cycle; no new code authored. Existing test suite: 109 tests, 0 failures. |
+| 4 | Every AC has evidence | ✅ §ACs AC1–AC6 each carry oracle result and evidence. |
+| 5 | Known debt explicit | ✅ §Debt: 3 items (dev:api description, manual smoke, provisional closeout). |
+| 6 | Schema / shape audit | N/A — no schema-bearing contract changed. |
+| 7 | Peer enumeration | N/A — no family-of-siblings closure claim. |
+| 8 | Harness audit | N/A — no schema-bearing contract changed. |
+| 9 | Post-patch re-audit (all languages) | N/A — no mid-cycle RC patch. Diff languages: Markdown only. All Markdown surfaces read and verified. |
+| 10 | Branch CI green | Local-only repo; no CI configured. `npm run test:all` exit 0 at 2026-06-14: 109 tests, 0 failures (verified immediately before this signal). |
+| 11 | Artifact enumeration matches diff | ✅ All 7 files in `git diff --stat main..HEAD` enumerated in §CDD Trace step 6. |
+| 12 | Caller-path trace for new modules | N/A — no new code modules or functions added. `docs/SMOKE.md` is documentation only. |
+| 13 | Test assertion count from runner output | ✅ Runner output pasted in §ACs AC2: "Tests: 76 passed, 76 total (api)" + "Tests: 33 passed, 33 total (web)" = 109 total. |
+| 14 | α commit author email | ✅ `git log --format='%ae' main..HEAD` shows all α commits carry `alpha@issue-tracker.cdd.cnos`; γ commit carries `gamma@issue-tracker.cdd.cnos`. No drift. |
+| 15 | γ-artifact presence | ✅ §5.1 canonical dispatch: `.cdd/unreleased/10/gamma-scaffold.md` present on `cycle/10` at commit `c2c4b7d`. |
+
+All 15 rows pass (rows 1, 6, 7, 8, 9, 12 N/A with reasons).
+
+**Branch is author-complete. Ready for β.**
