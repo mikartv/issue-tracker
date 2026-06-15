@@ -1,7 +1,7 @@
 # Issue 10 — Integration smoke + README polish
 
 **Mode:** design-and-build  
-**Status:** open  
+**Status:** closed  
 **Branch:** cycle/10
 
 ## Problem
@@ -17,12 +17,12 @@
 
 ## Acceptance Criteria
 
-- [ ] AC1: README documents: prerequisites (Node 20, Docker), `dev:db`, `dev:api`, `dev:web`, `test:all`
-- [ ] AC2: `npm run test:all` passes from clean clone (document any one-time setup)
-- [ ] AC3: Smoke script or e2e test: create project → create issue → comment → status through `closed` (api-level supertest or documented manual checklist in `docs/SMOKE.md`)
-- [ ] AC4: Swagger `/api/docs` lists all v1 endpoints
-- [ ] AC5: No open contradictions between SCOPE, STACK, and implemented behavior
-- [ ] AC6: `.cdd/PROJECT.md` claims verified against code, CI, and README
+- [x] AC1: README documents: prerequisites (Node 20, Docker), `dev:db`, `dev:api`, `dev:web`, `test:all`
+- [x] AC2: `npm run test:all` passes from clean clone (document any one-time setup)
+- [x] AC3: Smoke script or e2e test: create project → create issue → comment → status through `closed` (api-level supertest or documented manual checklist in `docs/SMOKE.md`)
+- [x] AC4: Swagger `/api/docs` lists all v1 endpoints
+- [x] AC5: No open contradictions between SCOPE, STACK, and implemented behavior
+- [x] AC6: `.cdd/PROJECT.md` claims verified against code, CI, and README
 
 ## Non-goals
 
