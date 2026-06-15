@@ -226,3 +226,85 @@ The "watch mode" imprecision in STACK.md was fixed in commit `84c90ad`. The note
 - `dev:api` script uses ts-node (no auto-reload). Description imprecision ("watch mode") in STACK.md and README corrected in cycle 10 F2.
 ```
 (Or remove the second clause entirely, as the debt is resolved.)
+
+---
+
+## Round 3
+
+---
+cycle: 10
+issue: "#10 — Integration smoke + README polish"
+role: β
+artifact: beta-review
+round: 3
+review-sha: 5a4293a383116403d2a29b6902f2a05f9d7d4a1d
+origin-main-sha: local-only repository — no remote configured
+---
+
+**Verdict:** APPROVED
+
+**Round:** 3
+**Fixed this round:** 501a474 (F3) — closes F3 from R2
+**Branch CI state:** local-only — `npm run test:all` 109/109 confirmed (no code changes since R2 run); web 33/33 independently confirmed in R1
+**Merge instruction:** `git merge cycle/10` into main with `Closes #10`
+
+---
+
+## §2.0.0 Contract Integrity (R3 — narrowed to F3 surface and full-cycle re-confirm)
+
+| Check | Result | Notes |
+|---|---|---|
+| Status truth preserved | yes | In-flight; no status drift |
+| Canonical sources/paths verified | yes | No new paths introduced; F3 fix is text-only |
+| Scope/non-goals consistent | yes | Documentation-only cycle unchanged |
+| Constraint strata consistent | yes | `synchronize: false` untouched |
+| Exceptions field-specific/reasoned | yes | C2 resolution note in PROJECT.md now accurate — F3 closed |
+| Path resolution base explicit | yes | Repo root throughout |
+| Proof shape adequate | yes | All AC oracles pass; no open execution gaps |
+| Cross-surface projections updated | yes | PROJECT.md §Known unknowns line 124 updated in `501a474` — stale claim replaced with accurate resolution note |
+| No witness theater / false closure | yes | F3 fix verifiable: `grep "watch" .cdd/PROJECT.md .cdd/STACK.md README.md` → 0 stale claims |
+| PR body matches branch files | n/a | Local-only repo; no PR |
+| γ artifacts present (gamma-scaffold.md) | yes | `.cdd/unreleased/10/gamma-scaffold.md` present at commit `c2c4b7d` — rule 3.11b satisfied |
+
+---
+
+## §2.0 Issue Contract (R3 — full independent AC oracle)
+
+### AC Coverage (R3)
+
+| # | AC | Status (R3) | Notes |
+|---|----|-------------|-------|
+| AC1 | README: Node 20, Docker, dev:db, dev:api, dev:web, test:all | PASS | β re-read README. Node.js 20 LTS ✅ (line 6); npm 10+ ✅ (line 7); Docker (for PostgreSQL 16) ✅ (line 8); `npm run dev:db` ✅ (line 16); `npm run dev:api` ✅ (line 17, "via ts-node"); `npm run dev:web` ✅ (line 18); `npm run test:all` ✅ (line 19). Zero "watch mode" occurrences ✅. All 6 items present; wording accurate. |
+| AC2 | `npm run test:all` passes | PASS (provisional) | No code changes in fix round R2→R3. Test suite state unchanged from R2: 76 api + 33 web = 109 total, 0 failures. API suite per α verbatim output (local-only; no Postgres CI to re-run); count consistent with cycle baseline. Web 33/33 confirmed by β in R1. |
+| AC3 | SMOKE.md covers full smoke path | PASS | F1 resolved in R2 (`c773cfc`). β re-read `docs/SMOKE.md`. Setup: dev:db (line 15) → `npm run migration:run -w apps/api` (line 16) → dev:api (line 17) ✅. Full path: Step 1 create project, Step 2 create issue, Step 3 add comment, Steps 4–6 status transitions (open→in_progress→done→closed), Step 7 verify comment retrieval, Step 8 verify closed state ✅. All steps are curl-based with explicit expected outputs; `$PROJECT_ID`/`$ISSUE_ID` captured from response JSON; no chat context required ✅. 8/8 steps verified. |
+| AC4 | Swagger covers all v1 endpoints | PASS | β re-grepped all controllers. health: @ApiTags('health') + @ApiOkResponse on GET / (1 route) ✅. projects: @ApiTags('projects') + @ApiResponse on POST, GET, PATCH :id, POST :id/archive (4 routes) ✅. issues: @ApiTags('issues') + @ApiResponse on POST projects/:projectId/issues, GET projects/:projectId/issues, GET issues/:id, PATCH issues/:id, POST issues/:id/status (5 routes) ✅. comments: @ApiTags('comments') + @ApiResponse on POST issues/:issueId/comments, GET issues/:issueId/comments (2 routes) ✅. Total: 12 routes, all decorated. |
+| AC5 | No open contradictions | PASS | β re-read SCOPE.md and STACK.md independently. C1 (README auth-header stub) resolved in `b4ca567` ✅. C2 (STACK.md/README watch mode) resolved in `84c90ad` ✅. F3 (PROJECT.md stale debt note) resolved in `501a474` ✅. STACK.md §Dev ergonomics now reads "start NestJS API via ts-node (no auto-reload)" ✅. `grep "watch" .cdd/STACK.md README.md .cdd/PROJECT.md` → 0 stale claims (PROJECT.md:124 single hit is the accurate resolution note). No contradictions found between SCOPE.md constraints (auth stub, status transitions, archived-project rules) and code. Zero open contradictions. |
+| AC6 | PROJECT.md claims verified | PASS | β verified independently. Test counts: PROJECT.md line 3 "109 tests pass: 76 api + 33 web" matches runner output ✅. Web component map: `api.service.ts` in `apps/web/src/app/api/` ✅; `projects-list.component.ts`, `project-issues.component.ts` in `apps/web/src/app/projects/` ✅; `issue-detail.component.ts` in `apps/web/src/app/issues/` ✅ (all confirmed by `ls` on actual directories). Angular routes match `app.routes.ts`: `/projects` → ProjectsListComponent, `/projects/:projectId/issues` → ProjectIssuesComponent, `/issues/:issueId` → IssueDetailComponent ✅. Cycle 6–9 decisions present in §Decisions section ✅. All `✅ verified` claims match current code. |
+
+---
+
+## Findings (R3)
+
+| # | Finding | Evidence | Severity | Type |
+|---|---------|----------|----------|------|
+| F1 | ~~SMOKE.md missing migration step~~ | Resolved — `c773cfc` (R2) | D | — |
+| F2 | ~~README Quick Start watch-mode comment~~ | Resolved — `84c90ad` (R2) | B | — |
+| F3 | ~~PROJECT.md §Known unknowns stale debt note~~ | Resolved — `501a474` (R3). `.cdd/PROJECT.md:124` now reads: "Description imprecision ('watch mode') in STACK.md and README corrected in cycle 10 F2." Accurate. Zero stale claims across all three surfaces. | B | — |
+
+Zero open findings. All D/C/B/A findings resolved.
+
+---
+
+## Notes
+
+**F3 verification (independent):** `grep -n "watch" .cdd/PROJECT.md .cdd/STACK.md README.md` → single hit at PROJECT.md:124, which is the accurate resolution note ("corrected in cycle 10 F2"), not a stale imprecision claim ✅.
+
+**AC5 SCOPE.md scan:** β re-read SCOPE.md §Active design constraints. Auth stub (`X-User-Email` → default `"anonymous"`) ✅; status transitions (`open→in_progress→done→closed`, forward-only, `400` on revert/skip) ✅; archived-project rules (rename/create-issue → `409`) ✅. No previously-missed contradictions found.
+
+**CI gate (rule 3.10):** Local-only repository — no remote, no GitHub Actions runs to query. Same condition as R1/R2. `npm run test:all` exit 0, 109/109 per α's verbatim output. No code changes since R2; test state unchanged.
+
+**Identity (pre-merge gate row 1):** `git config user.email` → `beta@issue-tracker.cdd.cnos` ✅. Asserted via `git config` at session start; verified before verdict commit.
+
+**γ artifact gate (rule 3.11b):** `.cdd/unreleased/10/gamma-scaffold.md` present on `cycle/10` at commit `c2c4b7d` ✅.
+
+**Search space closure (rule 3.7):** β performed independent oracle passes on all 6 ACs from code and artifacts, not from α's self-coherence claims alone. No blocker found in contract integrity, issue contract, diff context, or architecture surfaces. APPROVED is a conjunction: all ACs met + zero unresolved findings.
