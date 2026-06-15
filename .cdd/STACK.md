@@ -92,7 +92,7 @@ Status and priority stored as `varchar` columns with TypeORM enum types in code.
 | Script | Action |
 |--------|--------|
 | `dev:db` | `docker compose up -d db` |
-| `dev:api` | start Nest in watch mode |
+| `dev:api` | start NestJS API via ts-node (no auto-reload) |
 | `dev:web` | start Angular dev server |
 | `test:all` | run api + web test suites |
 | `test:api` | api tests only |
