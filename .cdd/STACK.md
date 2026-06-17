@@ -104,12 +104,14 @@ Status and priority stored as `varchar` columns with TypeORM enum types in code.
 
 ## CDD dispatch (cnos + cn-sigma)
 
-This project does **not** mirror cycles to GitHub Issues. Contracts live at `.cdd/issues/N/ISSUE.md`.
+**Cycle contracts live as GitHub Issue bodies** at `https://github.com/mikartv/issue-tracker/issues`.
+δ creates each issue via `gh issue create`; the issue body is the binding contract.
+Cycles 0–10 used local `.cdd/issues/N/ISSUE.md` (D-CY2-2: pre-remote era); cycle 11+ uses GitHub Issues.
 
-γ/α/β dispatch prompts MUST reference the local file — **not** `gh issue view`:
+γ/α/β dispatch prompts reference the issue via `gh issue view N`:
 
 ```text
-Issue: Read `.cdd/issues/N/ISSUE.md` from repo root (full contract: gap, AC, non-goals)
+Issue: gh issue view N         (full contract: gap, AC, non-goals — the issue body)
 Branch: cycle/N
 ```
 
@@ -117,9 +119,61 @@ Cycle artifacts on branch `cycle/N`: `.cdd/unreleased/N/` (`gamma-scaffold.md`, 
 
 Project MCP: `.cdd/PROJECT.md` — verify claims against code/CI after cycle 1; update at each cycle close-out.
 
-Default **7-axis implementation contract** for dispatch: table in §Implementation contract quick reference below. Per-cycle `ISSUE.md` may override or extend; empty rows MUST be filled by δ from defaults before α dispatch.
+Default **7-axis implementation contract** for dispatch: table in §Implementation contract quick reference below. Per-cycle issue body may override or extend; axes MUST be pinned by δ in the issue body before α dispatch.
 
 Hub: `cn-sigma` (identity/memory). Product facts stay in this repo's `.cdd/` — not in `cn-sigma/threads/`.
+
+### γ-prompt: mandatory reads before scoping
+
+Every γ-prompt MUST include a "Read before scoping" section with these inputs:
+
+```text
+- gh issue view N                          (full contract: gap, AC, non-goals)
+- gh issue view N --comments               (operator clarifications, if any)
+- .cdd/PROJECT.md                          (verified repo map)
+- .cdd/iterations/INDEX.md                 (prior protocol findings, if exists)
+- .cdd/releases/{last-version}/*/gamma-closeout.md  (last closed cycle)
+- .cdd/SCOPE.md                            (product boundary)
+```
+
+Skipping these inputs risks repeating closed gaps or missing post-release MCAs. The last `gamma-closeout.md` is binding, not optional.
+
+### AC contract: UI screens
+
+If an issue creates or modifies any component under `apps/web/src`, the AC MUST include:
+
+- An explicit `routerLink` AC for every outbound navigation from that screen (list → detail, parent → child). Navigation is **never implied** by the existence of a screen.
+- An empty-state AC for every list view (`projects = []`, `issues = []`).
+- A runbook verification step (AC7-pattern): operator opens `/start`, clicks, arrives at `/destination`. Stated as concrete steps, not "navigation works".
+
+### α-rule: runbook honesty
+
+For any cycle that produces a runbook, smoke-test, or setup guide, α MUST:
+
+1. Verify each step is executable from a **clean clone** given only the stated prerequisites. Check `.cdd/STACK.md §Database` and `§Dev ergonomics` for commands the runbook might omit.
+2. Record the result in `alpha-closeout.md` as: "steps X, Y, Z executed — result [specific]" or "step Z could not be executed — reason [specific]".
+
+A claim of "runbook verified" without specific step results is an honest-claim violation (severity D).
+
+### β-rule: git identity check
+
+β MUST run a mechanical git identity check before any other review step:
+
+```bash
+git log cycle/N --format='%ae %s'
+```
+
+Any implementation (feat/fix) commit authored by a non-α identity is an RC finding, severity D. CDD artifact commits (self-coherence updates, alpha-closeout) may be authored by α or γ per protocol.
+
+### β-rule: CI green gate
+
+β MUST verify CI is green on `cycle/N` before issuing APPROVE:
+
+```bash
+gh run list --branch cycle/N --limit 5
+```
+
+If the most recent run is not `completed / success`, β returns REQUEST CHANGES (D-severity, `ci-red`). Exception: if the cycle's scope is documentation-only (zero code/test changes), β notes this explicitly and may APPROVE without CI.
 
 ## CI (delivered in Issue 1)
 

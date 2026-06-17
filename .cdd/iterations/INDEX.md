@@ -13,28 +13,27 @@ receipt has `protocol_gap_count > 0` — findings of type `cdd-skill-gap`,
 
 | Cycle | Issue | Date | Findings | Gap type | Proposed patches | MCAs committed | No-patch | Path |
 |-------|-------|------|----------|----------|------------------|----------------|----------|------|
-| 10 | #10 — Integration smoke + README polish | 2026-06-14 | 3 (F1 D: runbook operability, F2 B: watch-mode, F3 B: peer-enumeration) | cdd-skill-gap (loaded-skill miss: α peer-enumeration rule + runbook-AC oracle scope) | 2 (α/SKILL.md §2.3 derived-fact carriers; AC oracle operability check) | 1 (bundled — runbook operability + peer-enumeration) | 0 | .cdd/releases/1.0.0/10/ |
+| 8 | #8 — Issue detail + comments UI | 2026-06-14 | Identity drift: feat-commit `b727dfd` as `beta@`, not caught by β | cdd-protocol-gap (β git-author check absent from protocol) | 1 (add git-author check to β-prompt) | 1 (patched in STACK.md §CDD dispatch, 2026-06-17) | 0 | .cdd/releases/1.0.0/8/ |
+| 10 | #10 — Integration smoke + README polish | 2026-06-14 | 3 (F1 D: runbook operability, F2 B: watch-mode, F3 B: peer-enumeration) | cdd-skill-gap (loaded-skill miss: α peer-enumeration rule + runbook-AC oracle scope) | 2 (α/SKILL.md §2.3 derived-fact carriers; AC oracle operability check) | 1 (bundled — patched in STACK.md §CDD dispatch, 2026-06-17) | 0 | .cdd/releases/1.0.0/10/ |
 
 ---
 
-## Retroactive audit status — cycles 1–9
+## Retroactive audit — cycles 1–9 (completed 2026-06-17)
 
-_Full retroactive audit of cycles 1–9 is planned for the ε=δ pass (Step 3 in
-`ПЛАН-следующий-этап.md`). Cycles below are flagged as candidates based on
-gamma-closeout review; `cdd-iteration.md` files not yet written._
+_Audit performed as ε=δ pass by reading all gamma-closeout.md files.
+Verdict per cycle: whether the finding type was `cdd-skill-gap` / `cdd-protocol-gap`
+or fell within normal operating tolerance (review loop worked as designed)._
 
-| Cycle | Candidate reason | Audit status |
-|-------|-----------------|--------------|
-| 1 | F1 B (honest-claim): §Debt D2 guard claimed not present in code | Pending |
-| 2 | F1 C (honest-claim): DATABASE_URL guard claimed not implemented | Pending |
-| 3 | F1 A (honest-claim): test-count off by 1 (7→8 cases) | Pending |
-| 4 | B4-A1 A (advisory): grep attribution wrong — count correct, no action | Likely no gap (advisory/drop) |
-| 5 | 0 findings | No gap |
-| 6 | 0 findings | No gap |
-| 7 | 0 findings | No gap |
-| 8 | NIT-1, NIT-2 + identity drift (not caught by β) | Pending — identity miss is a candidate cdd-protocol-gap |
-| 9 | F1 NIT (test coverage) | Likely no gap (judgment call, not skill miss) |
+| Cycle | Finding | Gap type candidate | Verdict | Rationale |
+|-------|---------|-------------------|---------|-----------|
+| 1 | F1 B — honest-claim (§Debt D2 guard claimed, not implemented) | cdd-skill-gap? | **No gap** | γ-closeout: "Single B-level finding… not a pattern. No patch. No MCA warranted." β caught it at R1 — review loop worked correctly. Normal tolerance. |
+| 2 | F1 C — honest-claim (DATABASE_URL guard claimed, not present) | cdd-skill-gap? | **No gap** | γ-closeout: "No process gap identified. No patch needed." β R1 catch; α chose to implement the guard (stronger fix). Review loop worked. |
+| 3 | F1 A — honest-claim (test count 7→8) | cdd-skill-gap? | **No gap** | γ-closeout: "No process gap found. No patch needed." Arithmetic error in doc narrative; runner total was correct. β R1 catch. Normal tolerance. |
+| 4 | B4-A1 A — advisory (grep attribution, count correct) | none | **No gap** | γ-closeout: drop, no action. Count was accurate; explanation wrong with zero functional impact. Advisory/drop by β. |
+| 5 | 0 findings | — | **No gap** | Cleanest backend cycle. |
+| 6 | 0 findings | — | **No gap** | 2nd consecutive 0-finding cycle. |
+| 7 | 0 findings | — | **No gap** | Angular Material integration; no findings. |
+| 8 | Identity drift (`b727dfd` as `beta@`); NIT-1, NIT-2 | cdd-protocol-gap | **Gap confirmed** — see entry in confirmed table below | β did not flag identity drift because no git-author check was in β protocol. Trigger NOT FORMALLY FIRED in γ-closeout, but the protocol hole is real and was patched in STACK.md §CDD dispatch (2026-06-17 ε=δ pass). |
+| 9 | F1 NIT — test coverage (no cancel-discards test) | none | **No gap** | γ-closeout: "judgment call, not a skill miss". NIT is a test-coverage preference, not a protocol failure. |
 
-_Note: Cycles 1–3 honest-claim findings were caught and resolved by β R1 in each
-case — the review loop worked correctly. Whether these constitute `cdd-skill-gap`
-(α oracle scope) vs. normal operating tolerance is the question for the ε=δ audit._
+_Honest-claim pattern (C1–C4):_ Four cycles each carried a B/C/A honest-claim finding. All were caught by β R1; all resolved in one fix round. γ-closeout verdicts in each case: "within normal operating tolerance; no patch warranted." The β feedback loop is the correct correction surface for documentation precision at this scale. Retrospective verdict: no cdd-skill-gap, no cdd-iteration.md needed for C1–C4.
