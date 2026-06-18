@@ -107,6 +107,8 @@ Status and priority stored as `varchar` columns with TypeORM enum types in code.
 **Cycle contracts live as GitHub Issue bodies** at `https://github.com/mikartv/issue-tracker/issues`.
 δ creates each issue via `gh issue create`; the issue body is the binding contract.
 Cycles 0–10 used local `.cdd/issues/N/ISSUE.md` (D-CY2-2: pre-remote era); cycle 11+ uses GitHub Issues.
+Note: GitHub issue numbers start at #1 for this repo. Cycle 11 = gh #1, cycle 12 = gh #2, etc.
+Mapping: gh_issue_number = cycle_number - 10.
 
 γ/α/β dispatch prompts reference the issue via `gh issue view N`:
 

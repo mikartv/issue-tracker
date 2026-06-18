@@ -15,6 +15,7 @@ Per-cycle contracts live at `.cdd/issues/N/ISSUE.md`. γ MUST NOT dispatch α wi
 | 8 | Issue detail + comments UI | closed | design-and-build | cycle/8 | `.cdd/issues/8/ISSUE.md` |
 | 9 | Create/edit issue flows | closed | design-and-build | cycle/9 | `.cdd/issues/9/ISSUE.md` |
 | 10 | Integration smoke + README polish | closed | design-and-build | cycle/10 | `.cdd/issues/10/ISSUE.md` |
+| 11 | UX navigation: routerLink between views | open | design-and-build | cycle/11 | https://github.com/mikartv/issue-tracker/issues/1 |
 
 ## Cycle notes (non-normative)
 
