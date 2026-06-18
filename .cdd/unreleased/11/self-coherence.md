@@ -1,6 +1,6 @@
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills, ACs, Self-check]
+completed: [Gap, Skills, ACs, Self-check, Debt]
 -->
 
 # Self-Coherence — Cycle 11 (gh #1)
@@ -109,3 +109,47 @@ Deferred to operator/β confirmation.
 
 **No other debt.** All AC1–AC6 are mechanically verified. No known regressions. No
 partial implementations. No outstanding ambiguities pushed onto β.
+
+## §CDD Trace
+
+| Step | Role | Artifact | SHA / Evidence |
+|------|------|----------|----------------|
+| S0 — Dispatch received | α | Dispatch prompt loaded; branch `cycle/11` confirmed | `c5146d0` (γ scaffold) on `origin/cycle/11` |
+| S1 — Skills loaded | α | CDD.md + alpha/SKILL.md loaded; PROJECT.md, STACK.md, gamma-scaffold.md read | Pre-implementation |
+| S2 — Issue read | α | `gh issue view 1` — gap, mode, ACs, non-goals, implementation contract | Pre-implementation |
+| S3 — Git identity set | α | `alpha@issue-tracker.cdd.cnos` / Alpha | Pre-commit; verified `git log -1 --format='%ae'` |
+| S4 — Implementation | α | 4 files changed: `projects-list.component.ts`, `project-issues.component.ts`, `.spec.ts` files | `3b1b943` |
+| S5 — Tests green | α | `npm run test:web` → `Tests: 39 passed, 39 total` (5 suites) | At `3b1b943` |
+| S6 — Diff enumeration | α | All 4 modified files declared in §ACs. No new modules; callers exist (route wiring unchanged from cycle 6). | `git diff --stat origin/main..3b1b943` |
+| S7 — Self-coherence | α | This file (`self-coherence.md`) written section-by-section, committed incrementally | `201c7ad` → `8dfd97d` → (this commit) |
+
+**Diff stat (`git diff --stat origin/main..3b1b943`):**
+```
+apps/web/src/app/projects/project-issues.component.spec.ts | 71 +++++++++++++
+apps/web/src/app/projects/project-issues.component.ts      | 83 ++++++++++----
+apps/web/src/app/projects/projects-list.component.spec.ts  | 27 +++++
+apps/web/src/app/projects/projects-list.component.ts       | 48 ++++++---
+4 files changed, 178 insertions(+), 51 deletions(-)
+```
+
+All 4 files are mentioned in §ACs. No unmentioned files.
+
+**Pre-review gate:**
+
+| Row | Check | Result |
+|-----|-------|--------|
+| 1 | Branch rebased onto `origin/main` | PASS — merge-base = `c97225f` = current `origin/main` HEAD (observed at self-coherence write time) |
+| 2 | `self-coherence.md` carries CDD Trace through step 7 | PASS — this section |
+| 3 | Tests present | PASS — 6 new tests added; 39 total pass |
+| 4 | Every AC has evidence | PASS — §ACs table |
+| 5 | Known debt explicit | PASS — §Debt: D1 (pre-existing API test env), D2 (AC7 runbook gate) |
+| 6 | Schema/shape audit | N/A — no schema-bearing contract changes |
+| 7 | Peer enumeration | PASS — ProjectsListComponent, ProjectIssuesComponent, IssueDetailComponent enumerated; exempt stated |
+| 8 | Harness audit | N/A — no schema-bearing contract changes |
+| 9 | Polyglot re-audit | PASS — diff is TypeScript only; no shell/YAML/Markdown surfaces changed |
+| 10 | Branch CI | Cannot verify locally (GitHub Actions); noted as known limitation — β to verify CI green before merge |
+| 11 | Artifact enumeration matches diff | PASS — all 4 diff files mentioned in §ACs |
+| 12 | New modules caller-path trace | N/A — no new modules added; label maps and `createError` are fields on existing components |
+| 13 | Test assertion count from runner | PASS — `Tests: 39 passed, 39 total` (from actual runner output) |
+| 14 | Commit author email | PASS — all α commits: `alpha@issue-tracker.cdd.cnos`; γ commit: `gamma@issue-tracker.cdd.cnos`; pre-dispatch beta commits: `beta@issue-tracker.cdd.cnos` (not implementation commits) |
+| 15 | γ-artifact at §5.1 path | PASS — `git cat-file -e origin/cycle/11:.cdd/unreleased/11/gamma-scaffold.md` → exists |
