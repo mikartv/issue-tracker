@@ -130,15 +130,24 @@ Hub: `cn-sigma` (identity/memory). Product facts stay in this repo's `.cdd/` —
 Every γ-prompt MUST include a "Read before scoping" section with these inputs:
 
 ```text
+## Skills (Tier 1a — load in order before any other step)
+- ../cn-sigma/.cn/vendor/packages/cnos.cdd/skills/cdd/CDD.md
+- ../cn-sigma/.cn/vendor/packages/cnos.cdd/skills/cdd/gamma/SKILL.md
+- ../cn-sigma/.cn/vendor/packages/cnos.cdd/skills/cdd/issue/SKILL.md
+- ../cn-sigma/.cn/vendor/packages/cnos.cdd/skills/cdd/post-release/SKILL.md
+- ../cn-sigma/.cn/vendor/packages/cnos.cdd/skills/cdd/operator/SKILL.md
+
+## Project context
 - gh issue view N                          (full contract: gap, AC, non-goals)
 - gh issue view N --comments               (operator clarifications, if any)
 - .cdd/PROJECT.md                          (verified repo map)
+- .cdd/STACK.md                            (pinned conventions + dispatch bindings)
 - .cdd/iterations/INDEX.md                 (prior protocol findings, if exists)
 - .cdd/releases/{last-version}/*/gamma-closeout.md  (last closed cycle)
 - .cdd/SCOPE.md                            (product boundary)
 ```
 
-Skipping these inputs risks repeating closed gaps or missing post-release MCAs. The last `gamma-closeout.md` is binding, not optional.
+Tier 1a skill paths are relative to the issue-tracker working directory. Skills are loaded as hard generation constraints — not post-hoc checklists. Skipping any Tier 1a file is a skill-loading gate violation (OPERATOR.md). Skipping project context risks repeating closed gaps or missing post-release MCAs.
 
 ### AC contract: UI screens
 

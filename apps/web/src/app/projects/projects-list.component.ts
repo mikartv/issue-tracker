@@ -5,6 +5,7 @@ import {
   OnInit,
   inject,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
@@ -19,6 +20,7 @@ import { ApiService, type Project } from '../api/api.service';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    RouterLink,
     FormsModule,
     MatButtonModule,
     MatFormFieldModule,
@@ -32,35 +34,41 @@ import { ApiService, type Project } from '../api/api.service';
 
       @if (loading) {
         <mat-spinner diameter="40" />
-      } @else if (error) {
-        <p class="error">{{ error }}</p>
       } @else {
-        <table mat-table [dataSource]="projects" class="projects-table">
-          <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef>Name</th>
-            <td mat-cell *matCellDef="let project" [class.archived]="project.archived">
-              {{ project.name }}
-              @if (project.archived) {
-                <span class="archived-badge">Archived</span>
-              }
-            </td>
-          </ng-container>
+        @if (error) {
+          <p class="error">{{ error }}</p>
+        } @else if (projects.length === 0) {
+          <p>No projects yet.</p>
+        } @else {
+          <table mat-table [dataSource]="projects" class="projects-table">
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Name</th>
+              <td mat-cell *matCellDef="let project" [class.archived]="project.archived">
+                <a [routerLink]="['/projects', project.id, 'issues']" class="project-link">
+                  {{ project.name }}
+                </a>
+                @if (project.archived) {
+                  <span class="archived-badge">Archived</span>
+                }
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef></th>
-            <td mat-cell *matCellDef="let project">
-              @if (!project.archived) {
-                <button mat-stroked-button (click)="archiveProject(project)">Archive</button>
-              }
-              @if (archiveErrors[project.id]) {
-                <span class="inline-error">{{ archiveErrors[project.id] }}</span>
-              }
-            </td>
-          </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let project">
+                @if (!project.archived) {
+                  <button mat-stroked-button (click)="archiveProject(project)">Archive</button>
+                }
+                @if (archiveErrors[project.id]) {
+                  <span class="inline-error">{{ archiveErrors[project.id] }}</span>
+                }
+              </td>
+            </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        }
       }
 
       <div class="create-form">
@@ -91,6 +99,13 @@ import { ApiService, type Project } from '../api/api.service';
       }
       .projects-table {
         width: 100%;
+      }
+      .project-link {
+        text-decoration: none;
+        color: inherit;
+      }
+      .project-link:hover {
+        text-decoration: underline;
       }
       .error {
         color: #c00;

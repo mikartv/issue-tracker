@@ -5,7 +5,7 @@ import {
   OnInit,
   inject,
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
@@ -20,6 +20,7 @@ import { ApiService, type Issue } from '../api/api.service';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    RouterLink,
     MatProgressSpinnerModule,
     MatTableModule,
     MatFormFieldModule,
@@ -33,28 +34,34 @@ import { ApiService, type Issue } from '../api/api.service';
 
       @if (loading) {
         <mat-spinner diameter="40" />
-      } @else if (error) {
-        <p class="error">{{ error }}</p>
       } @else {
-        <table mat-table [dataSource]="issues" class="issues-table">
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let issue">{{ issue.status }}</td>
-          </ng-container>
+        @if (error) {
+          <p class="error">{{ error }}</p>
+        } @else if (issues.length === 0) {
+          <p>No issues yet.</p>
+        } @else {
+          <table mat-table [dataSource]="issues" class="issues-table">
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let issue">{{ statusLabels[issue.status] ?? issue.status }}</td>
+            </ng-container>
 
-          <ng-container matColumnDef="priority">
-            <th mat-header-cell *matHeaderCellDef>Priority</th>
-            <td mat-cell *matCellDef="let issue">{{ issue.priority }}</td>
-          </ng-container>
+            <ng-container matColumnDef="priority">
+              <th mat-header-cell *matHeaderCellDef>Priority</th>
+              <td mat-cell *matCellDef="let issue">{{ priorityLabels[issue.priority] ?? issue.priority }}</td>
+            </ng-container>
 
-          <ng-container matColumnDef="title">
-            <th mat-header-cell *matHeaderCellDef>Title</th>
-            <td mat-cell *matCellDef="let issue">{{ issue.title }}</td>
-          </ng-container>
+            <ng-container matColumnDef="title">
+              <th mat-header-cell *matHeaderCellDef>Title</th>
+              <td mat-cell *matCellDef="let issue">
+                <a [routerLink]="['/issues', issue.id]" class="issue-link">{{ issue.title }}</a>
+              </td>
+            </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        }
 
         <div class="create-section">
           <h3>Create Issue</h3>
@@ -92,6 +99,9 @@ import { ApiService, type Issue } from '../api/api.service';
           >
             Create Issue
           </button>
+          @if (createError) {
+            <p class="create-error">{{ createError }}</p>
+          }
         </div>
       }
     </div>
@@ -119,6 +129,17 @@ import { ApiService, type Issue } from '../api/api.service';
         width: 100%;
         margin-top: 8px;
       }
+      .issue-link {
+        text-decoration: none;
+        color: inherit;
+      }
+      .issue-link:hover {
+        text-decoration: underline;
+      }
+      .create-error {
+        color: #c00;
+        margin-top: 8px;
+      }
     `,
   ],
 })
@@ -130,6 +151,7 @@ export class ProjectIssuesComponent implements OnInit {
   issues: Issue[] = [];
   loading = true;
   error: string | null = null;
+  createError: string | null = null;
   readonly displayedColumns = ['status', 'priority', 'title'];
 
   projectId = '';
@@ -141,6 +163,20 @@ export class ProjectIssuesComponent implements OnInit {
   successMessage = '';
 
   readonly priorities = ['low', 'medium', 'high', 'critical'];
+
+  readonly statusLabels: Record<string, string> = {
+    open: 'Open',
+    in_progress: 'In Progress',
+    resolved: 'Resolved',
+    closed: 'Closed',
+  };
+
+  readonly priorityLabels: Record<string, string> = {
+    low: 'Low',
+    medium: 'Medium',
+    high: 'High',
+    critical: 'Critical',
+  };
 
   ngOnInit(): void {
     this.projectId = this.route.snapshot.paramMap.get('projectId') ?? '';
@@ -164,6 +200,7 @@ export class ProjectIssuesComponent implements OnInit {
 
   submitCreate(): void {
     this.successMessage = '';
+    this.createError = null;
     const dto: { title: string; description?: string; priority?: string; assignee?: string } = {
       title: this.newTitle,
       priority: this.newPriority,
@@ -186,7 +223,7 @@ export class ProjectIssuesComponent implements OnInit {
           this.projectArchived = true;
           this.successMessage = '';
         } else {
-          this.error = err.message ?? 'Failed to create issue';
+          this.createError = err.message ?? 'Failed to create issue';
         }
         this.cdr.markForCheck();
       },

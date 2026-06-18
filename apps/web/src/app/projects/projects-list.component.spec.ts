@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterTestingModule } from '@angular/router/testing';
 import { ProjectsListComponent } from './projects-list.component';
 import type { Project } from '../api/api.service';
 
@@ -18,7 +19,7 @@ describe('ProjectsListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ProjectsListComponent, HttpClientTestingModule, NoopAnimationsModule],
+      imports: [ProjectsListComponent, HttpClientTestingModule, NoopAnimationsModule, RouterTestingModule],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProjectsListComponent);
@@ -71,6 +72,26 @@ describe('ProjectsListComponent', () => {
 
     expect(component.newProjectName).toBe('');
     expect(component.projects.length).toBe(3);
+  });
+
+  it('AC1: project name links have routerLink to /projects/:id/issues', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(`${BASE}/projects`).flush(mockProjects);
+    fixture.detectChanges();
+
+    const links = fixture.nativeElement.querySelectorAll<HTMLAnchorElement>('a.project-link');
+    expect(links.length).toBe(mockProjects.length);
+    expect(links[0].getAttribute('href')).toBe('/projects/1/issues');
+    expect(links[1].getAttribute('href')).toBe('/projects/2/issues');
+  });
+
+  it('AC3: shows "No projects yet." when project list is empty', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(`${BASE}/projects`).flush([]);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('No projects yet.');
+    expect(fixture.nativeElement.querySelector('table')).toBeNull();
   });
 
   it('shows inline 409 error on archive conflict without navigating', () => {

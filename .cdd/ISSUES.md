@@ -1,6 +1,6 @@
 # Issues Index
 
-Per-cycle contracts live at `.cdd/issues/N/ISSUE.md`. γ MUST NOT dispatch α without a populated contract for that cycle. Dispatch prompts read the local file (see `.cdd/STACK.md` §CDD dispatch) — not `gh issue view`.
+Cycle contracts (cycle 11+) live as GitHub Issue bodies at `https://github.com/mikartv/issue-tracker/issues`. Cycles 0–10 used local `.cdd/issues/N/ISSUE.md` (pre-remote era). γ MUST NOT dispatch α without an open GitHub Issue for that cycle. Dispatch prompts read the contract via `gh issue view N` (see `.cdd/STACK.md` §CDD dispatch).
 
 | ID | Title | Status | Mode | Branch | Contract |
 |----|-------|--------|------|--------|----------|
