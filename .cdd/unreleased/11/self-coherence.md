@@ -1,6 +1,6 @@
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills]
+completed: [Gap, Skills, ACs]
 -->
 
 # Self-Coherence — Cycle 11 (gh #1)
@@ -54,3 +54,40 @@ Per-AC oracles run against implementation SHA `3b1b943`.
 | AC5 | PASS | Template display expressions use `statusLabels[issue.status] ?? issue.status` and `priorityLabels[issue.priority] ?? issue.priority` (lines 46, 51). No raw enum strings in `{{ ... }}` bindings. `grep "in_progress\|critical" apps/web/src/app/projects/project-issues.component.ts` returns only class-body lines (statusLabels map key `in_progress: 'In Progress'`, priorityLabels map key `critical: 'Critical'`, and `priorities` array for select form field). Test `AC5: status and priority display as human-readable labels` passes — confirms `In Progress`, `High`, `Medium` in DOM text and `in_progress` absent. Note: corrected oracle from dispatch prompt applied — AC5 scope is template display expressions only, not TS class body. |
 | AC6 | PASS | Two patterns fixed: (1) load error: both components changed from `@else if (error) { <error replaces view> }` to `@if (error) { <error> }` inside the `@else` block so the form remains visible. (2) submit error in `ProjectIssuesComponent`: `submitCreate()` now sets `this.createError` instead of `this.error`; `createError` shown inline under Create Issue button as `<p class="create-error">`. Test `AC6 inline create error: non-409 submit failure shows createError inline without replacing table` passes — verifies `component.createError` truthy, `component.error` null, table still present, `.create-error` element present in DOM. |
 | AC7 | DEFERRED | Manual runbook gate — not executable by α; deferred to operator. Router plumbing is correct (RouterLink imported, routes unchanged from cycle 6, `routerLink` bindings use correct paths). |
+
+## §Self-check
+
+**Did α's work push ambiguity onto β?**
+
+No. Every AC has concrete evidence: grep oracle results, line-number citations, and passing
+test names. AC7 is correctly deferred as a manual runbook gate — this is stated explicitly,
+not silently omitted. AC5 uses the corrected oracle from the dispatch prompt (template display
+expressions only, not TS class body); this is called out explicitly.
+
+**Is every claim backed by evidence in the diff?**
+
+- AC1: `routerLink` binding confirmed by grep + rendered href in test.
+- AC2: `routerLink` binding confirmed by grep + rendered href in test (corrected oracle path used).
+- AC3: Empty state text confirmed by template inspection + test.
+- AC4: Empty state text confirmed by template inspection + test.
+- AC5: Label maps confirmed by template inspection + test asserting human-readable labels visible and raw `in_progress` absent from DOM.
+- AC6: `createError` field confirmed by grep; test verifies table visible and `.create-error` element present after non-409 submit failure.
+
+**Peer enumeration:**
+
+Surfaces that could carry routerLink for this app: `ProjectsListComponent`,
+`ProjectIssuesComponent`, `IssueDetailComponent`. `IssueDetailComponent` already had a
+back-link (cycle 8). The issue gap statement named only `projects-list` and `project-issues`
+as missing routerLink. Both are now updated. `IssueDetailComponent` is out of scope (not
+modified; has pre-existing routerLink). Peer set = {ProjectsListComponent ✓,
+ProjectIssuesComponent ✓, IssueDetailComponent — exempt (pre-existing link, not part of gap)}.
+
+**Sibling surfaces:**
+
+`app.routes.ts` and `api.service.ts` unchanged — confirmed by implementation contract constraint
+and diff inspection. No new packages added. No API changes.
+
+**Test coverage completeness:**
+
+6 new tests added (2 for `projects-list`, 4 for `project-issues`). All 39 web tests pass.
+Test runner output: `Tests: 39 passed, 39 total` (from `npm run test:web` at SHA `3b1b943`).
