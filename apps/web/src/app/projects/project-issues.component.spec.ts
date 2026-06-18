@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 import { ProjectIssuesComponent } from './project-issues.component';
 import type { Issue } from '../api/api.service';
 
@@ -40,7 +41,7 @@ describe('ProjectIssuesComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ProjectIssuesComponent, HttpClientTestingModule, NoopAnimationsModule],
+      imports: [ProjectIssuesComponent, HttpClientTestingModule, NoopAnimationsModule, RouterTestingModule],
       providers: [
         {
           provide: ActivatedRoute,
@@ -131,6 +132,59 @@ describe('ProjectIssuesComponent', () => {
     const buttons = Array.from(el.querySelectorAll<HTMLButtonElement>('button'));
     const createBtn = buttons.find((b) => b.textContent?.includes('Create Issue'));
     expect(createBtn?.disabled).toBe(true);
+  });
+
+  it('AC2: issue title links have routerLink to /issues/:id', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(`${BASE}/projects/${PROJECT_ID}/issues`).flush(mockIssues);
+    fixture.detectChanges();
+
+    const links = fixture.nativeElement.querySelectorAll<HTMLAnchorElement>('a.issue-link');
+    expect(links.length).toBe(mockIssues.length);
+    expect(links[0].getAttribute('href')).toBe('/issues/i1');
+    expect(links[1].getAttribute('href')).toBe('/issues/i2');
+  });
+
+  it('AC4: shows "No issues yet." when issue list is empty', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(`${BASE}/projects/${PROJECT_ID}/issues`).flush([]);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('No issues yet.');
+    expect(fixture.nativeElement.querySelector('table')).toBeNull();
+  });
+
+  it('AC5: status and priority display as human-readable labels', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(`${BASE}/projects/${PROJECT_ID}/issues`).flush(mockIssues);
+    fixture.detectChanges();
+
+    const text: string = fixture.nativeElement.textContent;
+    expect(text).toContain('In Progress');
+    expect(text).toContain('High');
+    expect(text).toContain('Medium');
+    expect(text).not.toContain('in_progress');
+  });
+
+  it('AC6 inline create error: non-409 submit failure shows createError inline without replacing table', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(`${BASE}/projects/${PROJECT_ID}/issues`).flush(mockIssues);
+    fixture.detectChanges();
+
+    component.newTitle = 'New Issue';
+    fixture.detectChanges();
+    component.submitCreate();
+
+    httpMock
+      .expectOne({ url: `${BASE}/projects/${PROJECT_ID}/issues`, method: 'POST' })
+      .flush({ message: 'Server error' }, { status: 500, statusText: 'Internal Server Error' });
+    fixture.detectChanges();
+
+    expect(component.createError).toBeTruthy();
+    expect(component.error).toBeNull();
+    const table = fixture.nativeElement.querySelector('table');
+    expect(table).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.create-error')).not.toBeNull();
   });
 
   it('AC6: success message appears in DOM after successful createIssue', () => {
