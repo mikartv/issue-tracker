@@ -1,6 +1,6 @@
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills, ACs]
+completed: [Gap, Skills, ACs, Self-check]
 -->
 
 # Self-Coherence — Cycle 11 (gh #1)
@@ -91,3 +91,21 @@ and diff inspection. No new packages added. No API changes.
 
 6 new tests added (2 for `projects-list`, 4 for `project-issues`). All 39 web tests pass.
 Test runner output: `Tests: 39 passed, 39 total` (from `npm run test:web` at SHA `3b1b943`).
+
+## §Debt
+
+**D1 — API tests (pre-existing, unrelated to this cycle):**
+`npm run test:api` fails with Postgres connection error in this environment. This is a
+pre-existing environmental issue — verified by running the API tests against the base
+commit (`c5146d0`) with the same result. My changes touch only `apps/web/`; the API test
+suite is unaffected by this cycle's diff.
+
+**D2 — AC7 manual runbook gate:**
+AC7 cannot be executed by α. It requires a running app (db + api + web) and a browser.
+This is noted in the issue body as `(runbook gate)` and in the AC oracle table as
+"Manual runbook gate — operator executes." The dispatch prompt explicitly states
+"Note on AC7: Manual runbook gate — not executable by α; deferred to operator."
+Deferred to operator/β confirmation.
+
+**No other debt.** All AC1–AC6 are mechanically verified. No known regressions. No
+partial implementations. No outstanding ambiguities pushed onto β.
