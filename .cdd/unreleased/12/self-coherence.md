@@ -7,7 +7,7 @@ artifact: self-coherence
 
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills, ACs]
+completed: [Gap, Skills, ACs, Self-check]
 -->
 
 ## §Gap
@@ -61,3 +61,14 @@ Test Suites: 5 passed, 5 total
 - Peer enumeration: only `IssueDetailComponent` is in-scope. `ProjectIssuesComponent` has label maps already and is explicitly out-of-scope per γ-scaffold and issue. No other components render issue status/priority.
 - Harness audit: N/A — no schema-bearing contract changed; API wire format unchanged.
 - Implementation contract: language (TypeScript strict), package scoping (`issue-detail.component.ts` only), no new runtime dependencies — all axes honored.
+
+## §Debt
+
+**D1 — Pre-existing `resolved` key in `project-issues.component.ts`:**
+`project-issues.component.ts` L171 maps `resolved: 'Resolved'` but the entity enum has `done`, not `resolved`. This is a pre-existing discrepancy noted in the γ-scaffold. Explicitly out of scope for cycle 12 per the dispatch. No debt introduced by this cycle; the pre-existing bug survives.
+
+**D2 — No automated E2E DOM-content assertions:**
+The issue body marks this as a non-goal (U4 tracking). Manual smoke only for DOM rendering; no new debt added by this cycle.
+
+**D3 — γ-artifact configuration:**
+This cycle runs under §5.2 (δ=γ, single-session). `gamma-scaffold.md` is present at `.cdd/unreleased/12/gamma-scaffold.md` on `origin/cycle/12`. Rule 3.11b §5.1 canonical dispatch satisfied.
