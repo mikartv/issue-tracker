@@ -1,6 +1,6 @@
 # Project MCP — issue-tracker
 
-**Last verified:** 2026-06-14 (cycle 10 — integration smoke + README polish; `npm run test:all` 109 tests pass: 76 api + 33 web)  
+**Last verified:** 2026-06-19 (cycle 13 — root redirect fix; `npm run test:all` 118 tests pass: 76 api + 42 web)  
 **Verify with:** `npm run test:all` (from repo root)
 
 ## Build / run / test
@@ -11,16 +11,16 @@
 | `npm run dev:db` | Start Postgres 16 via Docker (`docker compose up -d db`) | ✅ configured |
 | `npm run dev:api` | NestJS via ts-node (`ts-node -r tsconfig-paths/register src/main.ts`) — no auto-reload | ✅ configured |
 | `npm run dev:web` | Angular dev server (`ng serve`) | ✅ configured |
-| `npm run test:all` | api + web test suites | ✅ `109 tests passed` (cycle 10: 76 api + 33 web) |
+| `npm run test:all` | api + web test suites | ✅ `118 tests passed` (cycle 13: 76 api + 42 web) |
 | `npm run test:api` | API tests only (Jest) | ✅ `76 tests passed` (9 suites) |
-| `npm run test:web` | Web tests only (Jest via jest-preset-angular) | ✅ `33 tests passed` (5 suites) |
+| `npm run test:web` | Web tests only (Jest via jest-preset-angular) | ✅ `42 tests passed` (5 suites) |
 
-Sample output from `npm run test:all` (cycle 10):
+Sample output from `npm run test:all` (cycle 13):
 ```
 Test Suites: 9 passed, 9 total (api)
 Tests:       76 passed, 76 total (api)
 Test Suites: 5 passed, 5 total (web)
-Tests:       33 passed, 33 total (web)
+Tests:       42 passed, 42 total (web)
 ```
 
 ## Repo map
@@ -65,6 +65,7 @@ Tests:       33 passed, 33 total (web)
 
 | Route | Component | Cycle |
 |-------|-----------|-------|
+| `/` → `/projects` (redirect) | — | 13 ✅ |
 | `/projects` | `ProjectsListComponent` | 6 ✅ |
 | `/projects/:projectId/issues` | `ProjectIssuesComponent` | 7 ✅ |
 | `/issues/:issueId` | `IssueDetailComponent` | 8 ✅ |
@@ -118,7 +119,20 @@ See `.cdd/STACK.md`. Branch per cycle: `cycle/N`. Cycle artifacts: `.cdd/unrelea
 
 - 2026-06-14: Cycle 9 — Create/edit issue flows. Create-issue form added to `ProjectIssuesComponent`; inline edit form added to `IssueDetailComponent` (title, description, priority, assignee). `ApiService` gained `createIssue`, `updateIssue` methods. Template-driven form binding (`[value]` + `(input)`) consistent with pre-existing comment form. 33 web tests pass (23 pre-existing + 10 new).
 
+## Decisions (append-only, short) — cycle 11
+
+- 2026-06-18: Cycle 11 — UX navigation: routerLink between views. `routerLink` bindings added to every project row (`ProjectsListComponent`) and every issue row (`ProjectIssuesComponent`). Empty-state text ("No projects yet." / "No issues yet.") added to both list components. `statusLabels`/`priorityLabels` maps added to `ProjectIssuesComponent` to replace raw enum strings in display. Inline form-submit `createError` field replaces full-view `@else if (error)` pattern on submit; inline load-error added inside `@else` block. 6 new tests (2 list + 4 issues). 39 web tests pass. gh #1 closed.
+
+## Decisions (append-only, short) — cycle 12
+
+- 2026-06-19: Cycle 12 — bug: raw enum values in issue-detail (status, priority, "Move to" button). `statusLabels` and `priorityLabels` maps added to `IssueDetailComponent`; three template bindings updated (status display, priority display, "Move to" button label). 3 new unit tests (`label-AC1`, `label-AC2`, `label-AC3`). 42 web tests pass (39 pre-existing + 3 new). gh #2 closed.
+
+## Decisions (append-only, short) — cycle 13
+
+- 2026-06-19: Cycle 13 — bug: no root route — blank page at /. `{ path: '', redirectTo: 'projects', pathMatch: 'full' }` added as first entry in `apps/web/src/app/app.routes.ts`. Navigating to `/` now redirects to `/projects`. 1 file changed, 1 line added. 42 web tests pass (unchanged). gh #3 closed.
+
 ## Known unknowns / debt
 
 - ORM-level @ManyToOne/@OneToMany relations — deferred (D-CY2-4); issues loaded by project_id column directly.
 - `dev:api` script uses ts-node (no auto-reload). Description imprecision ("watch mode") in STACK.md and README corrected in cycle 10 F2.
+- AC1 oracle for root redirect (cycle 13) is manual smoke only — no automated Angular router navigation test (`app.routes.spec.ts`). Declared Known Gap in proof plan.
