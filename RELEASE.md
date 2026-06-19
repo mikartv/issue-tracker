@@ -1,47 +1,55 @@
-# RELEASE.md — issue-tracker v1.0.0
+# release 1.1.0 — issue-tracker
 
 ## Outcome
 
-issue-tracker v1.0.0 — первый полный вертикальный срез: Projects API, Issues API, Comments API (NestJS) + Angular SPA (Angular Material). 109 тестов (76 api + 33 web). Реализована через 10 CDD-циклов.
+Coherence delta: C_Σ A (`α A`, `β A`, `γ A-`) · **Level:** `L5`
+
+Three small-change cycles (11–13) eliminate all four "Known Issues" from v1.0.0: the
+Angular SPA is now fully navigable via routerLink, status/priority display as human-readable
+labels in every view, and the root URL redirects to `/projects` instead of showing a blank page.
 
 ## Why it matters
 
-Базовый issue-tracker с DB-схемой, REST API и Angular UI демонстрирует полный цикл разработки под CDD: от пустого репозитория через итерационные alpha/beta-review раунды до закрытого релиза с артефактами в `.cdd/releases/1.0.0/`.
+v1.0.0 shipped a functional but partially unusable SPA — users could not navigate between views
+without typing URLs manually, the root URL showed a blank page, and enum values were exposed as
+raw strings (`in_progress`, `critical`). All four documented known issues from v1.0.0 are
+resolved. The application can now be evaluated end-to-end — open browser, land on projects
+list, click through to issues and issue detail — without any URL manipulation.
+
+## Fixed
+
+- **Blank page at `/`** (#3, cycle 13): `{ path: '', redirectTo: 'projects', pathMatch: 'full' }`
+  added as first entry in `app.routes.ts`. Navigating to `/` now redirects to `/projects`.
+- **Raw enum values in IssueDetail** (#2, cycle 12): `statusLabels` and `priorityLabels` maps
+  added to `IssueDetailComponent`; status display, priority display, and "Move to" button label
+  are now human-readable.
+- **Raw enum values in ProjectIssues** (#1, cycle 11): `statusLabels` and `priorityLabels` maps
+  in `ProjectIssuesComponent` replace raw enum strings in the issue list.
+- **Full-page hide on create error** (#1, cycle 11): inline `createError` field replaces
+  `@else if (error)` — page content no longer hidden on non-409 form submit errors.
 
 ## Added
 
-- **Projects API**: create, list, rename, archive
-- **Issues API**: create, list-by-project, get, patch-fields, status-transitions (open→in_progress→done→closed)
-- **Comments API**: create, list per issue
-- **Angular SPA**: 3 views (ProjectsList, ProjectIssues, IssueDetail) с Angular Material styling
-- **PostgreSQL 16** via Docker Compose + TypeORM migrations
-- **Swagger API docs** at `/api/docs`
-- **CI: GitHub Actions** (api job с Postgres service container + web job)
-- **Documentation**: STACK.md (dev/prod runs), README.md (auth stub), SCOPE.md (DoD), PROJECT.md (map)
-
-## Known Issues
-
-- **Navigation**: Экраны между собой не связаны на уровне routerLink — доступны только через прямой ввод URL (Issue 11)
-- **Status/Priority display**: Отображаются как raw enum-строки (`in_progress`, `critical`) без человекочитаемых меток
-- **Error UX**: Ошибка submit (кроме 409 Conflict) скрывает весь контент страницы через `@else if (error)` условие
-- **Empty state**: Нет сообщений при пустом списке проектов или задач
-- **E2E automation**: `docs/SMOKE.md` — ручной checklist; автоматизированный supertest e2e spec отсутствует
+- **routerLink navigation** (#1, cycle 11): project rows in `ProjectsListComponent` navigate to
+  `/projects/:id/issues`; issue rows in `ProjectIssuesComponent` navigate to `/issues/:id`.
+- **Empty-state text** (#1, cycle 11): "No projects yet." and "No issues yet." messages when
+  lists are empty.
 
 ## Validation
 
-```bash
-npm run test:all
-# Output: 109 tests passed (76 api + 33 web), 0 failures
+- 42 web tests (5 suites), 76 API tests — 118 total — CI green on merge SHA for each cycle:
+  - Cycle 11: merge `a544fb1` → CI green on `308fd7d`
+  - Cycle 12: merge `b26efd1` → CI green on `664b225`
+  - Cycle 13: merge `5af970b` → CI green (actions/runs/27825866088)
+- Manual smoke: open `/` → redirects to `/projects` → click project row → navigates to
+  `/projects/:id/issues` → click issue row → navigates to `/issues/:id` → status and
+  priority display human-readable labels.
 
-# Manual smoke test (clean clone):
-npm install
-npm run dev:db      # Start Postgres
-npm run dev:api     # Start NestJS API (port 3333)
-npm run dev:web     # Start Angular app (port 4200)
-# Open http://localhost:4200/projects
-# See docs/SMOKE.md for step-by-step manual checklist
-```
+## Known Issues
 
----
-
-**Artifact reference:** `.cdd/releases/1.0.0/` contains 10 cycle directories with gamma-scaffold, alpha-closeout, beta-review, gamma-closeout per cycle.
+- No automated Angular router navigation test (`app.routes.spec.ts`) — AC1 oracle for cycle 13
+  is manual smoke only.
+- Pre-existing dead code: `resolved` key in `project-issues.component.ts` L171 (no issue has
+  `resolved` status; candidate for future cleanup).
+- E2E automation remains manual (`docs/SMOKE.md`).
+- ORM `@ManyToOne`/`@OneToMany` relations deferred from cycle 2 (D-CY2-4).
