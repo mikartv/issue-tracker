@@ -1,6 +1,6 @@
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills, ACs]
+completed: [Gap, Skills, ACs, Self-check]
 -->
 
 # Self-Coherence — Cycle 13
@@ -90,3 +90,14 @@ CI emitter, or test fixture writes routes. Harness audit: not applicable.
 - Package scoping: `apps/web/` ✅
 - Additive-only: existing three routes unchanged ✅
 - No API/wire contract change: no backend touched ✅
+
+## §Debt
+
+**Known debt:** The AC1 oracle is manual smoke only — no automated Angular router navigation
+test (`provideRouter` + `Router.navigate([''])`) was added. This is declared as a Known Gap
+in the proof plan and is not a protocol gap; it is product-level test coverage debt at the
+app-routing level. A future cycle could add a `app.routes.spec.ts` to cover redirect
+behavior automatically.
+
+**No other debt.** The change is a single additive line; no legacy forms, no workarounds,
+no partial implementations.
