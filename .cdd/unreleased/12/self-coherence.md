@@ -7,7 +7,7 @@ artifact: self-coherence
 
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills]
+completed: [Gap, Skills, ACs]
 -->
 
 ## §Gap
@@ -50,3 +50,14 @@ Test Suites: 5 passed, 5 total
 - `in_progress` absent from button text: confirmed — button shows "Move to In Progress"
 
 **Invariant check:** `statusLabels` covers all 4 entity-canonical status values (`open`, `in_progress`, `done`, `closed`). `priorityLabels` covers all 4 priority values (`low`, `medium`, `high`, `critical`). Both match entity enum in `apps/api/src/entities/issue.entity.ts`.
+
+## §Self-check
+
+**Did α's work push ambiguity onto β?** No.
+
+- Three ACs have direct test evidence. Negative assertions are present for each (raw key absent from display position).
+- The one pre-existing test that checked the buggy behavior (`AC2a: shows "Move to in_progress" button...`) was updated to assert the new correct label — this is the correct disposition for a test that validated a bug.
+- The existing test `AC1: displays title, status, and project link` checked `toContain(mockIssue.status)` where `mockIssue.status = 'open'`. After fix, "open" renders as "Open" — test updated to `toContain('Open')`. No ambiguity left for β.
+- Peer enumeration: only `IssueDetailComponent` is in-scope. `ProjectIssuesComponent` has label maps already and is explicitly out-of-scope per γ-scaffold and issue. No other components render issue status/priority.
+- Harness audit: N/A — no schema-bearing contract changed; API wire format unchanged.
+- Implementation contract: language (TypeScript strict), package scoping (`issue-detail.component.ts` only), no new runtime dependencies — all axes honored.
