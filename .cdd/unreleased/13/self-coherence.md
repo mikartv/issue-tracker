@@ -1,6 +1,6 @@
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills, ACs, Self-check]
+completed: [Gap, Skills, ACs, Self-check, Debt]
 -->
 
 # Self-Coherence — Cycle 13
@@ -101,3 +101,18 @@ behavior automatically.
 
 **No other debt.** The change is a single additive line; no legacy forms, no workarounds,
 no partial implementations.
+
+## §CDD Trace
+
+Lifecycle steps α is responsible for (Steps 4–7 of the 0–13 CDS table); Step 6 enumerates
+all files in `git diff --stat origin/main..HEAD`.
+
+| Step | Action | Artifact / evidence |
+|------|--------|---------------------|
+| 1 — Receive | Loaded dispatch: branch `cycle/13`, issue gh #3. Configured git identity: `alpha@issue-tracker.cdd.cnos`. Verified `origin/cycle/13` exists. | Git identity: `alpha@issue-tracker.cdd.cnos` (verified at `git log -1 --format='%ae' HEAD`). |
+| 2 — Design | Not required. Single-line additive routing entry; no new module, no design doc needed. Justification: γ scaffold §Surfaces explicitly limits change to 1 file, 1 line, 0 new surfaces. | Explicit "not required." |
+| 3 — Plan | Not required. Implementation sequencing trivial: one entry added to one array. | Explicit "not required." |
+| 4 — Tests | Existing 42 web tests ran; 0 regressions. No new automated test added (permitted per γ scaffold Known Gap). | `npm run test:web` → `Tests: 42 passed, 42 total`. |
+| 5 — Code | Added `{ path: '', redirectTo: 'projects', pathMatch: 'full' }` as first entry in `routes` array. Commit `95f69e7`. | `apps/web/src/app/app.routes.ts` +1 line. |
+| 6 — Docs | Not required. No authority surface, API shape, or runbook changed. Full diff vs `origin/main`: `apps/web/src/app/app.routes.ts` (+1 line, implementation); `.cdd/unreleased/13/gamma-scaffold.md` (γ artifact, not α-authored); `.cdd/unreleased/13/alpha-prompt.md` (γ artifact, not α-authored); `.cdd/unreleased/13/beta-prompt.md` (γ artifact, not α-authored); `.cdd/unreleased/13/self-coherence.md` (this file, α artifact). No component, README, or other doc surface changed. | Explicit "not required." All 5 files in diff enumerated above. |
+| 7 — Self-coherence | This file — `.cdd/unreleased/13/self-coherence.md`. Sections: Gap ✅ Skills ✅ ACs ✅ Self-check ✅ Debt ✅ CDD Trace ✅ Review-readiness (pending). | Written and committed section-by-section per `alpha/SKILL.md` §2.5 incremental discipline. |
