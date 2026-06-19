@@ -47,15 +47,15 @@ const NEXT_STATUS: Record<string, string | null> = {
         @if (!editMode) {
           <h2>{{ issue.title }}</h2>
           <p><strong>Description:</strong> {{ issue.description ?? '—' }}</p>
-          <p><strong>Status:</strong> {{ issue.status }}</p>
-          <p><strong>Priority:</strong> {{ issue.priority }}</p>
+          <p><strong>Status:</strong> {{ statusLabels[issue.status] ?? issue.status }}</p>
+          <p><strong>Priority:</strong> {{ priorityLabels[issue.priority] ?? issue.priority }}</p>
           <p><strong>Assignee:</strong> {{ issue.assignee ?? '—' }}</p>
           <p>
             <a [routerLink]="['/projects', issue.project_id, 'issues']">Back to project issues</a>
           </p>
 
           @if (nextStatus) {
-            <button mat-raised-button (click)="moveToNextStatus()">Move to {{ nextStatus }}</button>
+            <button mat-raised-button (click)="moveToNextStatus()">Move to {{ statusLabels[nextStatus!] ?? nextStatus }}</button>
           }
           <button mat-raised-button (click)="enterEditMode()">Edit</button>
 
@@ -145,6 +145,20 @@ export class IssueDetailComponent implements OnInit {
   editSuccessMessage = '';
 
   readonly priorities = ['low', 'medium', 'high', 'critical'];
+
+  readonly statusLabels: Record<string, string> = {
+    open: 'Open',
+    in_progress: 'In Progress',
+    done: 'Done',
+    closed: 'Closed',
+  };
+
+  readonly priorityLabels: Record<string, string> = {
+    low: 'Low',
+    medium: 'Medium',
+    high: 'High',
+    critical: 'Critical',
+  };
 
   get nextStatus(): string | null {
     return this.issue ? (NEXT_STATUS[this.issue.status] ?? null) : null;

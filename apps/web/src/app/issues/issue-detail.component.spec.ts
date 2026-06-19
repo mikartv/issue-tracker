@@ -100,13 +100,13 @@ describe('IssueDetailComponent', () => {
 
     const el: HTMLElement = fixture.nativeElement;
     expect(el.textContent).toContain(mockIssue.title);
-    expect(el.textContent).toContain(mockIssue.status);
+    expect(el.textContent).toContain('Open');
 
     const link = el.querySelector<HTMLAnchorElement>('a[href*="' + PROJECT_ID + '"]');
     expect(link).not.toBeNull();
   });
 
-  it('AC2a: shows "Move to in_progress" button when status is open', async () => {
+  it('AC2a: shows "Move to In Progress" button when status is open', async () => {
     await setup(buildApiMock({ status: 'open' }));
     fixture.detectChanges();
     fixture.detectChanges();
@@ -116,7 +116,7 @@ describe('IssueDetailComponent', () => {
     );
     const statusBtn = buttons.find((b) => b.textContent?.includes('Move to'));
     expect(statusBtn).toBeDefined();
-    expect(statusBtn!.textContent).toContain('in_progress');
+    expect(statusBtn!.textContent).toContain('In Progress');
   });
 
   it('AC2b: no "Move to" button when status is closed', async () => {
@@ -241,5 +241,49 @@ describe('IssueDetailComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Issue saved');
+  });
+
+  it('label-AC1: status in_progress renders as "In Progress" (not raw key)', async () => {
+    await setup(buildApiMock({ status: 'in_progress' }));
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    const statusParagraphs = Array.from(el.querySelectorAll<HTMLElement>('p')).filter((p) =>
+      p.textContent?.includes('Status:'),
+    );
+    expect(statusParagraphs.length).toBeGreaterThan(0);
+    const statusText = statusParagraphs[0].textContent ?? '';
+    expect(statusText).toContain('In Progress');
+    expect(statusText).not.toContain('in_progress');
+  });
+
+  it('label-AC2: priority critical renders as "Critical" (not raw key)', async () => {
+    await setup(buildApiMock({ priority: 'critical' }));
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    const priorityParagraphs = Array.from(el.querySelectorAll<HTMLElement>('p')).filter((p) =>
+      p.textContent?.includes('Priority:'),
+    );
+    expect(priorityParagraphs.length).toBeGreaterThan(0);
+    const priorityText = priorityParagraphs[0].textContent ?? '';
+    expect(priorityText).toContain('Critical');
+    expect(priorityText).not.toContain('critical');
+  });
+
+  it('label-AC3: Move to button reads "Move to In Progress" when status is open', async () => {
+    await setup(buildApiMock({ status: 'open' }));
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    const buttons = Array.from(
+      fixture.nativeElement.querySelectorAll<HTMLButtonElement>('button'),
+    );
+    const statusBtn = buttons.find((b) => b.textContent?.includes('Move to'));
+    expect(statusBtn).toBeDefined();
+    expect(statusBtn!.textContent).toContain('Move to In Progress');
+    expect(statusBtn!.textContent).not.toContain('in_progress');
   });
 });
