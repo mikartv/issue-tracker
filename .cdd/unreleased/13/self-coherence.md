@@ -1,6 +1,6 @@
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills]
+completed: [Gap, Skills, ACs]
 -->
 
 # Self-Coherence — Cycle 13
@@ -64,3 +64,29 @@ AC1 is mechanically provable by inspection of the routes array (redirect entry i
 and first) and empirically verifiable via the browser smoke.
 
 **Pass condition met:** redirect entry present and first in `routes` array. ✅
+
+## §Self-check
+
+**Did α push ambiguity onto β?** No. The change is a one-line additive entry in a routes
+array. The issue, the γ scaffold, and the Angular routing API together make the
+implementation unambiguous. β has nothing to discover that α should have resolved.
+
+**Is every claim backed by evidence in the diff?**
+- AC1 (redirect entry present and first): backed by the diff hunk above and the test run
+  output showing 42/42 pass.
+- No automated browser test was produced; this is explicitly permitted per the γ scaffold's
+  proof plan Known Gap. The oracle is manual smoke.
+
+**Peer enumeration:** γ scaffold already enumerated all peers via `rg "redirectTo|path: ''"
+apps/web/src/` → no matches. The only surface touched is `app.routes.ts`. No sibling
+routes files exist. Peer enumeration complete.
+
+**Harness audit:** no schema-bearing type, parser, or manifest was changed. The routes
+array is a TypeScript literal consumed by the Angular router framework. No shell harness,
+CI emitter, or test fixture writes routes. Harness audit: not applicable.
+
+**Implementation contract compliance:**
+- Language: TypeScript ✅
+- Package scoping: `apps/web/` ✅
+- Additive-only: existing three routes unchanged ✅
+- No API/wire contract change: no backend touched ✅
