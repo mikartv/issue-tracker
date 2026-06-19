@@ -7,7 +7,7 @@ artifact: self-coherence
 
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills, ACs, Self-check]
+completed: [Gap, Skills, ACs, Self-check, Debt]
 -->
 
 ## §Gap
@@ -72,3 +72,36 @@ The issue body marks this as a non-goal (U4 tracking). Manual smoke only for DOM
 
 **D3 — γ-artifact configuration:**
 This cycle runs under §5.2 (δ=γ, single-session). `gamma-scaffold.md` is present at `.cdd/unreleased/12/gamma-scaffold.md` on `origin/cycle/12`. Rule 3.11b §5.1 canonical dispatch satisfied.
+
+## §CDD Trace
+
+| Step | Lifecycle step | Artifact / evidence | Status |
+|------|---------------|---------------------|--------|
+| 0 | Dispatch received | α-prompt at `.cdd/unreleased/12/alpha-prompt.md` on `origin/cycle/12` | ✅ |
+| 1 | Branch checkout | `git switch cycle/12 && git pull origin cycle/12` — already on branch, up to date | ✅ |
+| 2 | Issue read | `gh issue view 2` — full contract read; all AC surfaces identified | ✅ |
+| 3 | Related artifacts read | `gamma-scaffold.md`, `PROJECT.md`, `STACK.md`, `SCOPE.md`, entity file, reference component `project-issues.component.ts` | ✅ |
+| 4 | Skills loaded | Tier 1a: CDD.md, alpha/SKILL.md. Tier 2: STACK.md conventions. Tier 3: none | ✅ |
+| 5 | Design | Not required — single-file template fix; no incoherence requires a design artifact. γ-scaffold defines the scope; α executes it | ✅ (explicitly not required) |
+| 6 | Implementation | `apps/web/src/app/issues/issue-detail.component.ts` — added `statusLabels`, `priorityLabels`; updated 3 template expressions. `issue-detail.component.spec.ts` — updated 2 existing tests that validated buggy behavior; added 3 new AC tests. Commit `4518cd9` on `cycle/12`. No new files; no API files touched. Caller-path trace N/A (label maps are properties accessed from template, not new modules). | ✅ |
+| 7 | Self-coherence | This document. ACs: AC1/AC2/AC3 all PASS. 42 tests pass (39 → 42). Known debt explicit (D1–D3). | ✅ |
+
+**Pre-review gate (§2.6):**
+
+| Row | Check | Result |
+|-----|-------|--------|
+| 1 | Branch rebased onto `origin/main` | ✅ `origin/main` at same SHA as `cycle/12` base; branch is 7 commits ahead, 0 behind |
+| 2 | `self-coherence.md` carries CDD Trace through step 7 | ✅ |
+| 3 | Tests present | ✅ 42 tests (3 new AC tests) |
+| 4 | Every AC has evidence | ✅ AC1/AC2/AC3 each have unit test + assertion |
+| 5 | Known debt explicit | ✅ D1–D3 in §Debt |
+| 6 | Schema/shape audit | N/A — no schema-bearing contract changed |
+| 7 | Peer enumeration | ✅ `IssueDetailComponent` only; `ProjectIssuesComponent` explicitly out-of-scope; no other component renders issue status/priority |
+| 8 | Harness audit | N/A — no schema-bearing contract |
+| 9 | Post-patch re-audit | ✅ TypeScript (only language in diff): `npm run test:web` green; template binding type-safe |
+| 10 | Branch CI green | ⚠️ CI triggers on `main` only (per `.github/workflows/ci.yml` `on: push: branches: [main]`); no CI run on cycle branches. Local `npm run test:web` = 42/42 pass. β to verify CI green on PR before merge. |
+| 11 | Artifact enumeration matches diff | ✅ `git diff --stat origin/main..HEAD` shows 3 files: `issue-detail.component.ts`, `issue-detail.component.spec.ts`, `self-coherence.md` — all mentioned in this document |
+| 12 | Caller-path trace for new modules | N/A — no new modules added; label maps are class properties accessed from template |
+| 13 | Test assertion count from runner | ✅ Runner output: `Tests: 42 passed, 42 total` |
+| 14 | α commit author email | ✅ `git log -1 --format='%ae' HEAD` → `alpha@issue-tracker.cdd.cnos` |
+| 15 | γ-artifact presence (rule 3.11b) | ✅ `.cdd/unreleased/12/gamma-scaffold.md` present on `origin/cycle/12` (§5.1 canonical dispatch) |
