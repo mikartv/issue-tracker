@@ -85,12 +85,25 @@ describe('ProjectsListComponent', () => {
     expect(links[1].getAttribute('href')).toBe('/projects/2/issues');
   });
 
-  it('AC3: shows "No projects yet." when project list is empty', () => {
+  it('AC1: renders mat-card elements and no mat-table when projects exist', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(`${BASE}/projects`).flush(mockProjects);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('mat-card').length).toBe(mockProjects.length);
+    expect(fixture.nativeElement.querySelector('table[mat-table]')).toBeNull();
+  });
+
+  it('AC2: shows designed empty state with icon and CTA when project list is empty', () => {
     fixture.detectChanges();
     httpMock.expectOne(`${BASE}/projects`).flush([]);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('No projects yet.');
+    const emptyState = fixture.nativeElement.querySelector('.empty-state');
+    expect(emptyState).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('No projects yet');
+    expect(fixture.nativeElement.querySelector('.empty-state mat-icon')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.empty-state button')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('table')).toBeNull();
   });
 

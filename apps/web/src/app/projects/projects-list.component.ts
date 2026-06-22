@@ -2,17 +2,20 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   OnInit,
+  ViewChild,
   inject,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTableModule } from '@angular/material/table';
 import { ApiService, type Project } from '../api/api.service';
 
 @Component({
@@ -23,10 +26,11 @@ import { ApiService, type Project } from '../api/api.service';
     RouterLink,
     FormsModule,
     MatButtonModule,
+    MatCardModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
-    MatTableModule,
   ],
   template: `
     <div class="container">
@@ -38,40 +42,40 @@ import { ApiService, type Project } from '../api/api.service';
         @if (error) {
           <p class="error">{{ error }}</p>
         } @else if (projects.length === 0) {
-          <p>No projects yet.</p>
+          <div class="empty-state">
+            <mat-icon>folder_open</mat-icon>
+            <p>No projects yet</p>
+            <button mat-raised-button color="primary" (click)="scrollToCreate()">Create project</button>
+          </div>
         } @else {
-          <table mat-table [dataSource]="projects" class="projects-table">
-            <ng-container matColumnDef="name">
-              <th mat-header-cell *matHeaderCellDef>Name</th>
-              <td mat-cell *matCellDef="let project" [class.archived]="project.archived">
-                <a [routerLink]="['/projects', project.id, 'issues']" class="project-link">
-                  {{ project.name }}
-                </a>
-                @if (project.archived) {
-                  <span class="archived-badge">Archived</span>
-                }
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef></th>
-              <td mat-cell *matCellDef="let project">
-                @if (!project.archived) {
-                  <button mat-stroked-button (click)="archiveProject(project)">Archive</button>
-                }
-                @if (archiveErrors[project.id]) {
-                  <span class="inline-error">{{ archiveErrors[project.id] }}</span>
-                }
-              </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-          </table>
+          <div class="projects-grid">
+            @for (project of projects; track project.id) {
+              <mat-card [class.archived]="project.archived">
+                <mat-card-header>
+                  <mat-card-title>
+                    <a [routerLink]="['/projects', project.id, 'issues']" class="project-link">
+                      {{ project.name }}
+                    </a>
+                    @if (project.archived) {
+                      <span class="archived-badge">Archived</span>
+                    }
+                  </mat-card-title>
+                </mat-card-header>
+                <mat-card-actions>
+                  @if (!project.archived) {
+                    <button mat-stroked-button (click)="archiveProject(project)">Archive</button>
+                  }
+                  @if (archiveErrors[project.id]) {
+                    <span class="inline-error">{{ archiveErrors[project.id] }}</span>
+                  }
+                </mat-card-actions>
+              </mat-card>
+            }
+          </div>
         }
       }
 
-      <div class="create-form">
+      <div class="create-form" #createForm>
         <h3>Create Project</h3>
         <mat-form-field>
           <mat-label>Project name</mat-label>
@@ -95,10 +99,20 @@ import { ApiService, type Project } from '../api/api.service';
     `
       .container {
         padding: 16px;
-        max-width: 800px;
+        max-width: 960px;
       }
-      .projects-table {
-        width: 100%;
+      .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: var(--it-space-4);
+      }
+      @media (max-width: 767px) {
+        .projects-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      mat-card.archived {
+        opacity: 0.6;
       }
       .project-link {
         text-decoration: none;
@@ -108,25 +122,40 @@ import { ApiService, type Project } from '../api/api.service';
         text-decoration: underline;
       }
       .error {
-        color: #c00;
+        color: var(--it-priority-critical);
       }
       .inline-error {
-        color: #c00;
+        color: var(--it-priority-critical);
         font-size: 0.875em;
         margin-left: 8px;
       }
-      .archived {
-        opacity: 0.5;
-        text-decoration: line-through;
-      }
       .archived-badge {
         font-size: 0.75em;
-        background: #ccc;
+        background: var(--it-surface);
+        color: var(--it-status-closed);
         padding: 2px 6px;
-        border-radius: 4px;
+        border-radius: var(--it-radius-sm);
         margin-left: 8px;
         text-decoration: none;
         display: inline-block;
+        border: 1px solid var(--it-status-closed);
+      }
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--it-space-4);
+        padding: var(--it-space-6) 0;
+        color: var(--it-status-closed);
+      }
+      .empty-state mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+      }
+      .empty-state p {
+        margin: 0;
+        font-size: 1.1em;
       }
       .create-form {
         margin-top: 24px;
@@ -139,6 +168,8 @@ import { ApiService, type Project } from '../api/api.service';
   ],
 })
 export class ProjectsListComponent implements OnInit {
+  @ViewChild('createForm') private readonly createFormEl?: ElementRef<HTMLElement>;
+
   private readonly api = inject(ApiService);
   private readonly cdr = inject(ChangeDetectorRef);
 
@@ -148,7 +179,6 @@ export class ProjectsListComponent implements OnInit {
   createError: string | null = null;
   newProjectName = '';
   archiveErrors: Record<string, string> = {};
-  readonly displayedColumns = ['name', 'actions'];
 
   ngOnInit(): void {
     this.loadProjects();
@@ -202,5 +232,9 @@ export class ProjectsListComponent implements OnInit {
         this.cdr.markForCheck();
       },
     });
+  }
+
+  scrollToCreate(): void {
+    this.createFormEl?.nativeElement.scrollIntoView?.({ behavior: 'smooth' });
   }
 }
