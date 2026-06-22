@@ -1,6 +1,6 @@
 # Project MCP — issue-tracker
 
-**Last verified:** 2026-06-19 (cycle 13 — root redirect fix; `npm run test:all` 118 tests pass: 76 api + 42 web)  
+**Last verified:** 2026-06-22 (cycle 14 — design-system foundation; `npm run test:all` 118 tests pass: 76 api + 42 web)  
 **Verify with:** `npm run test:all` (from repo root)
 
 ## Build / run / test
@@ -131,8 +131,13 @@ See `.cdd/STACK.md`. Branch per cycle: `cycle/N`. Cycle artifacts: `.cdd/unrelea
 
 - 2026-06-19: Cycle 13 — bug: no root route — blank page at /. `{ path: '', redirectTo: 'projects', pathMatch: 'full' }` added as first entry in `apps/web/src/app/app.routes.ts`. Navigating to `/` now redirects to `/projects`. 1 file changed, 1 line added. 42 web tests pass (unchanged). gh #3 closed.
 
+## Decisions (append-only, short) — cycle 14
+
+- 2026-06-22: Cycle 14 — enhancement: design-system foundation. `apps/web/src/styles.css` deleted; `apps/web/src/styles.scss` (99 lines) created with custom Angular Material M2 theme (`mat.define-light-theme` + `mat.define-palette`, deep-purple/amber palette), 17-token `:root` CSS custom-property layer (6 spacing, 3 radius, 2 elevation, 2 surface, 4 status, 4 priority), and global `box-sizing: border-box` reset. `apps/web/angular.json` updated (`styles[]` → `src/styles.scss`). Token keys match `IssueStatus`/`IssuePriority` enum values exactly. `mat.define-theme` (M3) not in @angular/material 17.3.10; M2 fallback used; AM18 upgrade deferred. 118 tests pass (76 api + 42 web, unchanged). gh #4 closed.
+
 ## Known unknowns / debt
 
 - ORM-level @ManyToOne/@OneToMany relations — deferred (D-CY2-4); issues loaded by project_id column directly.
 - `dev:api` script uses ts-node (no auto-reload). Description imprecision ("watch mode") in STACK.md and README corrected in cycle 10 F2.
 - AC1 oracle for root redirect (cycle 13) is manual smoke only — no automated Angular router navigation test (`app.routes.spec.ts`). Declared Known Gap in proof plan.
+- Angular Material 18 upgrade required for M3 `mat.define-theme` API (cycle 14 §Debt). Deferred as separate cycle.

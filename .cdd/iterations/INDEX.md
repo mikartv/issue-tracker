@@ -18,6 +18,16 @@ receipt has `protocol_gap_count > 0` — findings of type `cdd-skill-gap`,
 
 ---
 
+## Confirmed entries (v1.2.0 release)
+
+| Cycle | Issue | Date | Findings | Gap type | Proposed patches | MCAs committed | No-patch | Path |
+|-------|-------|------|----------|----------|------------------|----------------|----------|------|
+| 14 | #4 — design-system foundation | 2026-06-22 | 0 (protocol_gap_count = 0) | — | 0 | 0 | — | .cdd/releases/1.2.0/14/ |
+
+_No cdd-iteration.md authored (protocol_gap_count == 0 per γ-closeout). Row added as courtesy stub per cycle/401 convention._
+
+---
+
 ## Retroactive audit — cycles 1–9 (completed 2026-06-17)
 
 _Audit performed as ε=δ pass by reading all gamma-closeout.md files.
