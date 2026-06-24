@@ -28,9 +28,9 @@ hardcoded colors to R1 design tokens.
 
 | File | Insertions | Deletions |
 |------|-----------|-----------|
-| `apps/web/src/app/projects/projects-list.component.ts` | +93 | −46 |
-| `apps/web/src/app/projects/projects-list.component.spec.ts` | +17 | −11 |
-| **Total** | **+110** | **−57** |
+| `apps/web/src/app/projects/projects-list.component.ts` | +78 | −44 |
+| `apps/web/src/app/projects/projects-list.component.spec.ts` | +15 | −2 |
+| **Total** | **+93** | **−46** |
 
 Commit: `757a528`
 
