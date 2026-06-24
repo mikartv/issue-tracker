@@ -1,6 +1,6 @@
 # Project MCP — issue-tracker
 
-**Last verified:** 2026-06-24 (cycle 15 — redesign Projects screen; `npm run test:all` 119 tests pass: 76 api + 43 web)  
+**Last verified:** 2026-06-24 (cycle 16 — modern app shell; `npm run test:all` 120 tests pass: 76 api + 44 web)  
 **Verify with:** `npm run test:all` (from repo root)
 
 ## Build / run / test
@@ -11,16 +11,16 @@
 | `npm run dev:db` | Start Postgres 16 via Docker (`docker compose up -d db`) | ✅ configured |
 | `npm run dev:api` | NestJS via ts-node (`ts-node -r tsconfig-paths/register src/main.ts`) — no auto-reload | ✅ configured |
 | `npm run dev:web` | Angular dev server (`ng serve`) | ✅ configured |
-| `npm run test:all` | api + web test suites | ✅ `119 tests passed` (cycle 15: 76 api + 43 web) |
+| `npm run test:all` | api + web test suites | ✅ `120 tests passed` (cycle 16: 76 api + 44 web) |
 | `npm run test:api` | API tests only (Jest) | ✅ `76 tests passed` (9 suites) |
-| `npm run test:web` | Web tests only (Jest via jest-preset-angular) | ✅ `43 tests passed` (5 suites) |
+| `npm run test:web` | Web tests only (Jest via jest-preset-angular) | ✅ `44 tests passed` (5 suites) |
 
-Sample output from `npm run test:all` (cycle 15):
+Sample output from `npm run test:all` (cycle 16):
 ```
 Test Suites: 9 passed, 9 total (api)
 Tests:       76 passed, 76 total (api)
 Test Suites: 5 passed, 5 total (web)
-Tests:       43 passed, 43 total (web)
+Tests:       44 passed, 44 total (web)
 ```
 
 ## Repo map
@@ -138,6 +138,10 @@ See `.cdd/STACK.md`. Branch per cycle: `cycle/N`. Cycle artifacts: `.cdd/unrelea
 ## Decisions (append-only, short) — cycle 15
 
 - 2026-06-24: Cycle 15 — enhancement: redesign Projects screen. `ProjectsListComponent` redesigned from `<table mat-table>` to a responsive `<mat-card>` grid (`display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))`; `@media (max-width: 767px)` single-column). Designed empty state with `<mat-icon>folder_open</mat-icon>`, "No projects yet", and "Create project" CTA. Loading spinner retained. `MatTableModule` removed; `MatCardModule` added. 3 hardcoded color literals replaced with R1 design tokens (10 `var(--it-*)` applications total). +1 web test (43 total). gh #5 closed.
+
+## Decisions (append-only, short) — cycle 16
+
+- 2026-06-24: Cycle 16 — enhancement: modern app shell. `AppComponent` redesigned from bare `<main><h1>Issue Tracker</h1><router-outlet /></main>` to full app shell with persistent `<mat-toolbar>` (token-based `var(--it-surface)` background, `var(--it-shadow-1)` shadow), brand "Issue Tracker" as `<a routerLink="/projects">` (Angular router, no full reload), and `<router-outlet>` wrapped in `<div class="app-content">` (`max-width: 1000px; margin: 0 auto; padding: 0 var(--it-space-4)`). `MatToolbarModule` and `RouterLink` added to imports. Spec updated with toolbar assertion. +1 web test (44 total). gh #6 closed.
 
 ## Known unknowns / debt
 

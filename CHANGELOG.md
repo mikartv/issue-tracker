@@ -8,6 +8,7 @@
 | 1.1.0 | A | A | A | A- | L5 | 1+1+1 | Navigation + enum labels + root redirect: all v1.0.0 known issues closed |
 | 1.2.0 | A | A | A | A- | L6 | 1 | Design-system foundation: Material M2 theme + 17-token CSS custom-property layer |
 | 1.3.0 | A- | B+ | A | A- | L5 | 2 | Projects screen redesigned: card grid + empty/loading states; honest-claim §Diff scope (F-1) caught R1 |
+| 1.4.0 | A- | B+ | A | A- | L5 | 2 | App shell added: persistent toolbar, brand router-link, responsive content frame; F-1/F-2 (shared root: branch not rebased before signal) caught R1 |
 
 **Scoring notes:**
 - v1.0.0 γ: scope omission (navigation ACs not required for UI cycles → P0 at release) caps at B; §5.2 A- ceiling does not lift below-ceiling grades.
@@ -16,7 +17,17 @@
 - v1.1.0 α/β: 0 findings across all 3 cycles, 1 review round each → A.
 - v1.2.0 γ: §5.2 cap → A-. α/β: 0 findings, 1 round, design-and-build mode → A.
 - v1.3.0 γ: §5.2 cap → A-. α: 1 honest-claim finding (§Diff scope mismatch, B severity) → B+. β: finding caught R1, verified R2 → A.
+- v1.4.0 γ: §5.2 cap → A-. α: 2 findings (F-1 D protocol-compliance, F-2 B honest-claim) sharing one root cause; implementation substantively clean; 2 rounds → B+. β: both findings caught R1, shared root cause identified, R2 targeted → A.
 - C_Σ is the geometric mean of α/β/γ numeric grades (A=4.0, A-=3.7, B+=3.3, B=3.0).
+
+---
+
+## v1.4.0 — 2026-06-24
+
+### Added
+- Persistent `<mat-toolbar>` on all routes with token-based surface background and shadow — cycle 16 (#6)
+- Brand "Issue Tracker" as `routerLink="/projects"` anchor (Angular router; no full-page reload) — cycle 16 (#6)
+- Responsive content frame: `<router-outlet>` wrapped in `.app-content` container (`max-width: 1000px; margin: 0 auto; padding: 0 var(--it-space-4)`) — cycle 16 (#6)
 
 ---
 
