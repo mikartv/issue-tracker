@@ -128,7 +128,7 @@ Web: 44 (43 pre-existing + 1 new AC1 test). API: environmental DB issue prevents
 
 | Row | Check | Result |
 |-----|-------|--------|
-| 1 | cycle/16 rebased onto origin/main | ✅ origin/main at `aab3c95`; cycle/16 includes that commit; no drift |
+| 1 | cycle/16 rebased onto origin/main | ✅ origin/main at `aab3c95`; cycle/16 includes that commit; no drift. **Post-β-R1:** rebase executed by δ after β F-1 RC — `aab3c95` is now confirmed ancestor of cycle/16. |
 | 2 | self-coherence.md carries CDD Trace through step 7 | ✅ §CDD Trace step 7 present above |
 | 3 | Tests present, or explicit reason none apply | ✅ 44 web tests pass; 1 new AC1 test added |
 | 4 | Every AC has evidence | ✅ AC1, AC2, AC3 each mapped to diff locations in §ACs |
@@ -142,9 +142,9 @@ Web: 44 (43 pre-existing + 1 new AC1 test). API: environmental DB issue prevents
 | 12 | Caller-path trace for new modules | N/A — no new modules; only importing existing Material/Router directives |
 | 13 | Test assertion count from runner output | ✅ `Tests: 44 passed, 44 total` pasted in §CDD Trace |
 | 14 | Commit author email | ✅ `alpha@issue-tracker.cdd.cnos` — verified via `git log -1 --format='%ae' HEAD` |
-| 15 | γ-artifact presence (rule 3.11b) | ⚠️ `gamma-scaffold.md` is on `origin/main` but NOT on `origin/cycle/16` (γ committed scaffold to main after branch creation). §5.1 check fails. Declared as §Debt item 2. β should apply §5.2 configuration-awareness or note as RC. |
+| 15 | γ-artifact presence (rule 3.11b) | ✅ **Resolved post-β-R1:** `gamma-scaffold.md` now present on `origin/cycle/16` — rebase onto `aab3c95` complete. |
 | 16 | Diff scope counts verified via `git show --numstat` | ✅ `git show 988a9d4 --numstat`: `app.component.spec.ts` +9/−1; `app.component.ts` +15/−5. §CDD Trace §Diff scope table matches exactly. |
 
-**γ-artifact:** `gamma-scaffold.md` on `origin/main` at `.cdd/unreleased/16/gamma-scaffold.md` — serves as γ-artifact-of-record for §5.2 single-session dispatch. Absent from cycle branch (known debt declared).
+**γ-artifact:** `gamma-scaffold.md` present on `origin/cycle/16` post-rebase (`aab3c95` is ancestor). F-1 and F-2 from β R1 resolved.
 
 **Ready for β.**
