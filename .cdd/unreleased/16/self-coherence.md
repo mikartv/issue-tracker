@@ -1,6 +1,6 @@
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills, ACs, Self-check]
+completed: [Gap, Skills, ACs, Self-check, Debt]
 -->
 
 # Self-Coherence — Cycle 16
@@ -86,3 +86,34 @@ Per-AC oracles run against implementation commit `988a9d4`.
 2. **γ-artifact absent from cycle branch (row 15):** `gamma-scaffold.md` is on `origin/main` at `.cdd/unreleased/16/gamma-scaffold.md` but is NOT on `origin/cycle/16`. γ committed the scaffold to main after (or independently from) branch creation. Result: `git cat-file -e origin/cycle/16:.cdd/unreleased/16/gamma-scaffold.md` fails. Rule 3.11b will fire at β unless β applies the §5.2 configuration-awareness exemption or the issue body carries a `## Protocol exemption` section. Declaring as known debt; anticipate β RC under rule 3.11b or explicit exemption acknowledgment.
 
 3. **API e2e tests environmental:** `test:api` e2e suites (4 suites, 41 tests) fail with `TypeError: this.postgres.Pool is not a constructor` — pre-existing environment issue unrelated to this cycle's changes. Verified: same failure on clean cycle/16 HEAD before my implementation commit. Unit suites (5 suites, 35 tests) pass. Web tests: 44/44 pass.
+
+## §CDD Trace
+
+| Step | Action | Artifact / evidence |
+|------|--------|---------------------|
+| 1. Dispatch intake | Loaded Tier 1a skills; read issue gh #6, PROJECT.md, STACK.md, SCOPE.md, iterations/INDEX.md, gamma-closeout cycle 15; configured git identity `alpha@issue-tracker.cdd.cnos`; switched to `cycle/16` | Skills loaded; identity verified via `git log -1 --format='%ae' HEAD` |
+| 2. Produce: design | design-and-build mode; no separate design artifact required — issue body carries AC guidance with full implementation direction; single-file change, 3 ACs, no ambiguity | Not required (justified: single-file, fully specified ACs) |
+| 3. Produce: plan | Single-file change; no non-trivial implementation sequencing | Not required |
+| 4. Produce: tests | Updated `app.component.spec.ts` — added `MatToolbarModule` to TestBed imports; added `should render mat-toolbar (AC1)` assertion | `app.component.spec.ts` (diff: +9/−1) |
+| 5. Produce: code | Rewrote `app.component.ts` — imports `MatToolbarModule` + `RouterLink`; template: `<mat-toolbar>` with R1 tokens + brand anchor + `<div class="app-content">` wrapping `<router-outlet>`; component styles for `.app-content` | `app.component.ts` (diff: +15/−5); impl commit `988a9d4` |
+| 6. Produce: docs | No docs/spec surfaces changed; no new commands, no API changes, no route changes | N/A — package scoping limited to `app.component.ts` + spec; no authority surface change |
+| 7. Self-coherence + pre-review gate | Ran `git show 988a9d4 --numstat` (row 16); verified rebase (`origin/main` not ahead of cycle/16); checked γ-artifact (row 15: absent from cycle branch, declared as §Debt item 2); ran `npm run test:web` — 44 passed; reviewed all AC evidence | This file; runner output pasted in §ACs |
+
+**Diff scope** (from `git show 988a9d4 --numstat`):
+
+| File | Insertions | Deletions |
+|------|-----------|-----------|
+| `apps/web/src/app/app.component.spec.ts` | +9 | −1 |
+| `apps/web/src/app/app.component.ts` | +15 | −5 |
+| **Total** | **+24** | **−6** |
+
+**Files changed:** 2 (matches package scoping constraint: `app.component.ts` and `app.component.spec.ts` only)
+
+**New module caller trace:** No new modules or functions added. `MatToolbarModule` and `RouterLink` are imported Material/Router directives — not new modules authored by α. No caller-path trace required (row 12 N/A).
+
+**Tests at signal (from `npm run test:web` runner output):**
+```
+Test Suites: 5 passed, 5 total
+Tests:       44 passed, 44 total
+```
+Web: 44 (43 pre-existing + 1 new AC1 test). API: environmental DB issue prevents e2e run; unit tests: 35/35 pass (see §Debt item 3). Total functional = 44 web + 35 api-unit = 79 passing in this environment.
