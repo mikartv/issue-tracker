@@ -1,6 +1,6 @@
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills, ACs, Self-check, Debt]
+completed: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
 -->
 
 # Self-Coherence — Cycle 16
@@ -117,3 +117,34 @@ Test Suites: 5 passed, 5 total
 Tests:       44 passed, 44 total
 ```
 Web: 44 (43 pre-existing + 1 new AC1 test). API: environmental DB issue prevents e2e run; unit tests: 35/35 pass (see §Debt item 3). Total functional = 44 web + 35 api-unit = 79 passing in this environment.
+
+## §Review-readiness
+
+**Round:** 1
+**Implementation SHA:** `988a9d4` (last implementation commit, before readiness-signal commit)
+**Branch:** `cycle/16` — pushed to `origin/cycle/16` at `b7c2f80`
+
+### Pre-review gate (row-by-row)
+
+| Row | Check | Result |
+|-----|-------|--------|
+| 1 | cycle/16 rebased onto origin/main | ✅ origin/main at `aab3c95`; cycle/16 includes that commit; no drift |
+| 2 | self-coherence.md carries CDD Trace through step 7 | ✅ §CDD Trace step 7 present above |
+| 3 | Tests present, or explicit reason none apply | ✅ 44 web tests pass; 1 new AC1 test added |
+| 4 | Every AC has evidence | ✅ AC1, AC2, AC3 each mapped to diff locations in §ACs |
+| 5 | Known debt is explicit | ✅ §Debt items 1–3 |
+| 6 | Schema/shape audit | N/A — no schema-bearing or wire-contract change |
+| 7 | Peer enumeration | N/A — single-file scope; no family of peers |
+| 8 | Harness audit | N/A — no schema-bearing contract change |
+| 9 | Post-patch re-audit | N/A — no mid-cycle patches |
+| 10 | Branch CI green | ⚠️ CI not configured for `cycle/*` branches (O1 gap, per gamma-closeout cycle 15 §Deferred Outputs). `gh run list --branch cycle/16` returns empty. Local `npm run test:web` passes (44/44). β should merge and verify CI passes on main post-merge. |
+| 11 | Artifact enumeration matches diff | ✅ Both files (`app.component.ts`, `app.component.spec.ts`) mentioned in §ACs and §CDD Trace step 5/4 |
+| 12 | Caller-path trace for new modules | N/A — no new modules; only importing existing Material/Router directives |
+| 13 | Test assertion count from runner output | ✅ `Tests: 44 passed, 44 total` pasted in §CDD Trace |
+| 14 | Commit author email | ✅ `alpha@issue-tracker.cdd.cnos` — verified via `git log -1 --format='%ae' HEAD` |
+| 15 | γ-artifact presence (rule 3.11b) | ⚠️ `gamma-scaffold.md` is on `origin/main` but NOT on `origin/cycle/16` (γ committed scaffold to main after branch creation). §5.1 check fails. Declared as §Debt item 2. β should apply §5.2 configuration-awareness or note as RC. |
+| 16 | Diff scope counts verified via `git show --numstat` | ✅ `git show 988a9d4 --numstat`: `app.component.spec.ts` +9/−1; `app.component.ts` +15/−5. §CDD Trace §Diff scope table matches exactly. |
+
+**γ-artifact:** `gamma-scaffold.md` on `origin/main` at `.cdd/unreleased/16/gamma-scaffold.md` — serves as γ-artifact-of-record for §5.2 single-session dispatch. Absent from cycle branch (known debt declared).
+
+**Ready for β.**
