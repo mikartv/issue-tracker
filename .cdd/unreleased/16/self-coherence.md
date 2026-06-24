@@ -1,6 +1,6 @@
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills, ACs]
+completed: [Gap, Skills, ACs, Self-check]
 -->
 
 # Self-Coherence — Cycle 16
@@ -78,3 +78,11 @@ Per-AC oracles run against implementation commit `988a9d4`.
 **Peer enumeration:** Scope is single-file (`app.component.ts` + its spec). No sibling routes or components were changed. Existing per-view `.container` rules untouched (non-goal per issue). No new npm dependencies added. No changes outside the declared package scope.
 
 **Harness audit:** No schema-bearing change. No contract change. N/A.
+
+## §Debt
+
+1. **Responsive layout test absent (AC3):** No component test verifies that no horizontal scrollbar appears at 375px viewport. Verified by manual resize only — per issue proof plan §"Known gap". This is the expected gap for this cycle.
+
+2. **γ-artifact absent from cycle branch (row 15):** `gamma-scaffold.md` is on `origin/main` at `.cdd/unreleased/16/gamma-scaffold.md` but is NOT on `origin/cycle/16`. γ committed the scaffold to main after (or independently from) branch creation. Result: `git cat-file -e origin/cycle/16:.cdd/unreleased/16/gamma-scaffold.md` fails. Rule 3.11b will fire at β unless β applies the §5.2 configuration-awareness exemption or the issue body carries a `## Protocol exemption` section. Declaring as known debt; anticipate β RC under rule 3.11b or explicit exemption acknowledgment.
+
+3. **API e2e tests environmental:** `test:api` e2e suites (4 suites, 41 tests) fail with `TypeError: this.postgres.Pool is not a constructor` — pre-existing environment issue unrelated to this cycle's changes. Verified: same failure on clean cycle/16 HEAD before my implementation commit. Unit suites (5 suites, 35 tests) pass. Web tests: 44/44 pass.
