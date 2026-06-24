@@ -1,6 +1,6 @@
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills]
+completed: [Gap, Skills, ACs]
 -->
 
 # Self-Coherence — Cycle 16
@@ -62,3 +62,19 @@ Per-AC oracles run against implementation commit `988a9d4`.
 - `padding: 0 var(--it-space-4)` = `0 16px` — prevents content from touching viewport edges at 375px.
 - At 375px viewport: content area = 375px − 32px padding = 343px, well below 1000px cap. No overflow source. Global `box-sizing: border-box` reset in `styles.scss` ensures padding is contained. No horizontal scrollbar.
 - Known gap: no component test at 375px — manual resize only (see §Debt).
+
+## §Self-check
+
+**Did α's work push ambiguity onto β?** No. Every AC maps to concrete evidence in the diff:
+- AC1: `MatToolbarModule` in imports + `<mat-toolbar>` first in template + spec assertion.
+- AC2: `RouterLink` in imports + `routerLink="/projects"` attribute + `<h1>` removed.
+- AC3: `.app-content` wrapper + component styles + reasoning on why 375px is scroll-free.
+
+**Is every claim backed by evidence in the diff?** Yes.
+- "toolbar visible on every route" — no `@if` or condition in template; structurally unconditional.
+- "no full page reload on brand click" — `routerLink` directive, not `href`; this is verifiable by diffing the template.
+- "no horizontal scroll at 375px" — `max-width: 1000px` + `margin: 0 auto` + `padding: 0 var(--it-space-4)` (16px each side); `box-sizing: border-box` in global reset means padding is absorbed, not added to width.
+
+**Peer enumeration:** Scope is single-file (`app.component.ts` + its spec). No sibling routes or components were changed. Existing per-view `.container` rules untouched (non-goal per issue). No new npm dependencies added. No changes outside the declared package scope.
+
+**Harness audit:** No schema-bearing change. No contract change. N/A.
