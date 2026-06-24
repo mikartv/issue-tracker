@@ -176,3 +176,106 @@ Two findings block merge:
 | F-2 | B | `honest-claim` | Self-coherence Row 1 falsely claims cycle includes `aab3c95` | Update Row 1 after rebase |
 
 AC1–AC3 all pass substantively. After F-1 and F-2 are resolved, β can APPROVE in R2 on a targeted re-review of the two affected surfaces (cycle branch γ-scaffold presence and self-coherence Row 1).
+
+---
+
+# β Review — Cycle 16
+
+**Round:** R2
+**Verdict:** APPROVE
+**Origin/main SHA (fetched synchronously):** `aab3c9594baf227456f35619062f1ad463a9049f`
+**Cycle/16 HEAD SHA:** `405c5705a9cbdb5063d3b40605f1a1eea000fe3b`
+**Implementation commit reviewed:** `988a9d4a31aa874ad28e7ae8cf81cd93da608bab`
+**Date:** 2026-06-24
+
+---
+
+## Mechanical Pre-Checks (R2)
+
+### Step 1 — Git identity check: PASS
+
+Three bootstrap commits by `mihail_ar00@mail.ru` are pre-cycle CDD artifact commits (cycles 0–1), not implementation commits for this cycle. Implementation commit `988a9d4` is authored by `alpha@issue-tracker.cdd.cnos`. No implementation commits by non-α identity.
+
+### Step 2 — CI green gate: NOTE (not blocking)
+
+`gh run list --branch cycle/16 --limit 5` returns empty. Exception applies: CI triggers on push/PR to `main` only (pre-existing structural gap O1, documented in gamma-closeout cycle 15 §Deferred Outputs). Local `npm run test:web`: `Tests: 44 passed, 44 total`. Verify CI green on main post-merge.
+
+### Step 3 — γ scaffold present: PASS (F-1 resolved)
+
+`git ls-tree -r --name-only origin/cycle/16 .cdd/unreleased/16/gamma-scaffold.md` → `.cdd/unreleased/16/gamma-scaffold.md` present.
+
+`git merge-base --is-ancestor aab3c95 origin/cycle/16` → exit 0. `aab3c95` is confirmed ancestor of `origin/cycle/16`. Rebase complete.
+
+### Step 4 — Non-goal check: PASS
+
+No diffs to `apps/api/`, `apps/web/src/styles.scss`, or package manifests. All empty.
+
+---
+
+## R2 Targeted Re-Review
+
+### F-1 resolution verified
+
+`gamma-scaffold.md` present on `origin/cycle/16`. Gate satisfied.
+
+### F-2 resolution verified
+
+Self-coherence §Review-readiness Row 1 updated post-β-R1: "✅ origin/main at `aab3c95`; cycle/16 includes that commit; no drift. **Post-β-R1:** rebase executed by δ after β F-1 RC — `aab3c95` is now confirmed ancestor of cycle/16." Verified true via `git merge-base --is-ancestor`. No contradiction remains between §Debt item 2 (now superseded) and Row 1.
+
+---
+
+## Substantive Review (R2 — full pass)
+
+### AC1 — Toolbar present and unconditional on all routes: PASS
+
+- `MatToolbarModule` imported line 3, in `imports` array line 8
+- `<mat-toolbar style="background: var(--it-surface); box-shadow: var(--it-shadow-1);">` at line 10 — first element in template, no `@if`, unconditional
+- Spec: `compiled.querySelector('mat-toolbar')` truthy assertion present
+- **AC1: PASS**
+
+### AC2 — Brand links home via router: PASS
+
+- `RouterLink` imported line 2, in `imports` array line 8
+- Line 11: `<a routerLink="/projects" ...>Issue Tracker</a>` — no `href`, no external reload
+- `<h1>Issue Tracker</h1>` and `<main>` removed
+- **AC2: PASS**
+
+### AC3 — Responsive content frame: PASS
+
+- `<div class="app-content">` wraps `<router-outlet />` (lines 13–15)
+- Component styles lines 18–22: `max-width: 1000px; margin: 0 auto; padding: 0 var(--it-space-4);`
+- R1 token `var(--it-space-4)` for padding — no hardcoded pixel padding
+- Known gap (no 375px automated test) declared in §Debt per issue proof plan
+- **AC3: PASS**
+
+### Honest-claim check: PASS
+
+`git show 988a9d4 --numstat`: `app.component.spec.ts` +9/−1; `app.component.ts` +15/−5. Matches self-coherence §Diff scope exactly.
+
+`npm run test:web`: `Tests: 44 passed, 44 total`. Matches self-coherence claim. 44 ≥ 43 baseline.
+
+### Wiring check: PASS
+
+`MatToolbarModule` (import line 3) → `mat-toolbar` (template line 10) ✅
+`RouterLink` (import line 2) → `routerLink` (template line 11) ✅
+
+---
+
+## Summary
+
+| Check | R2 Result |
+|-------|-----------|
+| Step 1 — Git identity | PASS |
+| Step 2 — CI green gate | NOTE (O1 gap, non-blocking) |
+| Step 3 — γ scaffold | PASS (F-1 resolved) |
+| Step 4 — Non-goal | PASS |
+| F-2 honest-claim fix | PASS (Row 1 accurate) |
+| AC1 | PASS |
+| AC2 | PASS |
+| AC3 | PASS |
+| Honest-claim check | PASS |
+| Wiring check | PASS |
+
+All mechanical checks pass. All 3 ACs pass. F-1 and F-2 resolved. No new findings.
+
+**APPROVE. Proceeding to merge.**
