@@ -1,55 +1,52 @@
-# release 1.1.0 — issue-tracker
+# release 1.3.0 — issue-tracker
 
 ## Outcome
 
-Coherence delta: C_Σ A (`α A`, `β A`, `γ A-`) · **Level:** `L5`
+Coherence delta: C_Σ A- (`α B+`, `β A`, `γ A-`) · **Level:** `L5`
 
-Three small-change cycles (11–13) eliminate all four "Known Issues" from v1.0.0: the
-Angular SPA is now fully navigable via routerLink, status/priority display as human-readable
-labels in every view, and the root URL redirects to `/projects` instead of showing a blank page.
+One design-and-build cycle (15) ships the second wave of the R2–R8 UI redesign:
+the Projects screen is rebuilt from a plain table to a responsive card grid with
+designed empty and loading states, and full R1 design-token coverage.
 
 ## Why it matters
 
-v1.0.0 shipped a functional but partially unusable SPA — users could not navigate between views
-without typing URLs manually, the root URL showed a blank page, and enum values were exposed as
-raw strings (`in_progress`, `critical`). All four documented known issues from v1.0.0 are
-resolved. The application can now be evaluated end-to-end — open browser, land on projects
-list, click through to issues and issue detail — without any URL manipulation.
+v1.2.0 established the design-system foundation (M2 theme + 17 CSS tokens) but left
+the Projects screen on the old `<table mat-table>` layout with unstyled empty states
+and hardcoded color literals. v1.3.0 closes that gap: the screen now renders as a
+multi-column `mat-card` grid at desktop, single-column at mobile, with a designed
+empty state (icon + message + CTA) and the existing loading spinner retained.
+All three hardcoded color literals (`#c00`, `#ccc`) are replaced with R1 tokens —
+10 `var(--it-*)` applications in total.
 
-## Fixed
+## Changed
 
-- **Blank page at `/`** (#3, cycle 13): `{ path: '', redirectTo: 'projects', pathMatch: 'full' }`
-  added as first entry in `app.routes.ts`. Navigating to `/` now redirects to `/projects`.
-- **Raw enum values in IssueDetail** (#2, cycle 12): `statusLabels` and `priorityLabels` maps
-  added to `IssueDetailComponent`; status display, priority display, and "Move to" button label
-  are now human-readable.
-- **Raw enum values in ProjectIssues** (#1, cycle 11): `statusLabels` and `priorityLabels` maps
-  in `ProjectIssuesComponent` replace raw enum strings in the issue list.
-- **Full-page hide on create error** (#1, cycle 11): inline `createError` field replaces
-  `@else if (error)` — page content no longer hidden on non-409 form submit errors.
-
-## Added
-
-- **routerLink navigation** (#1, cycle 11): project rows in `ProjectsListComponent` navigate to
-  `/projects/:id/issues`; issue rows in `ProjectIssuesComponent` navigate to `/issues/:id`.
-- **Empty-state text** (#1, cycle 11): "No projects yet." and "No issues yet." messages when
-  lists are empty.
+- **Projects screen layout** (#5, cycle 15): `<table mat-table>` replaced with a
+  responsive `<mat-card>` grid (`display: grid; grid-template-columns:
+  repeat(auto-fill, minmax(280px, 1fr))`; single-column below 768 px).
+  `MatTableModule` removed; `MatCardModule` added. `displayedColumns` property removed.
+- **Empty state** (#5, cycle 15): bare `<p>No projects yet.</p>` replaced with a
+  designed block — `<mat-icon>folder_open</mat-icon>`, "No projects yet", and a
+  "Create project" button that scrolls to the create form.
+- **Token cleanup** (#5, cycle 15): `.error { color: #c00 }`,
+  `.inline-error { color: #c00 }`, `.archived-badge { background: #ccc }` — all three
+  literals replaced with `var(--it-priority-critical)` / `var(--it-surface)` /
+  `var(--it-status-closed)` tokens from the R1 layer.
 
 ## Validation
 
-- 42 web tests (5 suites), 76 API tests — 118 total — CI green on merge SHA for each cycle:
-  - Cycle 11: merge `a544fb1` → CI green on `308fd7d`
-  - Cycle 12: merge `b26efd1` → CI green on `664b225`
-  - Cycle 13: merge `5af970b` → CI green (actions/runs/27825866088)
-- Manual smoke: open `/` → redirects to `/projects` → click project row → navigates to
-  `/projects/:id/issues` → click issue row → navigates to `/issues/:id` → status and
-  priority display human-readable labels.
+- 119 tests (76 api + 43 web) — CI green on merge SHA `adf8071` →
+  CI green on `0e0c6c1` (actions/runs/28097347245, 2026-06-24T12:08:17Z)
+- Card actions preserved: routerLink → `/projects/:id/issues`, Archive button,
+  409 "Already archived" inline error, create form — all functional.
 
 ## Known Issues
 
-- No automated Angular router navigation test (`app.routes.spec.ts`) — AC1 oracle for cycle 13
-  is manual smoke only.
-- Pre-existing dead code: `resolved` key in `project-issues.component.ts` L171 (no issue has
-  `resolved` status; candidate for future cleanup).
-- E2E automation remains manual (`docs/SMOKE.md`).
-- ORM `@ManyToOne`/`@OneToMany` relations deferred from cycle 2 (D-CY2-4).
+- **R3–R8 redesign wave in progress**: `ProjectIssuesComponent` and remaining
+  components still use the pre-redesign layout; R3 is the next planned cycle.
+- **CI on feature branches absent** (O1, structural): CI triggers on `main` push
+  only; feature-branch runs are manual. Filed as deferred infrastructure gap.
+- **Angular Material 18 upgrade deferred**: `mat.define-theme` (M3 API) not yet
+  adopted; current theme uses the M2 `mat.define-light-theme` API from cycle 14.
+- **E2E automation remains manual** (`docs/SMOKE.md`).
+- **Grid responsiveness oracle is manual**: multi-column vs single-column viewport
+  behavior verified by code inspection only; no automated viewport test.
