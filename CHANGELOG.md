@@ -6,13 +6,35 @@
 |---------|-----|---|---|---|-------|--------|----------------|
 | 1.0.0 | B+ | B+ | B+ | B | L6 | 15 | First vertical slice: API + SPA; honest-claim pattern C1–C4; navigation gap (P0) at release |
 | 1.1.0 | A | A | A | A- | L5 | 1+1+1 | Navigation + enum labels + root redirect: all v1.0.0 known issues closed |
+| 1.2.0 | A | A | A | A- | L6 | 1 | Design-system foundation: Material M2 theme + 17-token CSS custom-property layer |
+| 1.3.0 | A- | B+ | A | A- | L5 | 2 | Projects screen redesigned: card grid + empty/loading states; honest-claim §Diff scope (F-1) caught R1 |
 
 **Scoring notes:**
 - v1.0.0 γ: scope omission (navigation ACs not required for UI cycles → P0 at release) caps at B; §5.2 A- ceiling does not lift below-ceiling grades.
 - v1.0.0 α/β: honest-claim pattern cycles 1–4 (all caught R1); C10 loaded-skill miss (3 rounds). All ACs met every cycle → B+ aggregate.
 - v1.1.0 γ: §5.2 (δ=γ) configuration-floor clause caps at A- per `release/SKILL.md §3.8`.
 - v1.1.0 α/β: 0 findings across all 3 cycles, 1 review round each → A.
+- v1.2.0 γ: §5.2 cap → A-. α/β: 0 findings, 1 round, design-and-build mode → A.
+- v1.3.0 γ: §5.2 cap → A-. α: 1 honest-claim finding (§Diff scope mismatch, B severity) → B+. β: finding caught R1, verified R2 → A.
 - C_Σ is the geometric mean of α/β/γ numeric grades (A=4.0, A-=3.7, B+=3.3, B=3.0).
+
+---
+
+## v1.3.0 — 2026-06-24
+
+### Changed
+- Projects screen redesigned from `<table mat-table>` to a responsive `<mat-card>` grid with `repeat(auto-fill, minmax(280px, 1fr))` — cycle 15 (#5)
+- Designed empty state (icon + "No projects yet" + "Create project" CTA) replaces bare `<p>No projects yet.</p>` — cycle 15 (#5)
+- 3 hardcoded color literals (`#c00`, `#ccc`) replaced with R1 design tokens; 10 `var(--it-*)` applications — cycle 15 (#5)
+
+---
+
+## v1.2.0 — 2026-06-22
+
+### Added
+- Angular Material M2 theme (`mat.define-light-theme`, deep-purple/amber palette) replacing `styles.css` — cycle 14 (#4)
+- 17-token CSS custom-property layer (`--it-status-*`, `--it-priority-*`, `--it-space-*`, `--it-radius-*`, `--it-shadow-*`, `--it-surface`, `--it-background`) — cycle 14 (#4)
+- Global `box-sizing: border-box` reset — cycle 14 (#4)
 
 ---
 

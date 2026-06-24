@@ -1,6 +1,6 @@
 # Project MCP — issue-tracker
 
-**Last verified:** 2026-06-22 (cycle 14 — design-system foundation; `npm run test:all` 118 tests pass: 76 api + 42 web)  
+**Last verified:** 2026-06-24 (cycle 15 — redesign Projects screen; `npm run test:all` 119 tests pass: 76 api + 43 web)  
 **Verify with:** `npm run test:all` (from repo root)
 
 ## Build / run / test
@@ -11,16 +11,16 @@
 | `npm run dev:db` | Start Postgres 16 via Docker (`docker compose up -d db`) | ✅ configured |
 | `npm run dev:api` | NestJS via ts-node (`ts-node -r tsconfig-paths/register src/main.ts`) — no auto-reload | ✅ configured |
 | `npm run dev:web` | Angular dev server (`ng serve`) | ✅ configured |
-| `npm run test:all` | api + web test suites | ✅ `118 tests passed` (cycle 13: 76 api + 42 web) |
+| `npm run test:all` | api + web test suites | ✅ `119 tests passed` (cycle 15: 76 api + 43 web) |
 | `npm run test:api` | API tests only (Jest) | ✅ `76 tests passed` (9 suites) |
-| `npm run test:web` | Web tests only (Jest via jest-preset-angular) | ✅ `42 tests passed` (5 suites) |
+| `npm run test:web` | Web tests only (Jest via jest-preset-angular) | ✅ `43 tests passed` (5 suites) |
 
-Sample output from `npm run test:all` (cycle 13):
+Sample output from `npm run test:all` (cycle 15):
 ```
 Test Suites: 9 passed, 9 total (api)
 Tests:       76 passed, 76 total (api)
 Test Suites: 5 passed, 5 total (web)
-Tests:       42 passed, 42 total (web)
+Tests:       43 passed, 43 total (web)
 ```
 
 ## Repo map
@@ -134,6 +134,10 @@ See `.cdd/STACK.md`. Branch per cycle: `cycle/N`. Cycle artifacts: `.cdd/unrelea
 ## Decisions (append-only, short) — cycle 14
 
 - 2026-06-22: Cycle 14 — enhancement: design-system foundation. `apps/web/src/styles.css` deleted; `apps/web/src/styles.scss` (99 lines) created with custom Angular Material M2 theme (`mat.define-light-theme` + `mat.define-palette`, deep-purple/amber palette), 17-token `:root` CSS custom-property layer (6 spacing, 3 radius, 2 elevation, 2 surface, 4 status, 4 priority), and global `box-sizing: border-box` reset. `apps/web/angular.json` updated (`styles[]` → `src/styles.scss`). Token keys match `IssueStatus`/`IssuePriority` enum values exactly. `mat.define-theme` (M3) not in @angular/material 17.3.10; M2 fallback used; AM18 upgrade deferred. 118 tests pass (76 api + 42 web, unchanged). gh #4 closed.
+
+## Decisions (append-only, short) — cycle 15
+
+- 2026-06-24: Cycle 15 — enhancement: redesign Projects screen. `ProjectsListComponent` redesigned from `<table mat-table>` to a responsive `<mat-card>` grid (`display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))`; `@media (max-width: 767px)` single-column). Designed empty state with `<mat-icon>folder_open</mat-icon>`, "No projects yet", and "Create project" CTA. Loading spinner retained. `MatTableModule` removed; `MatCardModule` added. 3 hardcoded color literals replaced with R1 design tokens (10 `var(--it-*)` applications total). +1 web test (43 total). gh #5 closed.
 
 ## Known unknowns / debt
 
