@@ -11,7 +11,7 @@ merge-sha: 7e9fbca
   [x] §Post-Merge Verification
   [x] §Close-out Triage Table
   [x] §Independent γ Process-Gap Check
-  [ ] §Cycle Iteration Triggers
+  [x] §Cycle Iteration Triggers
   [ ] §Immediate Outputs
   [ ] §Deferred Outputs
   [ ] §Next MCA
@@ -147,3 +147,18 @@ Yes. Two paths identified:
 **Result:** No formal trigger fires. Two process observations with deferred-output dispositions:
 (1) close-out prompt naming in `operator/SKILL.md §5.2`; (2) dispatch-prompt §2.5 reminder.
 Both committed as deferred outputs below.
+
+---
+
+## Cycle Iteration Triggers
+
+| Trigger | Fire condition | Status | Notes |
+|---------|----------------|--------|-------|
+| Review churn | rounds > 2 | **NOT FIRED** — 1 round (threshold: > 2) | Cleanest cycle yet: R1 APPROVE, 0 RC findings |
+| Mechanical overload | mechanical ratio > 20% AND ≥ 10 total findings | **NOT FIRED** — 0 findings (threshold: ≥ 10) | No β RC findings; below finding-count floor |
+| Avoidable tooling / environment failure | tooling or environment blocked the cycle in a way a guardrail could likely prevent | **NOT FIRED (operator error, not tooling)** | α close-out re-dispatch failure was an operator (δ=γ) prompt-selection error, not a tooling failure. No mechanical tooling blocked the cycle. Assessed as process gap → deferred output. |
+| Loaded-skill miss | a loaded skill should have prevented a finding but did not | **NOT FIRED (application gaps, not skill gaps)** | F-1 (α §2.5 single-commit): `alpha/SKILL.md §2.5` is adequate; α did not apply it. Close-out re-dispatch failure: `operator/SKILL.md §5.2` specifies close-out prompts; operator did not use the correct one. Both are application gaps. |
+
+**No trigger fires this cycle.** γ process-gap check identified two deferred process
+improvements (not trigger-level issues): close-out prompt naming and dispatch-prompt §2.5
+reminder. See §Deferred Outputs.
