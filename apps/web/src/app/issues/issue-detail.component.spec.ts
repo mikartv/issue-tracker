@@ -243,7 +243,7 @@ describe('IssueDetailComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Issue saved');
   });
 
-  it('label-AC1: status in_progress renders as "In Progress" (not raw key)', async () => {
+  it('label-AC1: status in_progress renders as "In Progress" via chip (not raw key)', async () => {
     await setup(buildApiMock({ status: 'in_progress' }));
     fixture.detectChanges();
     fixture.detectChanges();
@@ -256,9 +256,10 @@ describe('IssueDetailComponent', () => {
     const statusText = statusParagraphs[0].textContent ?? '';
     expect(statusText).toContain('In Progress');
     expect(statusText).not.toContain('in_progress');
+    expect(statusParagraphs[0].querySelector('app-chip')).not.toBeNull();
   });
 
-  it('label-AC2: priority critical renders as "Critical" (not raw key)', async () => {
+  it('label-AC2: priority critical renders as "Critical" via chip (not raw key)', async () => {
     await setup(buildApiMock({ priority: 'critical' }));
     fixture.detectChanges();
     fixture.detectChanges();
@@ -271,6 +272,7 @@ describe('IssueDetailComponent', () => {
     const priorityText = priorityParagraphs[0].textContent ?? '';
     expect(priorityText).toContain('Critical');
     expect(priorityText).not.toContain('critical');
+    expect(priorityParagraphs[0].querySelector('app-chip')).not.toBeNull();
   });
 
   it('label-AC3: Move to button reads "Move to In Progress" when status is open', async () => {

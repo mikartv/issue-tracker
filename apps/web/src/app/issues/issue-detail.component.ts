@@ -14,6 +14,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { ApiService, type Issue, type Comment } from '../api/api.service';
+import { ChipComponent } from '../shared/chip.component';
+import { STATUS_LABELS } from '../shared/issue-labels';
 
 const NEXT_STATUS: Record<string, string | null> = {
   open: 'in_progress',
@@ -34,6 +36,7 @@ const NEXT_STATUS: Record<string, string | null> = {
     MatInputModule,
     MatFormFieldModule,
     MatSelectModule,
+    ChipComponent,
   ],
   template: `
     @if (loading) {
@@ -47,15 +50,15 @@ const NEXT_STATUS: Record<string, string | null> = {
         @if (!editMode) {
           <h2>{{ issue.title }}</h2>
           <p><strong>Description:</strong> {{ issue.description ?? '—' }}</p>
-          <p><strong>Status:</strong> {{ statusLabels[issue.status] ?? issue.status }}</p>
-          <p><strong>Priority:</strong> {{ priorityLabels[issue.priority] ?? issue.priority }}</p>
+          <p><strong>Status:</strong> <app-chip [kind]="'status'" [value]="issue.status" /></p>
+          <p><strong>Priority:</strong> <app-chip [kind]="'priority'" [value]="issue.priority" /></p>
           <p><strong>Assignee:</strong> {{ issue.assignee ?? '—' }}</p>
           <p>
             <a [routerLink]="['/projects', issue.project_id, 'issues']">Back to project issues</a>
           </p>
 
           @if (nextStatus) {
-            <button mat-raised-button (click)="moveToNextStatus()">Move to {{ statusLabels[nextStatus!] ?? nextStatus }}</button>
+            <button mat-raised-button (click)="moveToNextStatus()">Move to {{ getStatusLabel(nextStatus!) }}</button>
           }
           <button mat-raised-button (click)="enterEditMode()">Edit</button>
 
@@ -146,19 +149,9 @@ export class IssueDetailComponent implements OnInit {
 
   readonly priorities = ['low', 'medium', 'high', 'critical'];
 
-  readonly statusLabels: Record<string, string> = {
-    open: 'Open',
-    in_progress: 'In Progress',
-    done: 'Done',
-    closed: 'Closed',
-  };
-
-  readonly priorityLabels: Record<string, string> = {
-    low: 'Low',
-    medium: 'Medium',
-    high: 'High',
-    critical: 'Critical',
-  };
+  getStatusLabel(key: string): string {
+    return STATUS_LABELS[key] ?? key;
+  }
 
   get nextStatus(): string | null {
     return this.issue ? (NEXT_STATUS[this.issue.status] ?? null) : null;

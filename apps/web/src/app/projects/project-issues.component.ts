@@ -14,6 +14,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { ApiService, type Issue } from '../api/api.service';
+import { ChipComponent } from '../shared/chip.component';
 
 @Component({
   selector: 'app-project-issues',
@@ -27,6 +28,7 @@ import { ApiService, type Issue } from '../api/api.service';
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
+    ChipComponent,
   ],
   template: `
     <div class="container">
@@ -43,12 +45,12 @@ import { ApiService, type Issue } from '../api/api.service';
           <table mat-table [dataSource]="issues" class="issues-table">
             <ng-container matColumnDef="status">
               <th mat-header-cell *matHeaderCellDef>Status</th>
-              <td mat-cell *matCellDef="let issue">{{ statusLabels[issue.status] ?? issue.status }}</td>
+              <td mat-cell *matCellDef="let issue"><app-chip [kind]="'status'" [value]="issue.status" /></td>
             </ng-container>
 
             <ng-container matColumnDef="priority">
               <th mat-header-cell *matHeaderCellDef>Priority</th>
-              <td mat-cell *matCellDef="let issue">{{ priorityLabels[issue.priority] ?? issue.priority }}</td>
+              <td mat-cell *matCellDef="let issue"><app-chip [kind]="'priority'" [value]="issue.priority" /></td>
             </ng-container>
 
             <ng-container matColumnDef="title">
@@ -163,20 +165,6 @@ export class ProjectIssuesComponent implements OnInit {
   successMessage = '';
 
   readonly priorities = ['low', 'medium', 'high', 'critical'];
-
-  readonly statusLabels: Record<string, string> = {
-    open: 'Open',
-    in_progress: 'In Progress',
-    resolved: 'Resolved',
-    closed: 'Closed',
-  };
-
-  readonly priorityLabels: Record<string, string> = {
-    low: 'Low',
-    medium: 'Medium',
-    high: 'High',
-    critical: 'Critical',
-  };
 
   ngOnInit(): void {
     this.projectId = this.route.snapshot.paramMap.get('projectId') ?? '';
