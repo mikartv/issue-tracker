@@ -10,7 +10,7 @@ merge-sha: 7e9fbca
   [x] §Cycle Summary
   [x] §Post-Merge Verification
   [x] §Close-out Triage Table
-  [ ] §Independent γ Process-Gap Check
+  [x] §Independent γ Process-Gap Check
   [ ] §Cycle Iteration Triggers
   [ ] §Immediate Outputs
   [ ] §Deferred Outputs
@@ -82,3 +82,68 @@ result on `7e9fbca` will be observable post-push.
 | α was re-dispatched with the implementation prompt instead of the close-out prompt; α committed `55c65e7` (pre-review corrections to `self-coherence.md`) to `cycle/17` instead of writing `alpha-closeout.md` on main; commit subsequently appears on main | dispatch history (session before this one) | process / operator error | Operator error (δ=γ in §5.2) — wrong prompt selected at re-dispatch; α correctly followed the prompt it received | `operator/SKILL.md §5.2 v0.1 overlay` specifies a close-out prompt distinct from the implementation prompt; the error was in prompt selection, not in the skill definition. `55c65e7` modifies `self-coherence.md` (corrections to Known Gaps §2 intra-doc inconsistency and transient row re-verification) — harmless given β had already reviewed and merged; the corrections are substantively correct. Root cause: no mechanical guard prevents using the wrong prompt at re-dispatch time | Note as process gap; assess whether a close-out dispatch prompt template in `operator/SKILL.md §5.2` would reduce recurrence. Deferred output: explicit close-out prompt template → cnos `operator/SKILL.md §5.2` | dispatch prompt; commit `55c65e7` |
 
 **Zero unresolved RC findings at close.** Triage complete.
+
+---
+
+## Independent γ Process-Gap Check (§2.9)
+
+**Q1 — Did this cycle reveal a recurring friction?**
+
+Two recurring patterns appeared:
+
+1. **α §2.5 single-commit self-coherence.** This is not the first cycle where α authored
+   `self-coherence.md` without section-by-section commits. The rule's protective value is
+   proportional to document length and session volatility; for short documents the risk is
+   lower but the pattern of non-compliance is consistent. The rule exists; it is not being
+   applied on short documents. Likely cause: α's mental model is "this file is short enough
+   to do in one pass" — which is often correct but still violates the discipline. The fix is
+   not a skill patch (the rule is clear) but could be a dispatch-prompt reminder.
+
+2. **Close-out re-dispatch using wrong prompt (α close-out re-dispatch failure).** γ re-
+   dispatched α with the implementation prompt instead of the close-out prompt. α correctly
+   followed the prompt and committed corrections to `self-coherence.md` on the already-merged
+   branch. This is a recurring coordination risk in §5.2 mode where δ=γ: at close-out
+   time, two distinct prompts exist (implementation and close-out) and there is no mechanical
+   guard preventing the wrong one from being used. Cycle 16 had a similar close-out dispatch
+   issue (wrong prompt content for re-dispatch after F-1/F-2), though in that case the
+   correct artifact was eventually produced in the same session.
+
+**Q2 — Was any gate too weak or too vague?**
+
+The close-out dispatch gate has no mechanical enforcement. `gamma/SKILL.md §2.7` correctly
+states: "if missing [α close-out], request δ to re-dispatch α via the close-out prompt
+(`operator/SKILL.md §5.2 v0.1 overlay`)." The skill is adequate; the failure was in
+execution. The missing piece is a close-out prompt template that is clearly differentiated
+from the implementation prompt — ideally named distinctly in `operator/SKILL.md §5.2` so
+that "re-dispatch α with the close-out prompt" means using a named, distinct artifact rather
+than selecting from general prompts.
+
+**Q3 — Did a role skill fail to prevent a predictable error?**
+
+No formal loaded-skill miss. Two candidates:
+
+- **α §2.5 single-commit:** skill exists and covers the case. Application gap. Not a
+  loaded-skill miss by the formal trigger definition.
+- **Close-out re-dispatch failure:** `operator/SKILL.md §5.2` specifies close-out prompts
+  exist. The error was in operator (δ=γ) selection. No skill underspecification.
+
+Assessment: no loaded-skill miss trigger applies.
+
+**Q4 — Did coordination burden show a better mechanical path?**
+
+Yes. Two paths identified:
+
+1. **Close-out dispatch prompt naming.** In §5.2 mode, the implementation prompt and the
+   close-out prompt are implicitly distinct but not always clearly named or separated in the
+   operator's working context. Naming the close-out prompt explicitly (e.g., "α close-out
+   prompt" as a distinct template in `operator/SKILL.md §5.2`) would reduce re-dispatch
+   confusion. Deferred output.
+
+2. **Dispatch-prompt reminder for `alpha/SKILL.md §2.5`.** The §2.5 rule could be surface-
+   level in the α dispatch prompt ("commit `self-coherence.md` section-by-section per
+   `alpha/SKILL.md §2.5`"). This is a one-line addition that does not require a skill patch.
+   Deferred output.
+
+**Result:** No formal trigger fires. Two process observations with deferred-output dispositions:
+(1) close-out prompt naming in `operator/SKILL.md §5.2`; (2) dispatch-prompt §2.5 reminder.
+Both committed as deferred outputs below.
