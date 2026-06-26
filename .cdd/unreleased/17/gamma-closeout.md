@@ -12,7 +12,7 @@ merge-sha: 7e9fbca
   [x] §Close-out Triage Table
   [x] §Independent γ Process-Gap Check
   [x] §Cycle Iteration Triggers
-  [ ] §Immediate Outputs
+  [x] §Immediate Outputs
   [ ] §Deferred Outputs
   [ ] §Next MCA
   [ ] §Hub Memory
@@ -162,3 +162,25 @@ Both committed as deferred outputs below.
 **No trigger fires this cycle.** γ process-gap check identified two deferred process
 improvements (not trigger-level issues): close-out prompt naming and dispatch-prompt §2.5
 reminder. See §Deferred Outputs.
+
+---
+
+## Immediate Outputs
+
+Executed in this session (batch-release mode: items 11, 12, 13 from §2.10 closure gate
+are skipped per δ instruction):
+
+1. **`gamma-closeout.md` authored** — this document; section-by-section commits to main.
+   Closure declaration artifact per `cnos.cds/skills/cds/CDS.md §"Artifact contract" →
+   §"Ownership matrix"`. Required before δ tags any batch release containing cycle 17.
+
+2. **Branch cleanup attempted** — `git push origin --delete cycle/17`, `cycle/14`,
+   `cycle/15`. Results recorded below.
+
+3. **Hub memory updated** — daily reflection + adhoc thread. See §Hub Memory.
+
+4. **gh #7 closed** — issue closed on GitHub (chip component + label maps shipped in
+   merge `7e9fbca`).
+
+**Branch cleanup results:**
+(Executed after §Hub Memory is written — see §Hub Memory for outcome record.)
