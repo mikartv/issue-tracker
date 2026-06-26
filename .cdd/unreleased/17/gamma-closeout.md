@@ -13,7 +13,7 @@ merge-sha: 7e9fbca
   [x] §Independent γ Process-Gap Check
   [x] §Cycle Iteration Triggers
   [x] §Immediate Outputs
-  [ ] §Deferred Outputs
+  [x] §Deferred Outputs
   [ ] §Next MCA
   [ ] §Hub Memory
 -->
@@ -184,3 +184,19 @@ are skipped per δ instruction):
 
 **Branch cleanup results:**
 (Executed after §Hub Memory is written — see §Hub Memory for outcome record.)
+
+---
+
+## Deferred Outputs
+
+| Item | Type | Owner | First AC / condition |
+|------|------|-------|----------------------|
+| Close-out dispatch prompt naming (§5.2) | Process / coordination | γ (next §5.2 dispatch or cnos PR) | Add explicit "α close-out prompt" template (distinct from implementation prompt) to `operator/SKILL.md §5.2 v0.1 overlay` in cnos; first AC: close-out re-dispatch uses a named close-out prompt template; F-class "wrong prompt" failure cannot recur |
+| Dispatch-prompt reminder for `alpha/SKILL.md §2.5` | Process / coordination | γ (next α dispatch) | Add one-line reminder in α dispatch prompt: "commit `self-coherence.md` section-by-section per `alpha/SKILL.md §2.5`"; first AC: α commits self-coherence.md incrementally in the next §5.2 cycle |
+| Angular Material 18 upgrade (M3 `mat.define-theme`) | Feature / future cycle | γ (future selection) | Select when AM18 aligns with wave; first AC: `@angular/material ~18.0` in `apps/web/package.json`; build green; M3 theme applied |
+| CI extension to feature branches (O1 gap) | Process / structural | δ | Add `on: push: branches: ['cycle/*']` to `.github/workflows/ci.yml`; first AC: CI runs green on first cycle-branch push |
+| 1.4.0 post-release assessment (PRA) | Release artifact | γ | After batch release tag — write `docs/gamma/cdd/1.4.0/POST-RELEASE-ASSESSMENT.md` covering cycles 15–17 in the batch |
+| 1.3.0 post-release assessment (PRA) | Release artifact | γ | Retroactive write-up for cycle 15 (carried from cycle 16 deferred) |
+| 1.2.0 post-release assessment (PRA) | Release artifact | γ | Retroactive write-up for cycle 14 (carried from cycle 16 deferred) |
+| Dispatch-prompt rebase instruction (§5.2 cycles where scaffold committed to main post-branch-creation) | Process / coordination | γ (next §5.2 dispatch) | Carried from cycle 16 deferred; add explicit `git fetch origin && git rebase origin/main` as step 1 in α dispatch prompt; first AC: F-1 class finding does not fire in next §5.2 cycle |
+| WCAG contrast audit for chip component | Quality / accessibility | γ (future selection) | Chip text (`color: #fff`) against R1 token background colors audited for WCAG AA contrast; known gap from self-coherence §Known Gaps item 1; first AC: all 8 chip token backgrounds pass WCAG AA with white text |
