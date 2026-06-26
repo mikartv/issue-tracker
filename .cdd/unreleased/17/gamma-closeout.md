@@ -14,7 +14,7 @@ merge-sha: 7e9fbca
   [x] §Cycle Iteration Triggers
   [x] §Immediate Outputs
   [x] §Deferred Outputs
-  [ ] §Next MCA
+  [x] §Next MCA
   [ ] §Hub Memory
 -->
 
@@ -200,3 +200,31 @@ are skipped per δ instruction):
 | 1.2.0 post-release assessment (PRA) | Release artifact | γ | Retroactive write-up for cycle 14 (carried from cycle 16 deferred) |
 | Dispatch-prompt rebase instruction (§5.2 cycles where scaffold committed to main post-branch-creation) | Process / coordination | γ (next §5.2 dispatch) | Carried from cycle 16 deferred; add explicit `git fetch origin && git rebase origin/main` as step 1 in α dispatch prompt; first AC: F-1 class finding does not fire in next §5.2 cycle |
 | WCAG contrast audit for chip component | Quality / accessibility | γ (future selection) | Chip text (`color: #fff`) against R1 token background colors audited for WCAG AA contrast; known gap from self-coherence §Known Gaps item 1; first AC: all 8 chip token backgrounds pass WCAG AA with white text |
+
+---
+
+## Next MCA
+
+**Candidate selection (applying `cnos.cds/skills/cds/CDS.md §"Selection function"`):**
+
+| Candidate | Source | Rule clause | Priority | Dependency | Decision |
+|-----------|--------|-------------|----------|------------|----------|
+| gh #9 — relax status transitions; add GET /projects/:id | open backlog | maximum-leverage rule — P1 backend gate; unblocks Kanban (#8/#10 P1) | P1 | none (backend; no frontend blocker) | **Leading candidate** |
+| gh #10 — Kanban board + drag-and-drop | open backlog | P1 frontend | P1 | gh #9 (free status transitions required for Kanban) | Dependent — cannot select until #9 ships |
+| gh #11 — create-issue in MatDialog | open backlog | P2 frontend | P2 | none | Eligible; lower priority than P1 items |
+| gh #12 — issue-detail redesign sidebar | open backlog | P2 frontend redesign wave | P2 | none | Eligible; wave continuation |
+| gh #13 — global feedback snackbar | open backlog | P2 frontend | P2 | none | Eligible; lower priority |
+
+**Decisive clause:** `cnos.cds/skills/cds/CDS.md §"Selection function" → §"Maximum-leverage
+rule"` — gh #9 (backend: relax status transitions + GET /projects/:id) is P1 and its
+completion unblocks gh #10 (Kanban board, the major P1 frontend feature). Shipping #9 first
+delivers the backend capability and unblocks the highest-value frontend cycle next.
+
+**Next MCA:** gh #9 — relax issue status transitions to allow any move; add `GET /projects/:id`  
+**Owner:** γ (next cycle selection + dispatch)  
+**Branch:** pending — create `cycle/18` from `origin/main` at next γ dispatch  
+**First AC:** Any status transition allowed (e.g., `open → done`, `done → open`); API returns
+4xx for current disallowed moves → returns 200  
+**MCI frozen until shipped?** no — wave progress continues; MCI/MCA balance remains healthy  
+**Rationale:** #9 is the smallest-scope P1 blocker. Completing it unlocks the Kanban board
+which is the project's current highest-leverage frontend capability gap.
