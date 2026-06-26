@@ -154,7 +154,7 @@ describe('ProjectIssuesComponent', () => {
     expect(fixture.nativeElement.querySelector('table')).toBeNull();
   });
 
-  it('AC5: status and priority display as human-readable labels', () => {
+  it('AC5: status and priority display as human-readable labels via chip components', () => {
     fixture.detectChanges();
     httpMock.expectOne(`${BASE}/projects/${PROJECT_ID}/issues`).flush(mockIssues);
     fixture.detectChanges();
@@ -164,6 +164,9 @@ describe('ProjectIssuesComponent', () => {
     expect(text).toContain('High');
     expect(text).toContain('Medium');
     expect(text).not.toContain('in_progress');
+
+    const chips = fixture.nativeElement.querySelectorAll('app-chip');
+    expect(chips.length).toBeGreaterThanOrEqual(mockIssues.length * 2);
   });
 
   it('AC6 inline create error: non-409 submit failure shows createError inline without replacing table', () => {
