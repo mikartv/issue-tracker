@@ -15,7 +15,7 @@ merge-sha: 7e9fbca
   [x] §Immediate Outputs
   [x] §Deferred Outputs
   [x] §Next MCA
-  [ ] §Hub Memory
+  [x] §Hub Memory
 -->
 
 # γ Close-Out — Cycle 17
@@ -228,3 +228,39 @@ delivers the backend capability and unblocks the highest-value frontend cycle ne
 **MCI frozen until shipped?** no — wave progress continues; MCI/MCA balance remains healthy  
 **Rationale:** #9 is the smallest-scope P1 blocker. Completing it unlocks the Kanban board
 which is the project's current highest-leverage frontend capability gap.
+
+---
+
+## Hub Memory
+
+### Daily reflection
+
+**Path:** `cn-sigma/threads/reflections/daily/20260626.md`  
+**Commit:** `7f0c60c` (cn-sigma local main)  
+**Content:** Cycle 17 close-out — shared chip component shipped; R1 APPROVE; 0 RC findings;
+batch-release mode; two process observations (close-out re-dispatch failure, α §2.5 single-
+commit); next MCA: gh #9 (P1 backend status transitions). State at close: 47 web + 76 api
+tests; gh #7 closed; branches `cycle/17`, `cycle/14`, `cycle/15` deleted.  
+**cn-sigma push:** 403 — `origin/cn-sigma` denied to `mikartv`. δ action required to push.
+
+### Adhoc thread
+
+**Thread:** `cn-sigma/threads/adhoc/20260617-cdd-protocol-findings-10cycles.md`  
+**Commit:** `7f0c60c` (cn-sigma local main; same commit as daily reflection)  
+**Content:** Appended "Cycles 15–17 update (2026-06-26)" — pattern summary across three
+cycles: no skill-level protocol gaps; recurring dispatch-prompt gaps accumulating (rebase
+instruction, close-out prompt naming, §2.5 reminder). Three deferred dispatch-prompt items
+identified for bundling in a cnos `operator/SKILL.md §5.2` v0.1 patch.  
+**cn-sigma push:** 403 (same as above — δ action required).
+
+### Immediate outputs executed in this session
+
+1. `gamma-closeout.md` — all sections authored, committed to main (9 section commits)
+2. `cycle/17`, `cycle/14`, `cycle/15` remote branches — all deleted successfully (no 403s)
+3. gh #7 — closed (comment: "Shipped in cycle 17 (merge 7e9fbca). AC1–AC4 PASS.")
+4. Hub memory — daily reflection + adhoc thread committed locally to cn-sigma;
+   push blocked by 403 (δ action required)
+
+---
+
+Cycle 17 closed — ready for batch release when δ decides.
