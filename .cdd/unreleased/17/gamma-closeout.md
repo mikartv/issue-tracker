@@ -8,7 +8,7 @@ merge-sha: 7e9fbca
 
 <!-- section-manifest
   [x] §Cycle Summary
-  [ ] §Post-Merge Verification
+  [x] §Post-Merge Verification
   [ ] §Close-out Triage Table
   [ ] §Independent γ Process-Gap Check
   [ ] §Cycle Iteration Triggers
@@ -37,3 +37,22 @@ identical logic (label lookup + CSS variable binding from R1 design tokens). Chi
 in `project-issues.component.ts` and `issue-detail.component.ts` (view mode); local
 divergent label maps deleted from both components. Fixed latent `resolved`/`done` label
 bug in `project-issues` by structural deletion of the broken map. gh #7 closed.
+
+---
+
+## Post-Merge Verification
+
+**CI gate:** No CI run found for merge SHA `7e9fbca` — `origin/main` push pending (δ action
+required). This is the same pre-push configuration as cycle 16 (merge SHA `9a3aed73` at
+cycle 16 close also had no CI run at close-out time).
+
+**Local verification (β close-out):** `npm run test:web` on merge commit `7e9fbca` → 47
+passed, 47 total. Local suite green.
+
+**Most recent CI run on `origin/main`:** SHA `f44a349` (gamma-scaffold commit, pre-cycle-17
+dispatch), 2026-06-24T16:29:29Z — success (per cycle 16 close-out record). All prior main
+CI runs green.
+
+**Disposition:** proceed on basis of local test suite green + all prior main CI runs green.
+Record as "pending — origin/main push required (δ action)" per dispatch instruction. CI
+result on `7e9fbca` will be observable post-push.
