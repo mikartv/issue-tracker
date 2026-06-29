@@ -7,14 +7,19 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { DragDropModule, CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { ApiService, type Issue } from '../api/api.service';
 import { ChipComponent } from '../shared/chip.component';
+import { STATUS_LABELS } from '../shared/issue-labels';
+
+export type IssueStatus = 'open' | 'in_progress' | 'done' | 'closed';
+
+export const STATUSES: IssueStatus[] = ['open', 'in_progress', 'done', 'closed'];
 
 @Component({
   selector: 'app-project-issues',
@@ -22,8 +27,8 @@ import { ChipComponent } from '../shared/chip.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
+    DragDropModule,
     MatProgressSpinnerModule,
-    MatTableModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
@@ -32,37 +37,50 @@ import { ChipComponent } from '../shared/chip.component';
   ],
   template: `
     <div class="container">
-      <h2>Issues</h2>
+      <h2>{{ projectName ? 'Issues — ' + projectName : 'Issues' }}</h2>
 
       @if (loading) {
         <mat-spinner diameter="40" />
       } @else {
         @if (error) {
           <p class="error">{{ error }}</p>
-        } @else if (issues.length === 0) {
-          <p>No issues yet.</p>
         } @else {
-          <table mat-table [dataSource]="issues" class="issues-table">
-            <ng-container matColumnDef="status">
-              <th mat-header-cell *matHeaderCellDef>Status</th>
-              <td mat-cell *matCellDef="let issue"><app-chip [kind]="'status'" [value]="issue.status" /></td>
-            </ng-container>
-
-            <ng-container matColumnDef="priority">
-              <th mat-header-cell *matHeaderCellDef>Priority</th>
-              <td mat-cell *matCellDef="let issue"><app-chip [kind]="'priority'" [value]="issue.priority" /></td>
-            </ng-container>
-
-            <ng-container matColumnDef="title">
-              <th mat-header-cell *matHeaderCellDef>Title</th>
-              <td mat-cell *matCellDef="let issue">
-                <a [routerLink]="['/issues', issue.id]" class="issue-link">{{ issue.title }}</a>
-              </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-          </table>
+          @if (dropError) {
+            <p class="drop-error">{{ dropError }}</p>
+          }
+          <div class="board" [cdkDropListGroup]>
+            @for (status of statuses; track status) {
+              <div class="board-column">
+                <div class="column-header">
+                  <app-chip [kind]="'status'" [value]="status" />
+                  <span class="count-badge">{{ columns[status].length }}</span>
+                </div>
+                <div
+                  class="column-list"
+                  cdkDropList
+                  [id]="status"
+                  [cdkDropListData]="columns[status]"
+                  [cdkDropListConnectedTo]="otherStatuses(status)"
+                  (cdkDropListDropped)="onDrop($event, status)"
+                >
+                  @if (columns[status].length === 0) {
+                    <p class="empty-col">No issues</p>
+                  }
+                  @for (issue of columns[status]; track issue.id) {
+                    <div class="issue-card" cdkDrag [cdkDragData]="issue">
+                      <a [routerLink]="['/issues', issue.id]" class="issue-link">{{ issue.title }}</a>
+                      <div class="card-meta">
+                        <app-chip [kind]="'priority'" [value]="issue.priority" />
+                        @if (issue.assignee) {
+                          <span class="assignee">{{ issue.assignee }}</span>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
         }
 
         <div class="create-section">
@@ -112,16 +130,90 @@ import { ChipComponent } from '../shared/chip.component';
     `
       .container {
         padding: 16px;
-        max-width: 1000px;
-      }
-      .issues-table {
-        width: 100%;
+        max-width: 1200px;
       }
       .error {
         color: #c00;
       }
       .success {
         color: #0a0;
+      }
+      .drop-error {
+        color: #c00;
+        margin-bottom: 8px;
+      }
+      .board {
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        padding-bottom: 8px;
+      }
+      .board-column {
+        flex: 0 0 220px;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .column-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        font-weight: 600;
+      }
+      .count-badge {
+        background: #e0e0e0;
+        border-radius: 12px;
+        padding: 0 8px;
+        font-size: 0.8em;
+        font-weight: 500;
+      }
+      .column-list {
+        background: #f5f5f5;
+        border-radius: 6px;
+        padding: 8px;
+        min-height: 80px;
+        flex: 1;
+      }
+      .column-list.cdk-drop-list-dragging .issue-card:not(.cdk-drag-placeholder) {
+        transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+      }
+      .issue-card {
+        background: #fff;
+        border-radius: 4px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        cursor: grab;
+      }
+      .issue-card:active {
+        cursor: grabbing;
+      }
+      .issue-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        font-weight: 500;
+        margin-bottom: 6px;
+      }
+      .issue-link:hover {
+        text-decoration: underline;
+      }
+      .card-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .assignee {
+        font-size: 0.8em;
+        color: #666;
+      }
+      .empty-col {
+        color: #999;
+        font-size: 0.85em;
+        text-align: center;
+        padding: 8px 0;
       }
       .create-section {
         margin-top: 24px;
@@ -130,13 +222,6 @@ import { ChipComponent } from '../shared/chip.component';
         display: block;
         width: 100%;
         margin-top: 8px;
-      }
-      .issue-link {
-        text-decoration: none;
-        color: inherit;
-      }
-      .issue-link:hover {
-        text-decoration: underline;
       }
       .create-error {
         color: #c00;
@@ -150,11 +235,20 @@ export class ProjectIssuesComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  issues: Issue[] = [];
+  readonly statuses: IssueStatus[] = STATUSES;
+
+  columns: Record<IssueStatus, Issue[]> = {
+    open: [],
+    in_progress: [],
+    done: [],
+    closed: [],
+  };
+
   loading = true;
   error: string | null = null;
+  dropError: string | null = null;
   createError: string | null = null;
-  readonly displayedColumns = ['status', 'priority', 'title'];
+  projectName = '';
 
   projectId = '';
   newTitle = '';
@@ -168,13 +262,26 @@ export class ProjectIssuesComponent implements OnInit {
 
   ngOnInit(): void {
     this.projectId = this.route.snapshot.paramMap.get('projectId') ?? '';
+    this.loadProject();
     this.loadIssues();
+  }
+
+  private loadProject(): void {
+    this.api.getProject(this.projectId).subscribe({
+      next: (project) => {
+        this.projectName = project.name;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        // non-fatal: heading falls back to "Issues"
+      },
+    });
   }
 
   private loadIssues(): void {
     this.api.getIssues(this.projectId).subscribe({
       next: (issues) => {
-        this.issues = issues;
+        this.distributeIssues(issues);
         this.loading = false;
         this.cdr.markForCheck();
       },
@@ -184,6 +291,65 @@ export class ProjectIssuesComponent implements OnInit {
         this.cdr.markForCheck();
       },
     });
+  }
+
+  private distributeIssues(issues: Issue[]): void {
+    const cols: Record<IssueStatus, Issue[]> = {
+      open: [],
+      in_progress: [],
+      done: [],
+      closed: [],
+    };
+    for (const issue of issues) {
+      const status = issue.status as IssueStatus;
+      if (cols[status]) {
+        cols[status].push(issue);
+      }
+    }
+    this.columns = cols;
+  }
+
+  otherStatuses(current: IssueStatus): IssueStatus[] {
+    return this.statuses.filter((s) => s !== current);
+  }
+
+  onDrop(event: CdkDragDrop<Issue[]>, targetStatus: IssueStatus): void {
+    if (event.previousContainer === event.container) {
+      return;
+    }
+
+    const issue: Issue = event.item.data;
+    const originStatus = issue.status as IssueStatus;
+
+    // Optimistic move
+    transferArrayItem(
+      event.previousContainer.data,
+      event.container.data,
+      event.previousIndex,
+      event.currentIndex,
+    );
+
+    // Persist
+    this.api.updateIssueStatus(issue.id, targetStatus).subscribe({
+      next: () => {
+        issue.status = targetStatus;
+        this.dropError = null;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        // Revert
+        transferArrayItem(
+          event.container.data,
+          event.previousContainer.data,
+          event.currentIndex,
+          event.previousIndex,
+        );
+        this.dropError = `Failed to move issue to ${STATUS_LABELS[targetStatus] ?? targetStatus}`;
+        this.cdr.markForCheck();
+      },
+    });
+
+    this.cdr.markForCheck();
   }
 
   submitCreate(): void {

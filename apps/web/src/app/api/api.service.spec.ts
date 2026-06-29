@@ -27,6 +27,27 @@ describe('ApiService', () => {
     expect(service).toBeTruthy();
   });
 
+  it('getProject(id) calls GET /api/v1/projects/:id and returns Project', () => {
+    const projectId = 'proj-abc';
+    const mockProject: Project = {
+      id: projectId,
+      name: 'Test Project',
+      archived: false,
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+    };
+
+    service.getProject(projectId).subscribe((project) => {
+      expect(project).toEqual(mockProject);
+    });
+
+    const req = httpMock.expectOne(
+      `http://localhost:3000/api/v1/projects/${projectId}`,
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush(mockProject);
+  });
+
   it('getProjects() calls GET http://localhost:3000/api/v1/projects', () => {
     const mockProjects: Project[] = [
       {

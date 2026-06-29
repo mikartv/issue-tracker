@@ -41,6 +41,10 @@ export class ApiService {
     return this.http.get<Project[]>(`${this.base}/projects`);
   }
 
+  getProject(id: string): Observable<Project> {
+    return this.http.get<Project>(`${this.base}/projects/${id}`);
+  }
+
   createProject(name: string): Observable<Project> {
     return this.http.post<Project>(`${this.base}/projects`, { name });
   }
