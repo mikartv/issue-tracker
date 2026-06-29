@@ -137,3 +137,36 @@ Baseline was 47 (cycle 18 γ close-out). Net new: +14 (1 in api.service.spec.ts 
 - No `app.routes.spec.ts` for navigation test — pre-existing debt (declared in PROJECT.md §Known unknowns)
 - Angular Material 18 upgrade for M3 `mat.define-theme` — pre-existing debt (cycle 14)
 - `cdkDropListGroup` directive bound via `[cdkDropListGroup]` on the board container: `DragDropModule` re-exports `CdkDropListGroup`, so it is available without explicit import, consistent with Angular CDK 17 patterns.
+
+## §CDD Trace
+
+| Step | Description | Evidence |
+|------|-------------|----------|
+| 0 | Load Tier 1a | `SKILL.md` loaded before any other step |
+| 1 | Receive dispatch | `gh issue view 10` read; PROJECT.md, STACK.md, gamma-scaffold.md read |
+| 2 | Gap identified | `getProject(id)` absent; `cdkDrag`/`cdkDropList` absent — confirmed via γ scaffold grep |
+| 3 | Active skills declared | Tier 1a: CDD.md + alpha/SKILL.md; Tier 2: TypeScript strict; Tier 3: Angular CDK drag-drop |
+| 4 | Tests written | `project-issues.component.spec.ts` (AC1–AC5 + create-form); `api.service.spec.ts` (+1 getProject test) |
+| 5 | Code written | `api.service.ts` (+getProject); `project-issues.component.ts` (full rewrite to Kanban) |
+| 6 | Diff scope declared | 4 source files + self-coherence.md; caller-path trace: `ProjectIssuesComponent.loadProject()` → `api.getProject()` |
+| 7 | Self-coherence | This file, written incrementally, committed per section |
+
+## §Review-readiness | round 1 | implementation SHA: 1bd0b00 | branch CI: not triggered (ci.yml triggers on push/PR to main only — cycle branch pushes are excluded by repo CI config) | local test run: 61/61 PASS | ready for β
+
+**Pre-review gate checklist:**
+
+1. ✅ Branch `cycle/19` rebased on `origin/main` at base SHA `1e37af0`; main has not advanced during this session (confirmed: `git log --oneline origin/main..HEAD` shows only cycle/19 commits)
+2. ✅ `self-coherence.md` carries CDD Trace through step 7
+3. ✅ Tests present: 61 total (AC1–AC5 mapped; create-issue form tests retained)
+4. ✅ Every AC has evidence (§AC evidence above)
+5. ✅ Known debt explicit (§Debt above)
+6. ✅ No schema/shape changes to API contracts — `getProject` is a new client method only, no API changes
+7. ✅ Peer enumeration: peer set = {api.service.ts, api.service.spec.ts, project-issues.component.ts, project-issues.component.spec.ts}; all 4 updated; chip.component/issue-labels.ts untouched (no change required)
+8. ✅ Harness audit: no schema-bearing contract changed; `POST /issues/:id/status` wire shape unchanged
+9. ✅ Polyglot re-audit: TypeScript only in diff; no shell/YAML/Go surfaces touched
+10. ⚠️ CI: `.github/workflows/ci.yml` triggers on `push/PR to main` only — cycle branch pushes do not trigger CI. Local `npm run test:web` (61/61) is the available pre-review gate. β should verify CI on merge.
+11. ✅ Artifact enumeration matches diff: all 4 source files declared in §Diff scope; self-coherence.md is the CDD artifact
+12. ✅ Caller-path trace: `ApiService.getProject(id)` called from `ProjectIssuesComponent.loadProject()` in `ngOnInit`
+13. ✅ Test assertion count from runner: `Tests: 61 passed, 61 total` (runner output pasted in §Transient rows)
+14. ✅ Git author email: all implementation commits authored by `alpha@issue-tracker.cdd.cnos` (verified: `git log -5 --format='%ae %s'`)
+15. ✅ γ-artifact at canonical §5.1 path: `git cat-file -e origin/cycle/19:.cdd/unreleased/19/gamma-scaffold.md` → EXISTS
