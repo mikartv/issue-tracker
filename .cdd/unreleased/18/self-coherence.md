@@ -1,5 +1,9 @@
 # Self-Coherence — Cycle 18
 
+## §Status
+
+REVIEW_READY. `npm test -w apps/api` (with DATABASE_URL): 9 suites, 76 tests — all pass.
+
 ## §Known Gaps
 
 Explicit non-goals per issue #9:
