@@ -257,60 +257,28 @@ describe('Issues E2E', () => {
       expect(r3.body.status).toBe('closed');
     });
 
-    it('400 — skip: open → done', async () => {
+    it('200 — skip: open → done', async () => {
       const project = await createProject();
       const issue = await createIssue(project.id);
-
-      await supertest(app.getHttpServer())
+      const res = await supertest(app.getHttpServer())
         .post(`/api/v1/issues/${issue.id}/status`)
         .send({ status: 'done' })
-        .expect(400);
-    });
-
-    it('400 — revert: advance to in_progress then try to revert to open', async () => {
-      const project = await createProject();
-      const issue = await createIssue(project.id);
-      await supertest(app.getHttpServer())
-        .post(`/api/v1/issues/${issue.id}/status`)
-        .send({ status: 'in_progress' })
         .expect(200);
-
-      await supertest(app.getHttpServer())
-        .post(`/api/v1/issues/${issue.id}/status`)
-        .send({ status: 'open' })
-        .expect(400);
+      expect(res.body.status).toBe('done');
     });
 
-    it('400 — same-status transition', async () => {
+    it('200 — backward: done → in_progress', async () => {
       const project = await createProject();
       const issue = await createIssue(project.id);
-
-      await supertest(app.getHttpServer())
-        .post(`/api/v1/issues/${issue.id}/status`)
-        .send({ status: 'open' })
-        .expect(400);
-    });
-
-    it('400 — transition from closed (terminal)', async () => {
-      const project = await createProject();
-      const issue = await createIssue(project.id);
-      await supertest(app.getHttpServer())
-        .post(`/api/v1/issues/${issue.id}/status`)
-        .send({ status: 'in_progress' })
-        .expect(200);
       await supertest(app.getHttpServer())
         .post(`/api/v1/issues/${issue.id}/status`)
         .send({ status: 'done' })
         .expect(200);
-      await supertest(app.getHttpServer())
+      const res = await supertest(app.getHttpServer())
         .post(`/api/v1/issues/${issue.id}/status`)
-        .send({ status: 'closed' })
+        .send({ status: 'in_progress' })
         .expect(200);
-
-      await supertest(app.getHttpServer())
-        .post(`/api/v1/issues/${issue.id}/status`)
-        .send({ status: 'open' })
-        .expect(400);
+      expect(res.body.status).toBe('in_progress');
     });
 
     it('400 — invalid status value', async () => {

@@ -100,6 +100,20 @@ describe('ProjectsService', () => {
     });
   });
 
+  describe('findOne', () => {
+    it('returns the project when found', async () => {
+      const project = { id: 'p1', name: 'Test', archived: false } as Project;
+      repo.findOneBy!.mockResolvedValue(project);
+      const result = await service.findOne('p1');
+      expect(result).toEqual(project);
+    });
+
+    it('throws NotFoundException when project does not exist', async () => {
+      repo.findOneBy!.mockResolvedValue(null);
+      await expect(service.findOne('missing')).rejects.toThrow(NotFoundException);
+    });
+  });
+
   describe('archive', () => {
     it('archives an active project', async () => {
       const project = {

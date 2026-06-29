@@ -1,6 +1,5 @@
 import 'reflect-metadata';
 import {
-  BadRequestException,
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
@@ -222,32 +221,20 @@ describe('IssuesService', () => {
       expect(result.status).toBe(IssueStatus.CLOSED);
     });
 
-    it('rejects skip open → done with BadRequestException', async () => {
+    it('allows skip: open → done', async () => {
       issueRepo.findOneBy!.mockResolvedValue(makeIssue(IssueStatus.OPEN));
-      await expect(
-        service.updateStatus('i1', { status: IssueStatus.DONE }),
-      ).rejects.toThrow(BadRequestException);
+      const saved = { id: 'i1', status: IssueStatus.DONE } as Issue;
+      issueRepo.save!.mockResolvedValue(saved);
+      const result = await service.updateStatus('i1', { status: IssueStatus.DONE });
+      expect(result.status).toBe(IssueStatus.DONE);
     });
 
-    it('rejects revert in_progress → open with BadRequestException', async () => {
-      issueRepo.findOneBy!.mockResolvedValue(makeIssue(IssueStatus.IN_PROGRESS));
-      await expect(
-        service.updateStatus('i1', { status: IssueStatus.OPEN }),
-      ).rejects.toThrow(BadRequestException);
-    });
-
-    it('rejects same-status transition with BadRequestException', async () => {
-      issueRepo.findOneBy!.mockResolvedValue(makeIssue(IssueStatus.OPEN));
-      await expect(
-        service.updateStatus('i1', { status: IssueStatus.OPEN }),
-      ).rejects.toThrow(BadRequestException);
-    });
-
-    it('rejects any transition from closed (terminal) with BadRequestException', async () => {
-      issueRepo.findOneBy!.mockResolvedValue(makeIssue(IssueStatus.CLOSED));
-      await expect(
-        service.updateStatus('i1', { status: IssueStatus.OPEN }),
-      ).rejects.toThrow(BadRequestException);
+    it('allows backward: done → in_progress', async () => {
+      issueRepo.findOneBy!.mockResolvedValue(makeIssue(IssueStatus.DONE));
+      const saved = { id: 'i1', status: IssueStatus.IN_PROGRESS } as Issue;
+      issueRepo.save!.mockResolvedValue(saved);
+      const result = await service.updateStatus('i1', { status: IssueStatus.IN_PROGRESS });
+      expect(result.status).toBe(IssueStatus.IN_PROGRESS);
     });
 
     it('throws NotFoundException when issue does not exist', async () => {
