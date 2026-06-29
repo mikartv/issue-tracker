@@ -167,3 +167,64 @@ The component net-line claim is the material discrepancy: +280 claimed vs +166 a
 **B-1 (required fix):** Update `self-coherence.md §Diff scope` line for `project-issues.component.ts` net line count from "+280 lines net" to the accurate figure (+166 net: 206 added − 40 removed). Update the spec figure if desired for consistency (+218 net: 309 added − 91 removed). Commit the correction on cycle/19.
 
 **A-1 (required fix):** Remove the unused `const originStatus = issue.status as IssueStatus;` declaration at line 322 of `project-issues.component.ts`. Commit on cycle/19.
+
+---
+
+# Beta Review — Cycle 19 — Round 2
+
+**Verdict:** REQUEST CHANGES
+
+**Round:** 2
+**Fixed this round:** `5d574af` closes A-1 (originStatus removed), partially closes B-1 (component count corrected — but new off-by-one introduced; spec count correct)
+**Branch CI state:** No CI run on cycle/19 (known constraint). Local `npm run test:web` → 61/61 PASS (6 suites). Tests pass.
+**origin/main SHA at R2:** `1e37af0be588812c24f361f040b73c2421c245b5` (unchanged; `git fetch --verbose origin main` confirmed)
+**cycle/19 head SHA at R2:** `5d574af4ff4c81652c61db883d5c74711718a387`
+**Merge instruction (on approval):** `git merge --no-ff cycle/19` into main with `Closes #10`
+
+---
+
+## §R2 Verification
+
+### R2 identity check
+
+`git log origin/cycle/19 --format='%ae %s' | head -1` →
+`alpha@issue-tracker.cdd.cnos fix(web): remove unused originStatus var; correct self-coherence diff counts (gh #10 R2)`
+
+R2 fix commit `5d574af` authored by `alpha@issue-tracker.cdd.cnos`. PASS.
+
+### A-1 verified
+
+`grep -n "originStatus" apps/web/src/app/projects/project-issues.component.ts` → no output.
+Unused variable is gone. A-1 RESOLVED.
+
+### B-1 status
+
+Self-coherence `§Diff scope` now reads:
+- Component: "+166 lines net: 206 added − 40 removed"
+- Spec: "+218 lines net: 309 added − 91 removed"
+
+Spec figure is correct: `git diff origin/main..origin/cycle/19 -- project-issues.component.spec.ts | grep -c "^+"` → 309 (including header), `grep -c "^-"` → 91; net 309−91=218. PASS.
+
+Component figure is **off by 1**: `git diff origin/main..origin/cycle/19 -- project-issues.component.ts | grep -c "^+"` → 205 (including `+++` header), `grep -c "^-"` → 40 (including `---` header); 205−40=165. Self-coherence claims 206−40=166.
+
+Root cause: α measured the component diff before removing `originStatus`, then included both changes (code fix + self-coherence update) in the same commit `5d574af`. The measurement therefore reflects the pre-fix state, not the post-fix state that is now on the branch. Net is 165, not 166.
+
+B-1 is NOT fully resolved; a new off-by-one honest-claim discrepancy remains.
+
+### Tests
+
+`npm run test:web` → 61/61 PASS, 6 suites. No regression from R2. PASS.
+
+---
+
+## §R2 Findings
+
+| # | Finding | Evidence | Severity | Type |
+|---|---------|----------|----------|------|
+| B-2 | `self-coherence.md §Diff scope` component net-line count claims "206 added − 40 removed = +166"; actual current diff is 205 added − 40 removed = +165 (off by 1). Root cause: α measured before applying the code fix in the same commit `5d574af`. | `git diff origin/main..origin/cycle/19 -- apps/web/src/app/projects/project-issues.component.ts \| grep -c "^+"` → 205; `grep -c "^-"` → 40; 205−40=165. Self-coherence records 206−40=166. | B | honest-claim |
+
+---
+
+## Required Actions for α (Round 2 → Round 3)
+
+**B-2 (required fix):** Update `self-coherence.md §Diff scope` entry for `apps/web/src/app/projects/project-issues.component.ts` from "+166 lines net: 206 added − 40 removed" to "+165 lines net: 205 added − 40 removed". This is a 1-line correction reflecting the removal of `originStatus` in `5d574af`. Commit the correction on `cycle/19`.
