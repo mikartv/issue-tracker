@@ -1,6 +1,6 @@
 # Project MCP — issue-tracker
 
-**Last verified:** 2026-06-24 (cycle 16 — modern app shell; `npm run test:all` 120 tests pass: 76 api + 44 web)  
+**Last verified:** 2026-06-29 (cycle 18 — free status transitions + GET /projects/:id; `npm run test:all` 123 tests pass: 76 api + 47 web)  
 **Verify with:** `npm run test:all` (from repo root)
 
 ## Build / run / test
@@ -142,6 +142,14 @@ See `.cdd/STACK.md`. Branch per cycle: `cycle/N`. Cycle artifacts: `.cdd/unrelea
 ## Decisions (append-only, short) — cycle 16
 
 - 2026-06-24: Cycle 16 — enhancement: modern app shell. `AppComponent` redesigned from bare `<main><h1>Issue Tracker</h1><router-outlet /></main>` to full app shell with persistent `<mat-toolbar>` (token-based `var(--it-surface)` background, `var(--it-shadow-1)` shadow), brand "Issue Tracker" as `<a routerLink="/projects">` (Angular router, no full reload), and `<router-outlet>` wrapped in `<div class="app-content">` (`max-width: 1000px; margin: 0 auto; padding: 0 var(--it-space-4)`). `MatToolbarModule` and `RouterLink` added to imports. Spec updated with toolbar assertion. +1 web test (44 total). gh #6 closed.
+
+## Decisions (append-only, short) — cycle 17
+
+- 2026-06-26: Cycle 17 — enhancement: shared status/priority chip component + consolidated label maps. Shared `<app-chip [kind] [value]>` component in `apps/web/src/app/shared/` with canonical `STATUS_LABELS`/`PRIORITY_LABELS` constants. Chip adopted in `project-issues.component.ts` and `issue-detail.component.ts`. Local divergent label maps deleted. Fixed latent `resolved`/`done` label bug by structural deletion. +3 web tests (47 total). gh #7 closed.
+
+## Decisions (append-only, short) — cycle 18
+
+- 2026-06-29: Cycle 18 — enhancement: free status transitions + GET /projects/:id. Removed `TRANSITIONS` constant and forward-only guard from `IssuesService.updateStatus` — any transition between valid `IssueStatus` values (open | in_progress | done | closed) now returns 200; invalid values still rejected by `@IsEnum` DTO (400). Added `ProjectsService.findOne(id)` (404 on missing) and `GET /projects/:id` route to `ProjectsController` (200/404). 4 spec files updated (4 old assertions removed, 8 new tests added across issues + projects). `SCOPE.md` updated. 76 api tests pass. gh #9 closed.
 
 ## Known unknowns / debt
 
