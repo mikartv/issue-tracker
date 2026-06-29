@@ -1,5 +1,12 @@
 # Self-Coherence — Cycle 18
 
+## §ACs
+
+- **AC1: Any valid status transition is accepted** — PASS. `TRANSITIONS` constant removed. `updateStatus` persists any `IssueStatus` target regardless of current status. E2e tests confirm skip (open→done) and backward (done→in_progress) both return 200.
+- **AC2: Invalid status value still rejected** — PASS. `UpdateIssueStatusDto` with `@IsEnum(IssueStatus)` unchanged. E2e test `'400 — invalid status value'` passes for `status: 'invalid_status'`.
+- **AC3: GET /projects/:id returns one project** — PASS. `ProjectsService.findOne(id)` added with 404 guard. `GET /projects/:id` route added to `ProjectsController`. E2e tests confirm 200 for known id and 404 for unknown UUID.
+- **AC4: Specs updated, suite green** — PASS. All 76 tests pass (`npm test -w apps/api` with DATABASE_URL). No spec asserts "Cannot transition" between valid statuses.
+
 ## §Mode
 
 Mode: design-and-build. 4 ACs. Backend-only change in `apps/api/` only. No new DB migrations, no frontend changes. Established NestJS/TypeORM/Jest patterns throughout.
