@@ -106,7 +106,7 @@ Files changed vs `origin/main`:
 
 1. `apps/web/src/app/api/api.service.ts` — added `getProject(id)` method (+5 lines)
 2. `apps/web/src/app/api/api.service.spec.ts` — added `getProject(id)` test (+20 lines)
-3. `apps/web/src/app/projects/project-issues.component.ts` — full rewrite (mat-table → Kanban board; +166 lines net: 206 added − 40 removed)
+3. `apps/web/src/app/projects/project-issues.component.ts` — full rewrite (mat-table → Kanban board; +165 lines net: 205 added − 40 removed)
 4. `apps/web/src/app/projects/project-issues.component.spec.ts` — rewritten (+218 lines net: 309 added − 91 removed)
 5. `.cdd/unreleased/19/self-coherence.md` — this file (new)
 
@@ -197,3 +197,28 @@ Tests:       61 passed, 61 total
 ```
 
 All 61 tests pass after removal of unused variable.
+
+## §Fix Round R3
+
+**Round:** 3
+**Base review:** β R2 verdict REQUEST CHANGES (1 finding)
+**Author:** alpha@issue-tracker.cdd.cnos
+
+### Findings addressed
+
+| Finding | Type | Action |
+|---------|------|--------|
+| B-2 | honest-claim | B-2 resolved — corrected component diff count from 206 added (+166 net) to 205 added (+165 net). The R2 fix removed `originStatus` variable (1 line) from `project-issues.component.ts`, reducing added-line count from 206 to 205 and net from +166 to +165. §Diff scope updated accordingly. |
+
+### Files changed in R3
+
+1. `.cdd/unreleased/19/self-coherence.md` — corrected §Diff scope component line count (206 added / +166 net → 205 added / +165 net); added this §Fix Round R3 section
+
+### Test count after fix
+
+```
+Test Suites: 6 passed, 6 total
+Tests:       61 passed, 61 total
+```
+
+All 61 tests pass (no source code changed in R3).
