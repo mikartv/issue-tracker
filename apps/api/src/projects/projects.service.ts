@@ -25,6 +25,14 @@ export class ProjectsService {
     return this.projectRepository.find();
   }
 
+  async findOne(id: string): Promise<Project> {
+    const project = await this.projectRepository.findOneBy({ id });
+    if (!project) {
+      throw new NotFoundException(`Project ${id} not found`);
+    }
+    return project;
+  }
+
   async rename(id: string, dto: UpdateProjectDto): Promise<Project> {
     const project = await this.projectRepository.findOneBy({ id });
     if (!project) {

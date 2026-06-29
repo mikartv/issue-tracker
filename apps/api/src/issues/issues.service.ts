@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -11,13 +10,6 @@ import { Project } from '../entities/project.entity';
 import { CreateIssueDto } from './dto/create-issue.dto';
 import { UpdateIssueDto } from './dto/update-issue.dto';
 import { UpdateIssueStatusDto } from './dto/update-issue-status.dto';
-
-const TRANSITIONS: Record<IssueStatus, IssueStatus | null> = {
-  [IssueStatus.OPEN]: IssueStatus.IN_PROGRESS,
-  [IssueStatus.IN_PROGRESS]: IssueStatus.DONE,
-  [IssueStatus.DONE]: IssueStatus.CLOSED,
-  [IssueStatus.CLOSED]: null,
-};
 
 @Injectable()
 export class IssuesService {
@@ -75,12 +67,6 @@ export class IssuesService {
     const issue = await this.issueRepository.findOneBy({ id });
     if (!issue) {
       throw new NotFoundException(`Issue ${id} not found`);
-    }
-    const allowed = TRANSITIONS[issue.status];
-    if (allowed === null || dto.status !== allowed) {
-      throw new BadRequestException(
-        `Cannot transition from '${issue.status}' to '${dto.status}'`,
-      );
     }
     issue.status = dto.status;
     return this.issueRepository.save(issue);

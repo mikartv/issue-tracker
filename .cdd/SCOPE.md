@@ -24,7 +24,7 @@ When sections conflict, per-cycle `ISSUE.md` governs that cycle; project-level d
 
 - Projects: create, list, rename, archive (no hard delete)
 - Issues: title, description, status, priority, assignee (nullable string/email), project_id
-- Status workflow: `open` → `in_progress` → `done` → `closed` (forward-only; see constraints)
+- Status workflow: `open` | `in_progress` | `done` | `closed` (free transitions between any valid status; invalid values rejected with 400)
 - Priority: `low` | `medium` | `high` | `critical` (default `medium`)
 - Comments on issues (author string, body, timestamps; no edit/delete in v1)
 - REST API (NestJS) + Angular SPA
@@ -52,7 +52,7 @@ Cycles are defined in `.cdd/ISSUES.md`.
 ## Active design constraints
 
 - **Auth stub:** optional request header `X-User-Email`. If absent or empty, actor is `"anonymous"`. Used for comment author and audit fields only; no enforcement beyond logging the value.
-- **Status transitions:** forward-only along `open` → `in_progress` → `done` → `closed`. Skipping steps and reverting to a previous status are rejected with `400`.
+- **Status transitions:** any transition between valid `IssueStatus` values (`open` | `in_progress` | `done` | `closed`) is accepted. Invalid status values are rejected with `400` by DTO validation.
 - **Archived projects:** readable and listable; `PATCH` rename on archived project → `409`; `POST` archive when already archived → `409`; creating new issues in an archived project → `409`.
 - **Assignee:** free-text string stored as-is; no validation beyond max length (255); nullable.
 - **Timestamps:** all stored and returned in UTC ISO-8601 (`timestamptz` in Postgres).

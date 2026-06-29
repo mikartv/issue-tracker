@@ -118,6 +118,28 @@ describe('Projects E2E', () => {
     });
   });
 
+  describe('GET /api/v1/projects/:id', () => {
+    it('200 — returns a single project', async () => {
+      const created = await supertest(app.getHttpServer())
+        .post('/api/v1/projects')
+        .send({ name: 'Single Project' })
+        .expect(201);
+
+      const res = await supertest(app.getHttpServer())
+        .get(`/api/v1/projects/${created.body.id}`)
+        .expect(200);
+
+      expect(res.body.id).toBe(created.body.id);
+      expect(res.body.name).toBe('Single Project');
+    });
+
+    it('404 — unknown id', async () => {
+      await supertest(app.getHttpServer())
+        .get('/api/v1/projects/00000000-0000-0000-0000-000000000000')
+        .expect(404);
+    });
+  });
+
   describe('PATCH /api/v1/projects/:id', () => {
     it('200 — renames an active project', async () => {
       const created = await supertest(app.getHttpServer())

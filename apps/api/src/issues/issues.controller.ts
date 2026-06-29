@@ -62,7 +62,7 @@ export class IssuesController {
   @HttpCode(200)
   @ApiBody({ type: UpdateIssueStatusDto })
   @ApiResponse({ status: 200, description: 'Status updated' })
-  @ApiResponse({ status: 400, description: 'Invalid transition' })
+  @ApiResponse({ status: 400, description: 'Invalid status value' })
   @ApiResponse({ status: 404, description: 'Issue not found' })
   async updateStatus(
     @Param('id') id: string,
