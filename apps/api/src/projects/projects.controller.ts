@@ -31,6 +31,13 @@ export class ProjectsController {
     return this.projectsService.findAll();
   }
 
+  @Get(':id')
+  @ApiResponse({ status: 200, description: 'Project found' })
+  @ApiResponse({ status: 404, description: 'Project not found' })
+  async findOne(@Param('id') id: string): Promise<unknown> {
+    return this.projectsService.findOne(id);
+  }
+
   @Patch(':id')
   @ApiBody({ type: UpdateProjectDto })
   @ApiResponse({ status: 200, description: 'Project renamed' })
