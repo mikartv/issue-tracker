@@ -1,5 +1,11 @@
 # Self-Coherence — Cycle 18
 
+## §Friction Log
+
+- Database was not running at test time; `docker compose up -d db` required before e2e tests pass. This is existing project infrastructure behavior, not introduced by this cycle.
+- The `npm test -w apps/api` command requires `DATABASE_URL` env var set (matches CI behavior per `.github/workflows/ci.yml`).
+- No friction in the implementation itself; all 9 files matched the dispatch contract exactly.
+
 ## §Status
 
 REVIEW_READY. `npm test -w apps/api` (with DATABASE_URL): 9 suites, 76 tests — all pass.
