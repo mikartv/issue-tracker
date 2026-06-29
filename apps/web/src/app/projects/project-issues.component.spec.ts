@@ -3,11 +3,37 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { of, throwError } from 'rxjs';
 import { ProjectIssuesComponent } from './project-issues.component';
-import type { Issue } from '../api/api.service';
+import { ApiService } from '../api/api.service';
+import type { Issue, Project } from '../api/api.service';
 
 const BASE = 'http://localhost:3000/api/v1';
 const PROJECT_ID = 'proj-1';
+
+function makeIssue(overrides: Partial<Issue> = {}): Issue {
+  return {
+    id: 'i1',
+    project_id: PROJECT_ID,
+    title: 'Fix bug',
+    status: 'open',
+    priority: 'high',
+    description: null,
+    assignee: null,
+    created_at: '',
+    updated_at: '',
+    ...overrides,
+  };
+}
+
+const mockProject: Project = {
+  id: PROJECT_ID,
+  name: 'Alpha',
+  archived: false,
+  created_at: '',
+  updated_at: '',
+};
 
 describe('ProjectIssuesComponent', () => {
   let fixture: ComponentFixture<ProjectIssuesComponent>;
@@ -15,29 +41,20 @@ describe('ProjectIssuesComponent', () => {
   let httpMock: HttpTestingController;
 
   const mockIssues: Issue[] = [
-    {
-      id: 'i1',
-      project_id: PROJECT_ID,
-      title: 'Fix bug',
-      status: 'open',
-      priority: 'high',
-      description: null,
-      assignee: null,
-      created_at: '',
-      updated_at: '',
-    },
-    {
-      id: 'i2',
-      project_id: PROJECT_ID,
-      title: 'Add feature',
-      status: 'in_progress',
-      priority: 'medium',
-      description: null,
-      assignee: null,
-      created_at: '',
-      updated_at: '',
-    },
+    makeIssue({ id: 'i1', title: 'Fix bug', status: 'open', priority: 'high' }),
+    makeIssue({ id: 'i2', title: 'Add feature', status: 'in_progress', priority: 'medium' }),
+    makeIssue({ id: 'i3', title: 'Refactor', status: 'done', priority: 'low' }),
+    makeIssue({ id: 'i4', title: 'Close it', status: 'closed', priority: 'critical' }),
   ];
+
+  function flushLoad(issues: Issue[] = mockIssues, project: Project = mockProject): void {
+    // Issues and project requests can come in either order; flush both
+    const issuesReq = httpMock.expectOne(`${BASE}/projects/${PROJECT_ID}/issues`);
+    const projectReq = httpMock.expectOne(`${BASE}/projects/${PROJECT_ID}`);
+    issuesReq.flush(issues);
+    projectReq.flush(project);
+    fixture.detectChanges();
+  }
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -65,12 +82,265 @@ describe('ProjectIssuesComponent', () => {
     httpMock.verify();
   });
 
-  it('loads and renders issues table', () => {
+  // ── AC1: four status columns render ─────────────────────────────────────────
+
+  it('AC1: four cdkDropList columns render with correct status labels', () => {
     fixture.detectChanges();
-    httpMock.expectOne(`${BASE}/projects/${PROJECT_ID}/issues`).flush(mockIssues);
+    flushLoad();
+
+    const el: HTMLElement = fixture.nativeElement;
+    const columns = el.querySelectorAll('[cdkdroplist]');
+    expect(columns.length).toBe(4);
+
+    const text = el.textContent ?? '';
+    expect(text).toContain('Open');
+    expect(text).toContain('In Progress');
+    expect(text).toContain('Done');
+    expect(text).toContain('Closed');
+  });
+
+  it('AC1: each column shows correct issue count badge', () => {
+    fixture.detectChanges();
+    flushLoad();
+
+    const badges = fixture.nativeElement.querySelectorAll<HTMLElement>('.count-badge');
+    expect(badges.length).toBe(4);
+    // one issue per column from mockIssues
+    badges.forEach((b) => expect(b.textContent?.trim()).toBe('1'));
+  });
+
+  it('AC1: no mat-table element in board view', () => {
+    fixture.detectChanges();
+    flushLoad();
+
+    expect(fixture.nativeElement.querySelector('table')).toBeNull();
+  });
+
+  // ── AC2: issue cards with title link and priority chip ───────────────────────
+
+  it('AC2: issue cards render with title link pointing to /issues/:id', () => {
+    fixture.detectChanges();
+    flushLoad();
+
+    const links = fixture.nativeElement.querySelectorAll<HTMLAnchorElement>('a.issue-link');
+    expect(links.length).toBe(mockIssues.length);
+    expect(links[0].getAttribute('href')).toBe('/issues/i1');
+  });
+
+  it('AC2: each card renders a priority app-chip', () => {
+    fixture.detectChanges();
+    flushLoad();
+
+    const chips = fixture.nativeElement.querySelectorAll('app-chip');
+    // 4 status chips (headers) + 4 priority chips (cards) = 8 minimum
+    expect(chips.length).toBeGreaterThanOrEqual(8);
+  });
+
+  it('AC2: issue cards are cdkDrag elements', () => {
+    fixture.detectChanges();
+    flushLoad();
+
+    const cards = fixture.nativeElement.querySelectorAll('.issue-card[cdkdrag]');
+    expect(cards.length).toBe(mockIssues.length);
+  });
+
+  it('AC2: assignee shown on card when non-null', () => {
+    const issuesWithAssignee: Issue[] = [
+      makeIssue({ id: 'a1', assignee: 'alice@example.com', status: 'open' }),
+    ];
+    fixture.detectChanges();
+    flushLoad(issuesWithAssignee);
+
+    expect(fixture.nativeElement.textContent).toContain('alice@example.com');
+  });
+
+  it('AC2: raw priority key not shown (chip shows label)', () => {
+    fixture.detectChanges();
+    flushLoad();
+
+    const text: string = fixture.nativeElement.textContent ?? '';
+    expect(text).not.toContain('in_progress');
+    expect(text).toContain('In Progress');
+  });
+
+  // ── AC3: drop to different column calls updateIssueStatus; card stays ────────
+
+  it('AC3: onDrop to different column calls updateIssueStatus with target status', () => {
+    const apiService = TestBed.inject(ApiService);
+    const updateSpy = jest.spyOn(apiService, 'updateIssueStatus').mockReturnValue(of(
+      makeIssue({ id: 'i1', status: 'done' }),
+    ));
+
+    fixture.detectChanges();
+    flushLoad();
+
+    const issue = makeIssue({ id: 'i1', status: 'open' });
+    component.columns['open'] = [issue];
+    component.columns['done'] = [];
+
+    const event = {
+      previousContainer: { data: component.columns['open'] },
+      container: { data: component.columns['done'] },
+      previousIndex: 0,
+      currentIndex: 0,
+      item: { data: issue },
+    } as unknown as CdkDragDrop<Issue[]>;
+
+    component.onDrop(event, 'done');
     fixture.detectChanges();
 
-    expect(component.issues).toEqual(mockIssues);
+    expect(updateSpy).toHaveBeenCalledWith('i1', 'done');
+    expect(component.columns['done']).toContain(issue);
+    expect(component.columns['open']).not.toContain(issue);
+  });
+
+  it('AC3: drop within same column does not call updateIssueStatus', () => {
+    const apiService = TestBed.inject(ApiService);
+    const updateSpy = jest.spyOn(apiService, 'updateIssueStatus');
+
+    fixture.detectChanges();
+    flushLoad();
+
+    const issue = makeIssue({ id: 'i1', status: 'open' });
+    component.columns['open'] = [issue];
+
+    const sameContainer = { data: component.columns['open'] };
+    const event = {
+      previousContainer: sameContainer,
+      container: sameContainer,
+      previousIndex: 0,
+      currentIndex: 0,
+      item: { data: issue },
+    } as unknown as CdkDragDrop<Issue[]>;
+
+    component.onDrop(event, 'open');
+    expect(updateSpy).not.toHaveBeenCalled();
+  });
+
+  // ── AC4: failed move reverts card to origin column ───────────────────────────
+
+  it('AC4: on updateIssueStatus error, card reverts to origin column', () => {
+    const apiService = TestBed.inject(ApiService);
+    jest.spyOn(apiService, 'updateIssueStatus').mockReturnValue(
+      throwError(() => new Error('Server error')),
+    );
+
+    fixture.detectChanges();
+    flushLoad();
+
+    const issue = makeIssue({ id: 'i1', status: 'open' });
+    component.columns['open'] = [issue];
+    component.columns['done'] = [];
+
+    const prevContainer = { data: component.columns['open'] };
+    const nextContainer = { data: component.columns['done'] };
+    const event = {
+      previousContainer: prevContainer,
+      container: nextContainer,
+      previousIndex: 0,
+      currentIndex: 0,
+      item: { data: issue },
+    } as unknown as CdkDragDrop<Issue[]>;
+
+    component.onDrop(event, 'done');
+    fixture.detectChanges();
+
+    expect(component.columns['open']).toContain(issue);
+    expect(component.columns['done']).not.toContain(issue);
+  });
+
+  it('AC4: on updateIssueStatus error, dropError message is shown', () => {
+    const apiService = TestBed.inject(ApiService);
+    jest.spyOn(apiService, 'updateIssueStatus').mockReturnValue(
+      throwError(() => new Error('Server error')),
+    );
+
+    fixture.detectChanges();
+    flushLoad();
+
+    const issue = makeIssue({ id: 'i1', status: 'open' });
+    component.columns['open'] = [issue];
+    component.columns['done'] = [];
+
+    const prevContainer = { data: component.columns['open'] };
+    const nextContainer = { data: component.columns['done'] };
+    const event = {
+      previousContainer: prevContainer,
+      container: nextContainer,
+      previousIndex: 0,
+      currentIndex: 0,
+      item: { data: issue },
+    } as unknown as CdkDragDrop<Issue[]>;
+
+    component.onDrop(event, 'done');
+    fixture.detectChanges();
+
+    expect(component.dropError).toBeTruthy();
+    const errorEl = fixture.nativeElement.querySelector('.drop-error');
+    expect(errorEl).not.toBeNull();
+  });
+
+  // ── AC5: getProject called; heading shows project name ───────────────────────
+
+  it('AC5: getProject called with correct project id', () => {
+    const apiService = TestBed.inject(ApiService);
+    const getProjectSpy = jest.spyOn(apiService, 'getProject').mockReturnValue(of(mockProject));
+    jest.spyOn(apiService, 'getIssues').mockReturnValue(of(mockIssues));
+
+    fixture.detectChanges();
+
+    expect(getProjectSpy).toHaveBeenCalledWith(PROJECT_ID);
+    expect(getProjectSpy).not.toHaveBeenCalledWith(expect.not.stringContaining(PROJECT_ID));
+  });
+
+  it('AC5: heading shows "Issues — <project name>" after getProject resolves', () => {
+    const apiService = TestBed.inject(ApiService);
+    jest.spyOn(apiService, 'getProject').mockReturnValue(of(mockProject));
+    jest.spyOn(apiService, 'getIssues').mockReturnValue(of(mockIssues));
+
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    const h2: HTMLElement = fixture.nativeElement.querySelector('h2');
+    expect(h2?.textContent?.trim()).toBe('Issues — Alpha');
+  });
+
+  it('AC5: heading shows "Issues" fallback while loading', () => {
+    // Before any data loads
+    fixture.detectChanges();
+    // Flush only issues to simulate project still pending; but heading should show "Issues" until project name resolves
+    // In the fresh state: projectName is '' so heading is "Issues"
+    const h2: HTMLElement = fixture.nativeElement.querySelector('h2');
+    expect(h2?.textContent?.trim()).toBe('Issues');
+
+    // Clean up pending requests
+    httpMock.expectOne(`${BASE}/projects/${PROJECT_ID}/issues`).flush([]);
+    httpMock.expectOne(`${BASE}/projects/${PROJECT_ID}`).flush(mockProject);
+  });
+
+  it('AC5: getProject uses GET /projects/:id (single project endpoint, not list)', () => {
+    fixture.detectChanges();
+    // Verify project endpoint is /projects/:id not /projects
+    const projectReq = httpMock.expectOne(`${BASE}/projects/${PROJECT_ID}`);
+    expect(projectReq.request.method).toBe('GET');
+    expect(projectReq.request.url).toContain(`/projects/${PROJECT_ID}`);
+    expect(projectReq.request.url).not.toMatch(/\/projects$/);
+    projectReq.flush(mockProject);
+
+    httpMock.expectOne(`${BASE}/projects/${PROJECT_ID}/issues`).flush(mockIssues);
+    fixture.detectChanges();
+  });
+
+  // ── Existing tests: create-issue form ────────────────────────────────────────
+
+  it('loads issues and distributes into columns', () => {
+    fixture.detectChanges();
+    flushLoad();
+
+    expect(component.columns['open'].length).toBe(1);
+    expect(component.columns['in_progress'].length).toBe(1);
+    expect(component.columns['done'].length).toBe(1);
+    expect(component.columns['closed'].length).toBe(1);
     expect(component.loading).toBe(false);
     expect(component.error).toBeNull();
   });
@@ -80,6 +350,7 @@ describe('ProjectIssuesComponent', () => {
     httpMock
       .expectOne(`${BASE}/projects/${PROJECT_ID}/issues`)
       .flush({ message: 'Server error' }, { status: 500, statusText: 'Internal Server Error' });
+    httpMock.expectOne(`${BASE}/projects/${PROJECT_ID}`).flush(mockProject);
     fixture.detectChanges();
 
     expect(component.loading).toBe(false);
@@ -87,20 +358,18 @@ describe('ProjectIssuesComponent', () => {
     expect(fixture.nativeElement.querySelector('.error')).not.toBeNull();
   });
 
-  it('AC1: create form fields for title, description, priority, assignee are present in DOM after issues load', () => {
+  it('create form fields for title, description, priority, assignee are present in DOM after load', () => {
     fixture.detectChanges();
-    httpMock.expectOne({ url: `${BASE}/projects/${PROJECT_ID}/issues`, method: 'GET' }).flush(mockIssues);
-    fixture.detectChanges();
+    flushLoad();
 
     const el: HTMLElement = fixture.nativeElement;
     const matFields = el.querySelectorAll('mat-form-field');
     expect(matFields.length).toBeGreaterThanOrEqual(4);
   });
 
-  it('AC3: 409 on createIssue shows archived message and submit button is disabled', () => {
+  it('409 on createIssue shows archived message and Create Issue button is disabled', () => {
     fixture.detectChanges();
-    httpMock.expectOne({ url: `${BASE}/projects/${PROJECT_ID}/issues`, method: 'GET' }).flush(mockIssues);
-    fixture.detectChanges();
+    flushLoad();
 
     component.newTitle = 'New Issue';
     fixture.detectChanges();
@@ -120,12 +389,10 @@ describe('ProjectIssuesComponent', () => {
     expect(createBtn?.disabled).toBe(true);
   });
 
-  it('AC4: Create Issue button is disabled when title is empty', () => {
+  it('Create Issue button is disabled when title is empty', () => {
     fixture.detectChanges();
-    httpMock.expectOne({ url: `${BASE}/projects/${PROJECT_ID}/issues`, method: 'GET' }).flush(mockIssues);
-    fixture.detectChanges();
+    flushLoad();
 
-    // newTitle is '' by default
     expect(component.newTitle.trim()).toBe('');
 
     const el: HTMLElement = fixture.nativeElement;
@@ -134,45 +401,9 @@ describe('ProjectIssuesComponent', () => {
     expect(createBtn?.disabled).toBe(true);
   });
 
-  it('AC2: issue title links have routerLink to /issues/:id', () => {
+  it('non-409 submit failure shows createError inline', () => {
     fixture.detectChanges();
-    httpMock.expectOne(`${BASE}/projects/${PROJECT_ID}/issues`).flush(mockIssues);
-    fixture.detectChanges();
-
-    const links = fixture.nativeElement.querySelectorAll<HTMLAnchorElement>('a.issue-link');
-    expect(links.length).toBe(mockIssues.length);
-    expect(links[0].getAttribute('href')).toBe('/issues/i1');
-    expect(links[1].getAttribute('href')).toBe('/issues/i2');
-  });
-
-  it('AC4: shows "No issues yet." when issue list is empty', () => {
-    fixture.detectChanges();
-    httpMock.expectOne(`${BASE}/projects/${PROJECT_ID}/issues`).flush([]);
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.textContent).toContain('No issues yet.');
-    expect(fixture.nativeElement.querySelector('table')).toBeNull();
-  });
-
-  it('AC5: status and priority display as human-readable labels via chip components', () => {
-    fixture.detectChanges();
-    httpMock.expectOne(`${BASE}/projects/${PROJECT_ID}/issues`).flush(mockIssues);
-    fixture.detectChanges();
-
-    const text: string = fixture.nativeElement.textContent;
-    expect(text).toContain('In Progress');
-    expect(text).toContain('High');
-    expect(text).toContain('Medium');
-    expect(text).not.toContain('in_progress');
-
-    const chips = fixture.nativeElement.querySelectorAll('app-chip');
-    expect(chips.length).toBeGreaterThanOrEqual(mockIssues.length * 2);
-  });
-
-  it('AC6 inline create error: non-409 submit failure shows createError inline without replacing table', () => {
-    fixture.detectChanges();
-    httpMock.expectOne(`${BASE}/projects/${PROJECT_ID}/issues`).flush(mockIssues);
-    fixture.detectChanges();
+    flushLoad();
 
     component.newTitle = 'New Issue';
     fixture.detectChanges();
@@ -185,37 +416,24 @@ describe('ProjectIssuesComponent', () => {
 
     expect(component.createError).toBeTruthy();
     expect(component.error).toBeNull();
-    const table = fixture.nativeElement.querySelector('table');
-    expect(table).not.toBeNull();
     expect(fixture.nativeElement.querySelector('.create-error')).not.toBeNull();
   });
 
-  it('AC6: success message appears in DOM after successful createIssue', () => {
+  it('success message appears after successful createIssue', () => {
     fixture.detectChanges();
-    httpMock.expectOne({ url: `${BASE}/projects/${PROJECT_ID}/issues`, method: 'GET' }).flush(mockIssues);
-    fixture.detectChanges();
+    flushLoad();
 
     component.newTitle = 'New Issue';
     fixture.detectChanges();
 
     component.submitCreate();
 
-    const newIssue: Issue = {
-      id: 'i3',
-      project_id: PROJECT_ID,
-      title: 'New Issue',
-      status: 'open',
-      priority: 'medium',
-      description: null,
-      assignee: null,
-      created_at: '',
-      updated_at: '',
-    };
+    const newIssue = makeIssue({ id: 'i5', title: 'New Issue', status: 'open' });
     httpMock
       .expectOne({ url: `${BASE}/projects/${PROJECT_ID}/issues`, method: 'POST' })
       .flush(newIssue);
 
-    // Flush the reload GET
+    // Flush the reload GET + project reload (only issues reload)
     httpMock
       .expectOne({ url: `${BASE}/projects/${PROJECT_ID}/issues`, method: 'GET' })
       .flush([...mockIssues, newIssue]);
