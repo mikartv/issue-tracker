@@ -106,8 +106,8 @@ Files changed vs `origin/main`:
 
 1. `apps/web/src/app/api/api.service.ts` — added `getProject(id)` method (+5 lines)
 2. `apps/web/src/app/api/api.service.spec.ts` — added `getProject(id)` test (+20 lines)
-3. `apps/web/src/app/projects/project-issues.component.ts` — full rewrite (mat-table → Kanban board; +280 lines net)
-4. `apps/web/src/app/projects/project-issues.component.spec.ts` — rewritten (+233 lines net)
+3. `apps/web/src/app/projects/project-issues.component.ts` — full rewrite (mat-table → Kanban board; +166 lines net: 206 added − 40 removed)
+4. `apps/web/src/app/projects/project-issues.component.spec.ts` — rewritten (+218 lines net: 309 added − 91 removed)
 5. `.cdd/unreleased/19/self-coherence.md` — this file (new)
 
 Files NOT changed: `apps/api/` (no scope), `apps/web/src/app/shared/` (chip unchanged), `apps/web/src/app/issues/`, `apps/web/src/styles.scss`
@@ -170,3 +170,30 @@ Baseline was 47 (cycle 18 γ close-out). Net new: +14 (1 in api.service.spec.ts 
 13. ✅ Test assertion count from runner: `Tests: 61 passed, 61 total` (runner output pasted in §Transient rows)
 14. ✅ Git author email: all implementation commits authored by `alpha@issue-tracker.cdd.cnos` (verified: `git log -5 --format='%ae %s'`)
 15. ✅ γ-artifact at canonical §5.1 path: `git cat-file -e origin/cycle/19:.cdd/unreleased/19/gamma-scaffold.md` → EXISTS
+
+## §Fix Round R2
+
+**Round:** 2
+**Base review:** β R1 verdict REQUEST CHANGES (2 findings)
+**Author:** alpha@issue-tracker.cdd.cnos
+
+### Findings addressed
+
+| Finding | Type | Action |
+|---------|------|--------|
+| A-1 | mechanical | Removed unused `const originStatus = issue.status as IssueStatus;` declaration from `onDrop()` in `project-issues.component.ts` (was line 322 pre-fix). Variable was declared but never read; error-path revert uses `event.container.data` / `event.previousContainer.data` directly. |
+| B-1 | honest-claim | Corrected `§Diff scope` net-line figures: `project-issues.component.ts` updated from "+280 lines net" to "+166 lines net: 206 added − 40 removed"; `project-issues.component.spec.ts` updated from "+233 lines net" to "+218 lines net: 309 added − 91 removed". Figures verified via `git diff origin/main -- <file> | grep -c "^[+-]"`. |
+
+### Files changed in R2
+
+1. `apps/web/src/app/projects/project-issues.component.ts` — removed unused `originStatus` variable
+2. `.cdd/unreleased/19/self-coherence.md` — corrected §Diff scope net-line counts; added this §Fix Round R2 section
+
+### Test count after fix
+
+```
+Test Suites: 6 passed, 6 total
+Tests:       61 passed, 61 total
+```
+
+All 61 tests pass after removal of unused variable.

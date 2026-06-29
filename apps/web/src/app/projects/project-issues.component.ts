@@ -319,7 +319,6 @@ export class ProjectIssuesComponent implements OnInit {
     }
 
     const issue: Issue = event.item.data;
-    const originStatus = issue.status as IssueStatus;
 
     // Optimistic move
     transferArrayItem(
