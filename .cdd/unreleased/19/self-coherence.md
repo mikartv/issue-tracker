@@ -99,3 +99,41 @@ Test names:
 - `AC5: getProject uses GET /projects/:id (single project endpoint, not list)` — URL contains `/projects/proj-1`, does not match `/projects$`
 
 Status: **PASS** (all 4 tests pass)
+
+## §Diff scope
+
+Files changed vs `origin/main`:
+
+1. `apps/web/src/app/api/api.service.ts` — added `getProject(id)` method (+5 lines)
+2. `apps/web/src/app/api/api.service.spec.ts` — added `getProject(id)` test (+20 lines)
+3. `apps/web/src/app/projects/project-issues.component.ts` — full rewrite (mat-table → Kanban board; +280 lines net)
+4. `apps/web/src/app/projects/project-issues.component.spec.ts` — rewritten (+233 lines net)
+5. `.cdd/unreleased/19/self-coherence.md` — this file (new)
+
+Files NOT changed: `apps/api/` (no scope), `apps/web/src/app/shared/` (chip unchanged), `apps/web/src/app/issues/`, `apps/web/src/styles.scss`
+
+Caller-path trace for new module `getProject`:
+- New function: `ApiService.getProject(id: string)` in `api.service.ts`
+- Non-test caller: `ProjectIssuesComponent.loadProject()` in `project-issues.component.ts` — calls `this.api.getProject(this.projectId)` in `ngOnInit`
+
+## §Transient rows
+
+**Branch CI:** cycle/19 not yet pushed to origin at time of writing this section. CI state will be recorded in §Review-readiness after push.
+
+**Final web test count (from runner output):**
+
+```
+Test Suites: 6 passed, 6 total
+Tests:       61 passed, 61 total
+```
+
+Baseline was 47 (cycle 18 γ close-out). Net new: +14 (1 in api.service.spec.ts + 13 in project-issues.component.spec.ts).
+
+## §Debt
+
+- Within-column card ordering / rank persistence: not implemented (non-goal per issue §Non-goals)
+- Realtime sync: not implemented (non-goal)
+- Create-issue dialog (R6): not implemented (non-goal; inline form retained as required)
+- No `app.routes.spec.ts` for navigation test — pre-existing debt (declared in PROJECT.md §Known unknowns)
+- Angular Material 18 upgrade for M3 `mat.define-theme` — pre-existing debt (cycle 14)
+- `cdkDropListGroup` directive bound via `[cdkDropListGroup]` on the board container: `DragDropModule` re-exports `CdkDropListGroup`, so it is available without explicit import, consistent with Angular CDK 17 patterns.
