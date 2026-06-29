@@ -1,5 +1,15 @@
 # Self-Coherence — Cycle 18
 
+## §Known Gaps
+
+Explicit non-goals per issue #9:
+- No frontend board changes (R5b).
+- No transition audit trail or status workflow metadata.
+- No auth/permission checks on transitions.
+- `POST /issues/:id/status` route shape unchanged.
+
+Residual gaps: none identified.
+
 ## §ACs
 
 - **AC1: Any valid status transition is accepted** — PASS. `TRANSITIONS` constant removed. `updateStatus` persists any `IssueStatus` target regardless of current status. E2e tests confirm skip (open→done) and backward (done→in_progress) both return 200.
