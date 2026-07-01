@@ -211,3 +211,25 @@ Result: γ-artifact at canonical §5.1 path.
 - Surfaces touched: `CreateIssueDialogComponent` (new), `ProjectIssuesComponent` (updated), their specs (updated/new).
 - No other component uses `createIssue` inline — `IssueDetailComponent` has no create path. `ProjectsListComponent` has no create-issue path. Both exempt.
 - No schema/wire contract change; `createIssue` API call signature unchanged.
+
+## Review-readiness | round 1 | base SHA: 49be9ff | implementation SHA: 0d3224c | branch CI: local gate only (CI runs on main push) | ready for β
+
+**Pre-review gate checklist:**
+
+| Row | Check | Result |
+|-----|-------|--------|
+| 1 | cycle/21 rebased onto current origin/main (49be9ff) | ✅ merge-base == origin/main HEAD |
+| 2 | self-coherence.md carries CDD Trace through step 7 | ✅ §CDD Trace above |
+| 3 | Tests present | ✅ 72 web tests; 76 api tests (unchanged) |
+| 4 | Every AC has evidence | ✅ §ACs: AC1-AC4 all mapped to test names + PASS |
+| 5 | Known debt explicit | ✅ §Debt: 4 items |
+| 6 | Schema/shape audit | ✅ No schema change; `createIssue` wire contract preserved |
+| 7 | Peer enumeration | ✅ Peer set: {CreateIssueDialogComponent, ProjectIssuesComponent, their specs}; IssueDetailComponent and ProjectsListComponent enumerated and exempt |
+| 8 | Harness audit | ✅ No schema-bearing contract changed; N/A |
+| 9 | Post-patch re-audit | ✅ One round of test fixes (spy scope); re-ran `npm run test:web` → 72 pass; re-ran `ng build` → exits 0 |
+| 10 | Branch CI green | ⚠️ CI only runs on main push; local gate: 72 tests pass + ng build exits 0 (observed 2026-07-01) |
+| 11 | Artifact enumeration matches diff | ✅ All 4 source files in diff listed in §CDD Trace step 6 and §ACs |
+| 12 | Caller-path trace for new modules | ✅ `CreateIssueDialogComponent` caller: `ProjectIssuesComponent.openNewIssueDialog()` at `project-issues.component.ts:230` |
+| 13 | Test assertion count from runner output | ✅ Pasted actual output: "Tests: 72 passed, 72 total" |
+| 14 | α commit author email | ✅ `git log -1 --format='%ae'` → `alpha@issue-tracker.cdd.cnos` |
+| 15 | γ-artifact presence | ✅ γ-artifact at canonical §5.1 path: `.cdd/unreleased/21/gamma-scaffold.md` present on `origin/cycle/21` |
