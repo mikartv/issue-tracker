@@ -135,3 +135,79 @@ Steps as executed:
 8. `cd apps/web && npx ng build --configuration=production` → exits 0, no NG8XXX
 9. Committed all 4 files in one implementation commit
 10. Writing self-coherence incrementally (this file)
+
+## §Diff scope
+
+All counts derived from `git diff origin/main` at final committed state (implementation commit `0d3224c`).
+
+| File | `+` lines | `−` lines | Net |
+|------|-----------|-----------|-----|
+| `apps/web/src/app/projects/create-issue-dialog.component.ts` (new) | 150 | 0 | +150 |
+| `apps/web/src/app/projects/create-issue-dialog.component.spec.ts` (new) | 176 | 0 | +176 |
+| `apps/web/src/app/projects/project-issues.component.ts` | 26 | 114 | −88 |
+| `apps/web/src/app/projects/project-issues.component.spec.ts` | 52 | 54 | −2 |
+| `.cdd/unreleased/21/gamma-scaffold.md` (γ artifact) | 73 | 0 | +73 |
+| `.cdd/unreleased/21/alpha-prompt.md` (γ artifact) | 264 | 0 | +264 |
+
+**Total across cycle source files (4):** +404 inserted, −168 deleted, net +236 lines.
+
+Note: `gamma-scaffold.md` and `alpha-prompt.md` are γ-authored cycle artifacts on this branch; they are not α implementation work but appear in the diff scope per STACK.md §α-rule.
+
+## §Transient rows
+
+| Row | State | Observed at |
+|-----|-------|-------------|
+| 1. cycle/21 rebased onto origin/main | `origin/main` at `06548fb`; cycle/21 rebased and up to date — `git rebase origin/main` returned "Current branch cycle/21 is up to date" at session start | 2026-07-01 session start |
+| 10. Branch CI green | CI only runs on `main` pushes (not branches) per `.github/workflows/ci.yml`; `gh run list --branch cycle/21` returns empty. Local gate: `npm run test:web` → 72 tests pass; `ng build` → exits 0 | 2026-07-01 |
+
+**Local test runner output (actual):**
+```
+Test Suites: 7 passed, 7 total
+Tests:       72 passed, 72 total
+Snapshots:   0 total
+Time:        2.287 s
+```
+
+**ng build result:**
+```
+Application bundle generation complete. [2.500 seconds]
+▲ [WARNING] bundle initial exceeded maximum budget. Budget 500.00 kB was not met by 311.18 kB
+```
+Exit code: 0. No NG8XXX errors. Bundle size warning is pre-existing (PROJECT.md known debt, pre-dating this cycle).
+
+**Test delta vs baseline:**
+- Baseline (cycle 20): 61 web tests, 76 api tests
+- This cycle: 72 web tests (+11), 76 api tests (unchanged)
+- Breakdown: removed 5 inline-form tests, added 10 dialog component tests (`CreateIssueDialogComponent`), added 3 parent AC1/AC2 dialog tests (net: −5 + 16 = +11)
+
+## §Debt
+
+1. **No e2e tests** — AC3/AC4 are verified by unit tests + manual smoke; no Cypress/Playwright e2e. Declared in issue proof plan as known gap.
+2. **Bundle size warning** — initial bundle 811 kB vs 500 kB budget (pre-existing from CDK DragDrop, cycle 19). Deferred as separate issue per PROJECT.md.
+3. **CI on branch not available** — GitHub Actions CI only triggers on `main` push/PR; no per-branch CI run for `cycle/21`. Local test gate substitutes. β should verify CI green after merge per STACK.md β-rule.
+4. **`component['dialog']` private property access in tests** — Angular's `MatDialog` injection creates a different instance per standalone component import hierarchy vs `TestBed.inject(MatDialog)`. Spying via `component['dialog']` is pragmatic; TypeScript strict mode allows private access in tests. This is a known Angular testing pattern, not a defect.
+
+## §CDD Trace
+
+| Step | Status | Evidence |
+|------|--------|----------|
+| 0. Issue received | ✅ | gh #11 — read in full; 4 ACs identified |
+| 1. Git identity set | ✅ | `git config user.email "alpha@issue-tracker.cdd.cnos"` verified at `git log -1 --format='%ae'` → `alpha@issue-tracker.cdd.cnos` |
+| 2. Branch | ✅ | `cycle/21` (γ-created); `git rebase origin/main` → up to date |
+| 3. Load order | ✅ | SKILL.md (Tier 1a) → gh issue view 11 → PROJECT.md → STACK.md → gamma-scaffold.md → alpha-prompt.md |
+| 4. Gap defined | ✅ | §Gap: inline create form always visible; no dialog; no trigger |
+| 5. Mode | ✅ | design-and-build (4 ACs, single cycle) |
+| 6. Artifacts produced | ✅ | (a) `create-issue-dialog.component.ts` — standalone dialog component; caller: `ProjectIssuesComponent.openNewIssueDialog()` → `this.dialog.open(CreateIssueDialogComponent, ...)` at `project-issues.component.ts:230`; (b) `create-issue-dialog.component.spec.ts` — 10 dialog unit tests; (c) `project-issues.component.ts` — inline form removed, MatDialog integrated, button added; (d) `project-issues.component.spec.ts` — 5 removed, 4 added |
+| 7. Self-coherence | ✅ | This file, committed incrementally: §Gap, §Skills, §ACs, §Self-check, §Implementation-plan, §Diff-scope, §Transient-rows, §Debt, §CDD-Trace |
+
+**γ-artifact check (pre-review gate §2.6 row 15):**
+`git cat-file -e origin/cycle/21:.cdd/unreleased/21/gamma-scaffold.md` → present.
+Result: γ-artifact at canonical §5.1 path.
+
+**Caller-path trace for new module (pre-review gate §2.6 row 12):**
+- `CreateIssueDialogComponent` — non-test caller: `ProjectIssuesComponent.openNewIssueDialog()` at `apps/web/src/app/projects/project-issues.component.ts` line 230 (`this.dialog.open(CreateIssueDialogComponent, { data: { projectId: this.projectId } satisfies CreateIssueDialogData })`). Also imported at `project-issues.component.ts` line 18.
+
+**Peer enumeration (§2.3):**
+- Surfaces touched: `CreateIssueDialogComponent` (new), `ProjectIssuesComponent` (updated), their specs (updated/new).
+- No other component uses `createIssue` inline — `IssueDetailComponent` has no create path. `ProjectsListComponent` has no create-issue path. Both exempt.
+- No schema/wire contract change; `createIssue` API call signature unchanged.
