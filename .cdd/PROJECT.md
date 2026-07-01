@@ -1,7 +1,6 @@
 # Project MCP — issue-tracker
 
-**Last verified:** 2026-07-01 (cycle 19 — Kanban board + cdk drag-and-drop; `npm run test:all` 137 tests pass: 76 api + 61 web)  
-**Known build defect:** `ng build` fails with NG8002 (`[cdkDropListGroup]` in `project-issues.component.ts:51`) — fix is cycle/20 (next MCA). Jest tests unaffected.  
+**Last verified:** 2026-07-01 (cycle 20 — P0 ng build fix; `npm run test:all` 137 tests pass: 76 api + 61 web; `ng build` exits 0)  
 **Verify with:** `npm run test:all` (from repo root)
 
 ## Build / run / test
@@ -156,10 +155,15 @@ See `.cdd/STACK.md`. Branch per cycle: `cycle/N`. Cycle artifacts: `.cdd/unrelea
 
 - 2026-07-01: Cycle 19 — enhancement: Kanban board view + cdk drag-and-drop. `ProjectIssuesComponent` fully rewritten: `mat-table` replaced with four-column `cdkDropList` Kanban board; issues as `cdkDrag` cards (title link, priority `app-chip`, assignee); optimistic drop handler with rollback on error; heading "Issues — {name}" via new `ApiService.getProject(id)` (calls `GET /projects/:id`); horizontal scroll for narrow viewports; inline create-issue form retained. `DragDropModule` imported; `CdkDragDrop`, `transferArrayItem` used. +14 web tests (61 total). gh #10 closed. Known defect: `ng build` fails with NG8002 (`[cdkDropListGroup]` property binding on directive selector in board template); fix is cycle/20.
 
+## Decisions (append-only, short) — cycle 20
+
+- 2026-07-01: Cycle 20 — P0 fix: `[cdkDropListGroup]` → `cdkDropListGroup` in `apps/web/src/app/projects/project-issues.component.ts:51`. Removed property-binding brackets; `cdkDropListGroup` is a directive selector, not an Angular `@Input()`. `ng build --configuration=production` now exits 0 with no NG8002. 0 findings, 1 review round. 137 tests unchanged (61 web + 76 api). gh #14 closed.
+
 ## Known unknowns / debt
 
 - ORM-level @ManyToOne/@OneToMany relations — deferred (D-CY2-4); issues loaded by project_id column directly.
 - `dev:api` script uses ts-node (no auto-reload). Description imprecision ("watch mode") in STACK.md and README corrected in cycle 10 F2.
 - AC1 oracle for root redirect (cycle 13) is manual smoke only — no automated Angular router navigation test (`app.routes.spec.ts`). Declared Known Gap in proof plan.
 - Angular Material 18 upgrade required for M3 `mat.define-theme` API (cycle 14 §Debt). Deferred as separate cycle.
-- `ng build` fails with NG8002 — `[cdkDropListGroup]` property binding on directive selector in `project-issues.component.ts:51`. Fix: remove brackets (`cdkDropListGroup`). Scheduled for cycle/20.
+- `ng build` bundle size warning: initial bundle exceeds 500 kB budget by ~270 kB (pre-existing from cycle 19 CDK drag-and-drop). Deferred as separate issue.
+- CI does not run `ng build` (O2 gap) — deferred to δ (`.github/workflows/ci.yml` edit).
