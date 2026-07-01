@@ -85,3 +85,53 @@ Post-cycle: 72 web tests (11 new net), 76 api tests (unchanged).
 - Test `'AC4-archived: 409 response does NOT close the dialog'` — verifies `dialogRef.close` not called on 409; **PASS**
 - Test `'AC4-archived: non-409 error sets submitError, not archivedError'` — 500 error sets `submitError`; **PASS**
 - Parent "New Issue" button: `[disabled]="projectArchived"` — set from `loadProject()` which now sets `this.projectArchived = project.archived`
+
+## §Self-check
+
+**Did α push ambiguity onto β?** No.
+
+- All 4 ACs have concrete test evidence with test names and PASS results.
+- All board/drag-drop tests from cycles 19-20 still pass (72 total; 0 board tests regressed).
+- The 5 removed inline-form tests are accounted for: each removal is justified by removal of the tested surface (inline form); not silent deletion.
+- New dialog component tests (10) and updated parent tests (3 new AC1/AC2 tests) fully cover the new surfaces.
+- `loadIssues()` was made `public` (was `private`) to allow direct call after dialog close and to enable test spying. This is intentional and disclosed.
+- `component['dialog']` private property access in tests: Angular standalone components inject `MatDialog` from their own imports hierarchy; spying on `TestBed.inject(MatDialog)` gave 0 call count because it returns a different instance. Spying directly on the component's private field is the pragmatic Angular testing pattern for this scenario. This is a known test-infrastructure pattern, not a debt item.
+- No API surface changes; `createIssue` signature unchanged.
+- `ng build` exits 0 with no NG8XXX errors; template bindings verified at AOT compile time.
+
+**Every claim backed by evidence in the diff?**
+- AC1: `.create-section` removal visible in component diff; DOM query tests confirm.
+- AC2: `openNewIssueDialog()` method in component diff; spy tests confirm.
+- AC3: `dialogRef.close(newIssue)` in dialog component; test confirms.
+- AC4: `archivedError` flag + `dialogRef.close()` without arg in dialog component; tests confirm.
+
+## §Implementation plan
+
+Steps as executed:
+
+1. Read Tier 1a skill (SKILL.md), issue, PROJECT.md, STACK.md, gamma-scaffold.md, alpha-prompt.md — mandatory load order
+2. Read draft files: `create-issue-dialog.component.ts` (~149 lines), `create-issue-dialog.component.spec.ts` (~175 lines) — verified correct per spec
+3. Rewrote `project-issues.component.ts`:
+   - Removed inline create section template block
+   - Removed `MatFormFieldModule`, `MatInputModule`, `MatSelectModule` imports
+   - Added `MatDialogModule`, `MatDialog` imports
+   - Added `CreateIssueDialogComponent`, `CreateIssueDialogData` import
+   - Added `private readonly dialog = inject(MatDialog)`
+   - Updated `loadProject()` to set `this.projectArchived = project.archived`
+   - Added `header-row` div with h2 + New Issue button
+   - Added `openNewIssueDialog()` method
+   - Made `loadIssues()` public (required for dialog afterClosed subscription + test spy)
+   - Removed: `newTitle`, `newDescription`, `newPriority`, `newAssignee`, `successMessage`, `createError`, `priorities`, `submitCreate()`, `onNewTitleChange()`, `onNewDescriptionChange()`, `onNewAssigneeChange()`
+   - Removed `.create-section`, `.form-field`, `.create-error` CSS; added `.header-row` CSS
+4. Rewrote `project-issues.component.spec.ts`:
+   - Added `MatDialog`, `MatDialogModule` imports
+   - Added `CreateIssueDialogComponent` import
+   - Added `MatDialogModule` to TestBed imports
+   - Removed 5 inline-form tests
+   - Added 4 AC1/AC2 tests (no inline form, button present, dialog open, refresh-on-close)
+5. Ran `npm run test:web` — initial 2 failures (spy scope issue)
+6. Fixed spy pattern: use `component['dialog']` to access the component-private `MatDialog` instance; fixed reload test to use `jest.spyOn` on ApiService directly
+7. `npm run test:web` → 72 tests pass
+8. `cd apps/web && npx ng build --configuration=production` → exits 0, no NG8XXX
+9. Committed all 4 files in one implementation commit
+10. Writing self-coherence incrementally (this file)
