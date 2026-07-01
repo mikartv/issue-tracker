@@ -136,7 +136,7 @@ describe('IssueDetailComponent', () => {
     fixture.detectChanges();
     fixture.detectChanges();
 
-    const items = fixture.nativeElement.querySelectorAll('li.comment-item');
+    const items = fixture.nativeElement.querySelectorAll('.comment-item');
     expect(items.length).toBe(2);
 
     component.commentBody = 'Hello world';
@@ -191,8 +191,6 @@ describe('IssueDetailComponent', () => {
 
     const matFields = el.querySelectorAll('mat-form-field');
     expect(matFields.length).toBeGreaterThan(0);
-    // Edit form is visible; view title is hidden
-    expect(el.querySelector('h3')?.textContent).toContain('Edit Issue');
   });
 
   it('AC2b: fill title and click save — updateIssue is called with new title', async () => {
@@ -249,14 +247,14 @@ describe('IssueDetailComponent', () => {
     fixture.detectChanges();
 
     const el: HTMLElement = fixture.nativeElement;
-    const statusParagraphs = Array.from(el.querySelectorAll<HTMLElement>('p')).filter((p) =>
-      p.textContent?.includes('Status:'),
-    );
-    expect(statusParagraphs.length).toBeGreaterThan(0);
-    const statusText = statusParagraphs[0].textContent ?? '';
-    expect(statusText).toContain('In Progress');
-    expect(statusText).not.toContain('in_progress');
-    expect(statusParagraphs[0].querySelector('app-chip')).not.toBeNull();
+    // Status chip is always visible in the sidebar
+    const sidebar = el.querySelector('.detail-sidebar');
+    expect(sidebar).not.toBeNull();
+    const chips = sidebar!.querySelectorAll('app-chip');
+    expect(chips.length).toBeGreaterThan(0);
+    const statusChip = Array.from(chips).find((c) => c.textContent?.includes('In Progress'));
+    expect(statusChip).not.toBeUndefined();
+    expect(sidebar!.textContent).not.toContain('in_progress');
   });
 
   it('label-AC2: priority critical renders as "Critical" via chip (not raw key)', async () => {
@@ -265,14 +263,13 @@ describe('IssueDetailComponent', () => {
     fixture.detectChanges();
 
     const el: HTMLElement = fixture.nativeElement;
-    const priorityParagraphs = Array.from(el.querySelectorAll<HTMLElement>('p')).filter((p) =>
-      p.textContent?.includes('Priority:'),
-    );
-    expect(priorityParagraphs.length).toBeGreaterThan(0);
-    const priorityText = priorityParagraphs[0].textContent ?? '';
-    expect(priorityText).toContain('Critical');
-    expect(priorityText).not.toContain('critical');
-    expect(priorityParagraphs[0].querySelector('app-chip')).not.toBeNull();
+    const sidebar = el.querySelector('.detail-sidebar');
+    expect(sidebar).not.toBeNull();
+    const chips = sidebar!.querySelectorAll('app-chip');
+    expect(chips.length).toBeGreaterThan(0);
+    const priorityChip = Array.from(chips).find((c) => c.textContent?.includes('Critical'));
+    expect(priorityChip).not.toBeUndefined();
+    expect(sidebar!.textContent).not.toContain('critical');
   });
 
   it('label-AC3: Move to button reads "Move to In Progress" when status is open', async () => {
@@ -287,5 +284,92 @@ describe('IssueDetailComponent', () => {
     expect(statusBtn).toBeDefined();
     expect(statusBtn!.textContent).toContain('Move to In Progress');
     expect(statusBtn!.textContent).not.toContain('in_progress');
+  });
+
+  // ============================================================
+  // New tests for gh #12 ACs
+  // ============================================================
+
+  it('gh12-AC1: sidebar card is present with status and priority chips', async () => {
+    await setup();
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    const sidebar = el.querySelector('.detail-sidebar');
+    expect(sidebar).not.toBeNull();
+
+    const chips = sidebar!.querySelectorAll('app-chip');
+    expect(chips.length).toBeGreaterThanOrEqual(2);
+
+    // Flat <p> stack with Status:/Priority: labels must not appear at root level
+    const rootParagraphs = Array.from(el.querySelectorAll<HTMLElement>('.detail-main > p')).filter(
+      (p) => p.textContent?.includes('Status:') || p.textContent?.includes('Priority:'),
+    );
+    expect(rootParagraphs.length).toBe(0);
+  });
+
+  it('gh12-AC2: comment section stays visible when editMode is active', async () => {
+    await setup();
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    // Enter edit mode
+    component.enterEditMode();
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    // Comment items should still be visible
+    const commentItems = el.querySelectorAll('.comment-item');
+    expect(commentItems.length).toBe(2);
+
+    // Comments section should be present
+    const commentsSection = el.querySelector('.comments-section');
+    expect(commentsSection).not.toBeNull();
+  });
+
+  it('gh12-AC3: inline edit keeps issue context visible; cancel makes no API call', async () => {
+    await setup();
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    component.enterEditMode();
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    // Status chip should remain visible in sidebar during edit
+    const sidebar = el.querySelector('.detail-sidebar');
+    expect(sidebar).not.toBeNull();
+    const statusChip = sidebar!.querySelector('app-chip');
+    expect(statusChip).not.toBeNull();
+
+    // Cancel should make no API call
+    component.cancelEdit();
+    expect(apiMock.updateIssue).not.toHaveBeenCalled();
+    expect(component.editMode).toBe(false);
+  });
+
+  it('gh12-AC4: comment thread renders avatar, author, timestamp, and body; no <li> items', async () => {
+    await setup();
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    const commentItems = el.querySelectorAll('.comment-item');
+    expect(commentItems.length).toBe(2);
+
+    const firstItem = commentItems[0];
+    expect(firstItem.querySelector('.comment-avatar')).not.toBeNull();
+    expect(firstItem.querySelector('.comment-author')).not.toBeNull();
+    expect(firstItem.querySelector('.comment-timestamp')).not.toBeNull();
+    expect(firstItem.querySelector('.comment-body')).not.toBeNull();
+
+    // Avatar should show initials (first letter of local-part of email)
+    const avatar = firstItem.querySelector('.comment-avatar');
+    expect(avatar!.textContent?.trim()).toBe('A'); // alice@example.com → 'A'
+
+    // No <li> elements used for comment items
+    const liItems = el.querySelectorAll('li.comment-item');
+    expect(liItems.length).toBe(0);
   });
 });

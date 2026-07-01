@@ -46,84 +46,184 @@ const NEXT_STATUS: Record<string, string | null> = {
     } @else if (error) {
       <p class="error">Error: {{ error }}</p>
     } @else if (issue) {
-      <div class="container">
-        @if (!editMode) {
-          <h2>{{ issue.title }}</h2>
-          <p><strong>Description:</strong> {{ issue.description ?? '—' }}</p>
-          <p><strong>Status:</strong> <app-chip [kind]="'status'" [value]="issue.status" /></p>
-          <p><strong>Priority:</strong> <app-chip [kind]="'priority'" [value]="issue.priority" /></p>
-          <p><strong>Assignee:</strong> {{ issue.assignee ?? '—' }}</p>
-          <p>
-            <a [routerLink]="['/projects', issue.project_id, 'issues']">Back to project issues</a>
-          </p>
-
-          @if (nextStatus) {
-            <button mat-raised-button (click)="moveToNextStatus()">Move to {{ getStatusLabel(nextStatus!) }}</button>
+      <div class="detail-layout">
+        <!-- Main content area -->
+        <main class="detail-main">
+          @if (!editMode) {
+            <h2 class="issue-title">{{ issue.title }}</h2>
+            <p class="detail-description">{{ issue.description ?? '—' }}</p>
+          } @else {
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Title</mat-label>
+              <input matInput [value]="editTitle" (input)="onEditTitleChange($event)" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Description</mat-label>
+              <textarea matInput [value]="editDescription" (input)="onEditDescriptionChange($event)" rows="3"></textarea>
+            </mat-form-field>
           }
-          <button mat-raised-button (click)="enterEditMode()">Edit</button>
 
-          @if (editSuccessMessage) {
-            <p class="success">{{ editSuccessMessage }}</p>
-          }
-        } @else {
-          <h3>Edit Issue</h3>
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Title</mat-label>
-            <input matInput [value]="editTitle" (input)="onEditTitleChange($event)" />
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Description</mat-label>
-            <textarea matInput [value]="editDescription" (input)="onEditDescriptionChange($event)" rows="3"></textarea>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Priority</mat-label>
-            <mat-select [value]="editPriority" (selectionChange)="editPriority = $event.value">
-              @for (p of priorities; track p) {
-                <mat-option [value]="p">{{ p }}</mat-option>
+          <!-- Comments section — always visible -->
+          <section class="comments-section">
+            <h3>Comments</h3>
+            <div class="comment-list">
+              @for (comment of comments; track comment.id) {
+                <div class="comment-item">
+                  <div class="comment-avatar">{{ getInitials(comment.author) }}</div>
+                  <div class="comment-content">
+                    <div class="comment-header">
+                      <span class="comment-author">{{ comment.author }}</span>
+                      <span class="comment-timestamp">{{ formatDate(comment.created_at) }}</span>
+                    </div>
+                    <div class="comment-body">{{ comment.body }}</div>
+                  </div>
+                </div>
+              } @empty {
+                <p class="comment-empty">No comments yet.</p>
               }
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Assignee</mat-label>
-            <input matInput [value]="editAssignee" (input)="onEditAssigneeChange($event)" />
-          </mat-form-field>
-          <button mat-raised-button color="primary" [disabled]="!editTitle.trim()" (click)="saveEdit()">Save</button>
-          <button mat-button (click)="cancelEdit()">Cancel</button>
-        }
+            </div>
 
-        <h3>Comments</h3>
-        <ul class="comment-list">
-          @for (comment of comments; track comment.id) {
-            <li class="comment-item">
-              <strong>{{ comment.author }}</strong> — {{ formatDate(comment.created_at) }}
-              <p>{{ comment.body }}</p>
-            </li>
-          } @empty {
-            <li>No comments yet.</li>
-          }
-        </ul>
+            <h4>Add Comment</h4>
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Your email (X-User-Email)</mat-label>
+              <input matInput [value]="userEmail" (input)="onEmailChange($event)" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Comment</mat-label>
+              <textarea matInput [value]="commentBody" (input)="onCommentChange($event)" rows="4"></textarea>
+            </mat-form-field>
+            <button mat-raised-button color="primary" (click)="submitComment()">Add Comment</button>
+          </section>
+        </main>
 
-        <h4>Add Comment</h4>
-        <mat-form-field appearance="outline" class="form-field">
-          <mat-label>Your email (X-User-Email)</mat-label>
-          <input matInput [value]="userEmail" (input)="onEmailChange($event)" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="form-field">
-          <mat-label>Comment</mat-label>
-          <textarea matInput [value]="commentBody" (input)="onCommentChange($event)" rows="4"></textarea>
-        </mat-form-field>
-        <button mat-raised-button color="primary" (click)="submitComment()">Add Comment</button>
+        <!-- Metadata sidebar -->
+        <aside class="detail-sidebar">
+          <mat-card>
+            <mat-card-content>
+              <div class="sidebar-field">
+                <span class="sidebar-label">Status</span>
+                <app-chip [kind]="'status'" [value]="issue.status" />
+              </div>
+
+              <div class="sidebar-field">
+                <span class="sidebar-label">Priority</span>
+                @if (!editMode) {
+                  <app-chip [kind]="'priority'" [value]="issue.priority" />
+                } @else {
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>Priority</mat-label>
+                    <mat-select [value]="editPriority" (selectionChange)="editPriority = $event.value">
+                      @for (p of priorities; track p) {
+                        <mat-option [value]="p">{{ p }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                }
+              </div>
+
+              <div class="sidebar-field">
+                <span class="sidebar-label">Assignee</span>
+                @if (!editMode) {
+                  <span>{{ issue.assignee ?? '—' }}</span>
+                } @else {
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>Assignee</mat-label>
+                    <input matInput [value]="editAssignee" (input)="onEditAssigneeChange($event)" />
+                  </mat-form-field>
+                }
+              </div>
+
+              @if (nextStatus) {
+                <button mat-raised-button class="sidebar-btn" (click)="moveToNextStatus()">Move to {{ getStatusLabel(nextStatus!) }}</button>
+              }
+
+              @if (!editMode) {
+                <button mat-raised-button class="sidebar-btn" (click)="enterEditMode()">Edit</button>
+              } @else {
+                <button mat-raised-button color="primary" class="sidebar-btn" [disabled]="!editTitle.trim()" (click)="saveEdit()">Save</button>
+                <button mat-button class="sidebar-btn" (click)="cancelEdit()">Cancel</button>
+              }
+
+              @if (editSuccessMessage) {
+                <p class="success">{{ editSuccessMessage }}</p>
+              }
+            </mat-card-content>
+          </mat-card>
+
+          <a [routerLink]="['/projects', issue.project_id, 'issues']">Back to project issues</a>
+        </aside>
       </div>
     }
   `,
   styles: [
     `
-      .container { padding: 16px; max-width: 800px; }
-      .error { color: #c00; }
-      .success { color: #0a0; }
-      .comment-list { list-style: none; padding: 0; }
-      .comment-item { border-bottom: 1px solid #eee; padding: 8px 0; }
-      .form-field { display: block; width: 100%; margin-top: 8px; }
+      .detail-layout {
+        display: grid;
+        grid-template-columns: 1fr 280px;
+        gap: var(--it-space-4);
+        padding: var(--it-space-4);
+        max-width: 1000px;
+      }
+      @media (max-width: 767px) {
+        .detail-layout { grid-template-columns: 1fr; }
+        .detail-sidebar { order: -1; }
+      }
+      .detail-main { min-width: 0; }
+      .issue-title { margin-top: 0; }
+      .detail-description { color: rgba(0, 0, 0, 0.7); }
+      .error { color: var(--it-priority-critical); }
+      .success { color: var(--it-status-done); }
+      .form-field { display: block; width: 100%; margin-top: var(--it-space-2); }
+      .sidebar-field {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: var(--it-space-3);
+      }
+      .sidebar-label {
+        font-size: 0.75em;
+        text-transform: uppercase;
+        color: rgba(0, 0, 0, 0.5);
+        margin-bottom: var(--it-space-1);
+        letter-spacing: 0.05em;
+      }
+      .sidebar-btn { display: block; width: 100%; margin-top: var(--it-space-2); }
+      .detail-sidebar a {
+        display: block;
+        margin-top: var(--it-space-3);
+        font-size: 0.9em;
+      }
+      .comments-section { margin-top: var(--it-space-4); }
+      .comment-list { margin-bottom: var(--it-space-4); }
+      .comment-item {
+        display: flex;
+        gap: var(--it-space-3);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        padding: var(--it-space-3) 0;
+      }
+      .comment-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--it-status-open);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.85em;
+        flex-shrink: 0;
+      }
+      .comment-content { flex: 1; min-width: 0; }
+      .comment-header {
+        display: flex;
+        gap: var(--it-space-2);
+        align-items: baseline;
+        margin-bottom: var(--it-space-1);
+      }
+      .comment-author { font-weight: 600; font-size: 0.9em; }
+      .comment-timestamp { font-size: 0.8em; color: rgba(0, 0, 0, 0.5); }
+      .comment-body { font-size: 0.95em; }
+      .comment-empty { color: rgba(0, 0, 0, 0.5); font-style: italic; }
     `,
   ],
 })
@@ -151,6 +251,11 @@ export class IssueDetailComponent implements OnInit {
 
   getStatusLabel(key: string): string {
     return STATUS_LABELS[key] ?? key;
+  }
+
+  getInitials(author: string): string {
+    const name = author.split('@')[0];
+    return name.charAt(0).toUpperCase();
   }
 
   get nextStatus(): string | null {
