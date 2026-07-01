@@ -5,9 +5,11 @@ import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { of, throwError } from 'rxjs';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ProjectIssuesComponent } from './project-issues.component';
 import { ApiService } from '../api/api.service';
 import type { Issue, Project } from '../api/api.service';
+import { CreateIssueDialogComponent } from './create-issue-dialog.component';
 
 const BASE = 'http://localhost:3000/api/v1';
 const PROJECT_ID = 'proj-1';
@@ -58,7 +60,7 @@ describe('ProjectIssuesComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ProjectIssuesComponent, HttpClientTestingModule, NoopAnimationsModule, RouterTestingModule],
+      imports: [ProjectIssuesComponent, HttpClientTestingModule, NoopAnimationsModule, RouterTestingModule, MatDialogModule],
       providers: [
         {
           provide: ActivatedRoute,
@@ -331,7 +333,7 @@ describe('ProjectIssuesComponent', () => {
     fixture.detectChanges();
   });
 
-  // ── Existing tests: create-issue form ────────────────────────────────────────
+  // ── Existing tests: loads / error ────────────────────────────────────────────
 
   it('loads issues and distributes into columns', () => {
     fixture.detectChanges();
@@ -358,88 +360,84 @@ describe('ProjectIssuesComponent', () => {
     expect(fixture.nativeElement.querySelector('.error')).not.toBeNull();
   });
 
-  it('create form fields for title, description, priority, assignee are present in DOM after load', () => {
+  // ── AC1 (dialog): No inline create form; "New Issue" button present ──────────
+
+  it('AC1: no create-form inputs rendered inline after load', () => {
     fixture.detectChanges();
     flushLoad();
 
     const el: HTMLElement = fixture.nativeElement;
-    const matFields = el.querySelectorAll('mat-form-field');
-    expect(matFields.length).toBeGreaterThanOrEqual(4);
+    // create-section is gone; no create-section div
+    expect(el.querySelector('.create-section')).toBeNull();
+    // No mat-input create fields on parent (dialog owns them)
+    const inputs = Array.from(el.querySelectorAll<HTMLInputElement>('input[matinput]'));
+    expect(inputs.length).toBe(0);
   });
 
-  it('409 on createIssue shows archived message and Create Issue button is disabled', () => {
+  it('AC1: "New Issue" button is present after load', () => {
     fixture.detectChanges();
     flushLoad();
-
-    component.newTitle = 'New Issue';
-    fixture.detectChanges();
-
-    component.submitCreate();
-
-    httpMock
-      .expectOne({ url: `${BASE}/projects/${PROJECT_ID}/issues`, method: 'POST' })
-      .flush({}, { status: 409, statusText: 'Conflict' });
-    fixture.detectChanges();
-
-    const el: HTMLElement = fixture.nativeElement;
-    expect(el.textContent).toContain('archived');
-
-    const buttons = Array.from(el.querySelectorAll<HTMLButtonElement>('button'));
-    const createBtn = buttons.find((b) => b.textContent?.includes('Create Issue'));
-    expect(createBtn?.disabled).toBe(true);
-  });
-
-  it('Create Issue button is disabled when title is empty', () => {
-    fixture.detectChanges();
-    flushLoad();
-
-    expect(component.newTitle.trim()).toBe('');
 
     const el: HTMLElement = fixture.nativeElement;
     const buttons = Array.from(el.querySelectorAll<HTMLButtonElement>('button'));
-    const createBtn = buttons.find((b) => b.textContent?.includes('Create Issue'));
-    expect(createBtn?.disabled).toBe(true);
+    const newIssueBtn = buttons.find((b) => b.textContent?.includes('New Issue'));
+    expect(newIssueBtn).toBeDefined();
   });
 
-  it('non-409 submit failure shows createError inline', () => {
+  // ── AC2 (dialog): Clicking "New Issue" opens MatDialog ──────────────────────
+
+  it('AC2: clicking "New Issue" button calls MatDialog.open with CreateIssueDialogComponent', () => {
     fixture.detectChanges();
     flushLoad();
 
-    component.newTitle = 'New Issue';
-    fixture.detectChanges();
-    component.submitCreate();
+    const openSpy = jest.spyOn(component['dialog'], 'open').mockReturnValue({
+      afterClosed: () => of(undefined),
+    } as any);
 
-    httpMock
-      .expectOne({ url: `${BASE}/projects/${PROJECT_ID}/issues`, method: 'POST' })
-      .flush({ message: 'Server error' }, { status: 500, statusText: 'Internal Server Error' });
-    fixture.detectChanges();
+    component.openNewIssueDialog();
 
-    expect(component.createError).toBeTruthy();
-    expect(component.error).toBeNull();
-    expect(fixture.nativeElement.querySelector('.create-error')).not.toBeNull();
+    expect(openSpy).toHaveBeenCalledWith(
+      CreateIssueDialogComponent,
+      expect.objectContaining({ data: expect.objectContaining({ projectId: PROJECT_ID }) }),
+    );
   });
 
-  it('success message appears after successful createIssue', () => {
+  it('AC2: "New Issue" button is enabled and calls openNewIssueDialog on click', () => {
     fixture.detectChanges();
     flushLoad();
 
-    component.newTitle = 'New Issue';
+    const openSpy = jest.spyOn(component['dialog'], 'open').mockReturnValue({
+      afterClosed: () => of(undefined),
+    } as any);
+
+    const el: HTMLElement = fixture.nativeElement;
+    const buttons = Array.from(el.querySelectorAll<HTMLButtonElement>('button'));
+    const newIssueBtn = buttons.find((b) => b.textContent?.includes('New Issue'));
+    expect(newIssueBtn).toBeDefined();
+    expect(newIssueBtn!.disabled).toBe(false);
+    newIssueBtn!.click();
     fixture.detectChanges();
 
-    component.submitCreate();
+    expect(openSpy).toHaveBeenCalledTimes(1);
+  });
 
-    const newIssue = makeIssue({ id: 'i5', title: 'New Issue', status: 'open' });
-    httpMock
-      .expectOne({ url: `${BASE}/projects/${PROJECT_ID}/issues`, method: 'POST' })
-      .flush(newIssue);
-
-    // Flush the reload GET + project reload (only issues reload)
-    httpMock
-      .expectOne({ url: `${BASE}/projects/${PROJECT_ID}/issues`, method: 'GET' })
-      .flush([...mockIssues, newIssue]);
+  it('AC2: after dialog closes with result, loadIssues is called again', () => {
+    const apiService = TestBed.inject(ApiService);
+    const newIssue = makeIssue({ id: 'i99', title: 'New' });
+    const getIssuesSpy = jest.spyOn(apiService, 'getIssues').mockReturnValue(of([]));
+    jest.spyOn(apiService, 'getProject').mockReturnValue(of(mockProject));
 
     fixture.detectChanges();
+    // With spies, no HTTP requests go out — all resolved via spies
+    fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Issue created');
+    jest.spyOn(component['dialog'], 'open').mockReturnValue({
+      afterClosed: () => of(newIssue),
+    } as any);
+
+    component.openNewIssueDialog();
+
+    // getIssues called again after dialog close with result
+    expect(getIssuesSpy).toHaveBeenCalledTimes(2); // once on init, once on dialog close
   });
 });
