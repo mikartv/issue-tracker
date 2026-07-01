@@ -1,6 +1,6 @@
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills, ACs]
+completed: [Gap, Skills, ACs, Self-check]
 -->
 
 # Self-coherence — Cycle 20
@@ -97,3 +97,15 @@ No schema-bearing contract changed. No harness audit required.
 - Runtime dependencies: no changes to imports or dependencies.
 - JSON/wire contract: no API changes.
 - Backward-compat: 61 existing tests pass.
+
+## §Debt
+
+**Known debt:**
+
+1. **Bundle size warning** — `ng build` emits `[WARNING] bundle initial exceeded maximum budget. Budget 500.00 kB was not met by 269.88 kB`. This is a pre-existing condition introduced when CDK drag-and-drop was added in cycle 19 (gh #10). Out of scope for this fix cycle. Deferred as a separate issue.
+
+2. **ng build CI step** — CI workflow does not run `ng build`; the NG8002 defect went undetected at merge time because Jest tests do not trigger AOT. Adding an `ng build` step to `.github/workflows/ci.yml` is deferred per issue non-goals (separate issue).
+
+3. **Provisional α close-out** — α exits after signaling review-readiness per bounded dispatch model. `alpha-closeout.md` will be written on re-dispatch after β merge.
+
+No loaded skill would have prevented the known debt items — they are architectural gaps in CI coverage, not authoring failures.
