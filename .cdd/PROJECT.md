@@ -1,6 +1,6 @@
 # Project MCP — issue-tracker
 
-**Last verified:** 2026-07-01 (cycle 20 — P0 ng build fix; `npm run test:all` 137 tests pass: 76 api + 61 web; `ng build` exits 0)  
+**Last verified:** 2026-07-01 (cycle 21 — gh #11 MatDialog create-issue; `npm run test:web` 72 web tests pass; 76 api unchanged = 148 total; `ng build` exits 0)  
 **Verify with:** `npm run test:all` (from repo root)
 
 ## Build / run / test
@@ -158,6 +158,10 @@ See `.cdd/STACK.md`. Branch per cycle: `cycle/N`. Cycle artifacts: `.cdd/unrelea
 ## Decisions (append-only, short) — cycle 20
 
 - 2026-07-01: Cycle 20 — P0 fix: `[cdkDropListGroup]` → `cdkDropListGroup` in `apps/web/src/app/projects/project-issues.component.ts:51`. Removed property-binding brackets; `cdkDropListGroup` is a directive selector, not an Angular `@Input()`. `ng build --configuration=production` now exits 0 with no NG8002. 0 findings, 1 review round. 137 tests unchanged (61 web + 76 api). gh #14 closed.
+
+## Decisions (append-only, short) — cycle 21
+
+- 2026-07-01: Cycle 21 — enhancement: gh #11 create-issue moved to `MatDialog`. New standalone `CreateIssueDialogComponent` (Title / Description / Priority / Assignee; submit calls `createIssue`, closes with result; 409 shows archived message; cancel closes with no args). `ProjectIssuesComponent` updated: inline create form removed; "New Issue" button added to header; `MatDialog.open` wired on click; `afterClosed()` triggers `loadIssues()` on result; `loadProject()` sets `projectArchived`. +11 web tests (72 total). gh #11 closed. 0 findings, 1 review round.
 
 ## Known unknowns / debt
 
