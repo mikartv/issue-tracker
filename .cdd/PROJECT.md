@@ -1,6 +1,6 @@
 # Project MCP — issue-tracker
 
-**Last verified:** 2026-07-01 (cycle 21 — gh #11 MatDialog create-issue; `npm run test:web` 72 web tests pass; 76 api unchanged = 148 total; `ng build` exits 0)  
+**Last verified:** 2026-07-01 (cycle 22 — gh #12 issue-detail redesign sidebar; `npm run test:web` 76 web tests pass; 76 api unchanged = 152 total; `ng build` exits 0)  
 **Verify with:** `npm run test:all` (from repo root)
 
 ## Build / run / test
@@ -11,9 +11,9 @@
 | `npm run dev:db` | Start Postgres 16 via Docker (`docker compose up -d db`) | ✅ configured |
 | `npm run dev:api` | NestJS via ts-node (`ts-node -r tsconfig-paths/register src/main.ts`) — no auto-reload | ✅ configured |
 | `npm run dev:web` | Angular dev server (`ng serve`) | ✅ configured |
-| `npm run test:all` | api + web test suites | ✅ `137 tests passed` (cycle 19: 76 api + 61 web) |
+| `npm run test:all` | api + web test suites | ✅ `152 tests passed` (cycle 22: 76 api + 76 web) |
 | `npm run test:api` | API tests only (Jest) | ✅ `76 tests passed` (9 suites) |
-| `npm run test:web` | Web tests only (Jest via jest-preset-angular) | ✅ `61 tests passed` (6 suites) |
+| `npm run test:web` | Web tests only (Jest via jest-preset-angular) | ✅ `76 tests passed` (6 suites) |
 
 Sample output from `npm run test:all` (cycle 19):
 ```
@@ -162,6 +162,10 @@ See `.cdd/STACK.md`. Branch per cycle: `cycle/N`. Cycle artifacts: `.cdd/unrelea
 ## Decisions (append-only, short) — cycle 21
 
 - 2026-07-01: Cycle 21 — enhancement: gh #11 create-issue moved to `MatDialog`. New standalone `CreateIssueDialogComponent` (Title / Description / Priority / Assignee; submit calls `createIssue`, closes with result; 409 shows archived message; cancel closes with no args). `ProjectIssuesComponent` updated: inline create form removed; "New Issue" button added to header; `MatDialog.open` wired on click; `afterClosed()` triggers `loadIssues()` on result; `loadProject()` sets `projectArchived`. +11 web tests (72 total). gh #11 closed. 0 findings, 1 review round.
+
+## Decisions (append-only, short) — cycle 22
+
+- 2026-07-01: Cycle 22 — enhancement: gh #12 `IssueDetailComponent` redesigned. Two-area CSS grid layout (`1fr + 280px` sidebar; single-column at ≤767px). `<aside class="detail-sidebar">` with `<mat-card>` containing status chip, priority chip, assignee, "Move to next status" button, Edit/Save/Cancel controls, back link. Comments `<section>` unconditionally rendered outside all `@if (editMode)` blocks. Inline edit: only title/description toggle in main area; status chip always visible in sidebar. Styled comment thread: `.comment-avatar` (initials), `.comment-author`, `.comment-timestamp`, `.comment-body` divs; no `<ul>/<li>`. R1 token replacements: `#c00` → `var(--it-priority-critical)`, `#0a0` → `var(--it-status-done)`, `#eee` → `rgba(0,0,0,0.08)`. New `getInitials(author)` method. +4 web tests (76 total). gh #12 closed. 0 findings, 1 review round.
 
 ## Known unknowns / debt
 
