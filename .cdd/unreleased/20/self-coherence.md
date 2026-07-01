@@ -1,6 +1,6 @@
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills, ACs, Self-check, Debt, CDD Trace]
+completed: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
 -->
 
 # Self-coherence — Cycle 20
