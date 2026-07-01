@@ -1,6 +1,7 @@
 # Project MCP — issue-tracker
 
-**Last verified:** 2026-06-29 (cycle 18 — free status transitions + GET /projects/:id; `npm run test:all` 123 tests pass: 76 api + 47 web)  
+**Last verified:** 2026-07-01 (cycle 19 — Kanban board + cdk drag-and-drop; `npm run test:all` 137 tests pass: 76 api + 61 web)  
+**Known build defect:** `ng build` fails with NG8002 (`[cdkDropListGroup]` in `project-issues.component.ts:51`) — fix is cycle/20 (next MCA). Jest tests unaffected.  
 **Verify with:** `npm run test:all` (from repo root)
 
 ## Build / run / test
@@ -11,16 +12,16 @@
 | `npm run dev:db` | Start Postgres 16 via Docker (`docker compose up -d db`) | ✅ configured |
 | `npm run dev:api` | NestJS via ts-node (`ts-node -r tsconfig-paths/register src/main.ts`) — no auto-reload | ✅ configured |
 | `npm run dev:web` | Angular dev server (`ng serve`) | ✅ configured |
-| `npm run test:all` | api + web test suites | ✅ `120 tests passed` (cycle 16: 76 api + 44 web) |
+| `npm run test:all` | api + web test suites | ✅ `137 tests passed` (cycle 19: 76 api + 61 web) |
 | `npm run test:api` | API tests only (Jest) | ✅ `76 tests passed` (9 suites) |
-| `npm run test:web` | Web tests only (Jest via jest-preset-angular) | ✅ `44 tests passed` (5 suites) |
+| `npm run test:web` | Web tests only (Jest via jest-preset-angular) | ✅ `61 tests passed` (6 suites) |
 
-Sample output from `npm run test:all` (cycle 16):
+Sample output from `npm run test:all` (cycle 19):
 ```
 Test Suites: 9 passed, 9 total (api)
 Tests:       76 passed, 76 total (api)
-Test Suites: 5 passed, 5 total (web)
-Tests:       44 passed, 44 total (web)
+Test Suites: 6 passed, 6 total (web)
+Tests:       61 passed, 61 total (web)
 ```
 
 ## Repo map
@@ -151,9 +152,14 @@ See `.cdd/STACK.md`. Branch per cycle: `cycle/N`. Cycle artifacts: `.cdd/unrelea
 
 - 2026-06-29: Cycle 18 — enhancement: free status transitions + GET /projects/:id. Removed `TRANSITIONS` constant and forward-only guard from `IssuesService.updateStatus` — any transition between valid `IssueStatus` values (open | in_progress | done | closed) now returns 200; invalid values still rejected by `@IsEnum` DTO (400). Added `ProjectsService.findOne(id)` (404 on missing) and `GET /projects/:id` route to `ProjectsController` (200/404). 4 spec files updated (4 old assertions removed, 8 new tests added across issues + projects). `SCOPE.md` updated. 76 api tests pass. gh #9 closed.
 
+## Decisions (append-only, short) — cycle 19
+
+- 2026-07-01: Cycle 19 — enhancement: Kanban board view + cdk drag-and-drop. `ProjectIssuesComponent` fully rewritten: `mat-table` replaced with four-column `cdkDropList` Kanban board; issues as `cdkDrag` cards (title link, priority `app-chip`, assignee); optimistic drop handler with rollback on error; heading "Issues — {name}" via new `ApiService.getProject(id)` (calls `GET /projects/:id`); horizontal scroll for narrow viewports; inline create-issue form retained. `DragDropModule` imported; `CdkDragDrop`, `transferArrayItem` used. +14 web tests (61 total). gh #10 closed. Known defect: `ng build` fails with NG8002 (`[cdkDropListGroup]` property binding on directive selector in board template); fix is cycle/20.
+
 ## Known unknowns / debt
 
 - ORM-level @ManyToOne/@OneToMany relations — deferred (D-CY2-4); issues loaded by project_id column directly.
 - `dev:api` script uses ts-node (no auto-reload). Description imprecision ("watch mode") in STACK.md and README corrected in cycle 10 F2.
 - AC1 oracle for root redirect (cycle 13) is manual smoke only — no automated Angular router navigation test (`app.routes.spec.ts`). Declared Known Gap in proof plan.
 - Angular Material 18 upgrade required for M3 `mat.define-theme` API (cycle 14 §Debt). Deferred as separate cycle.
+- `ng build` fails with NG8002 — `[cdkDropListGroup]` property binding on directive selector in `project-issues.component.ts:51`. Fix: remove brackets (`cdkDropListGroup`). Scheduled for cycle/20.

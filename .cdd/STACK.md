@@ -186,6 +186,33 @@ gh run list --branch cycle/N --limit 5
 
 If the most recent run is not `completed / success`, β returns REQUEST CHANGES (D-severity, `ci-red`). Exception: if the cycle's scope is documentation-only (zero code/test changes), β notes this explicitly and may APPROVE without CI.
 
+### β-rule: Angular ng build
+
+For any cycle that modifies Angular component templates (`.html` files or inline template strings in `.component.ts`), β MUST run:
+
+```bash
+cd apps/web && npx ng build --configuration=production
+```
+
+and verify it exits 0 with no NG8XXX errors. A non-zero exit or any NG8XXX diagnostic is an RC finding (D-severity, `aot-build-fail`). Exception: documentation-only cycles with zero template changes.
+
+*Rationale: Jest does not invoke the Angular AOT compiler; template property-binding errors (e.g. NG8002 binding to a directive selector) are invisible to Jest but caught by `ng build`. Cycle 19 established this gap — `[cdkDropListGroup]` escaped to main undetected (cdd-iteration.md F1).*
+
+### α-rule: self-coherence diff counts
+
+In `self-coherence.md §Diff scope`, derive all line counts from `git diff` at the **final committed state** — after all source edits for the cycle are committed. Never estimate; never copy from a measurement taken before a pending source edit.
+
+Correct procedure:
+
+```bash
+git diff origin/main -- apps/web/src/app/projects/project-issues.component.ts | grep -c '^+'
+git diff origin/main -- apps/web/src/app/projects/project-issues.component.ts | grep -c '^-'
+```
+
+Subtract the `^-` count from the `^+` count for the net figure. If a source edit is made after §Diff scope is written, recount before committing self-coherence.
+
+*Rationale: Cycles 18 and 19 both had α baseline/diff-count discrepancies from estimation errors. Cycle 19's B-1 and B-2 findings consumed 2 extra review rounds for a documentation-only correction (cdd-iteration.md F3).*
+
 ## CI (delivered in Issue 1)
 
 GitHub Actions workflow `.github/workflows/ci.yml`:

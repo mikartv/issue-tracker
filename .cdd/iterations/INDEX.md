@@ -28,6 +28,14 @@ _No cdd-iteration.md authored (protocol_gap_count == 0 per γ-closeout). Row add
 
 ---
 
+## Confirmed entries (v1.6.0 release)
+
+| Cycle | Issue | Date | Findings | Gap type | Proposed patches | MCAs committed | No-patch | Path |
+|-------|-------|------|----------|----------|------------------|----------------|----------|------|
+| 19 | #10 — Kanban board + drag-and-drop | 2026-07-01 | 3 (F1 D: β protocol silent on ng-build; F2 C: CI no ng-build step; F3 B: α §Diff scope estimation) | cdd-skill-gap (F1, F3), cdd-tooling-gap (F2) | 2 landed (STACK.md §β-rule ng-build, §α-rule diff-counts); 1 deferred (CI ng-build step) | 1 (cycle/20 P0 fix for NG8002) | 0 | .cdd/unreleased/19/ |
+
+---
+
 ## Retroactive audit — cycles 1–9 (completed 2026-06-17)
 
 _Audit performed as ε=δ pass by reading all gamma-closeout.md files.
