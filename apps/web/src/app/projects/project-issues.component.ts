@@ -9,13 +9,12 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { DragDropModule, CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSelectModule } from '@angular/material/select';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { ApiService, type Issue } from '../api/api.service';
 import { ChipComponent } from '../shared/chip.component';
 import { STATUS_LABELS } from '../shared/issue-labels';
+import { CreateIssueDialogComponent, CreateIssueDialogData } from './create-issue-dialog.component';
 
 export type IssueStatus = 'open' | 'in_progress' | 'done' | 'closed';
 
@@ -29,15 +28,18 @@ export const STATUSES: IssueStatus[] = ['open', 'in_progress', 'done', 'closed']
     RouterLink,
     DragDropModule,
     MatProgressSpinnerModule,
-    MatFormFieldModule,
-    MatInputModule,
     MatButtonModule,
-    MatSelectModule,
+    MatDialogModule,
     ChipComponent,
   ],
   template: `
     <div class="container">
-      <h2>{{ projectName ? 'Issues — ' + projectName : 'Issues' }}</h2>
+      <div class="header-row">
+        <h2>{{ projectName ? 'Issues — ' + projectName : 'Issues' }}</h2>
+        <button mat-raised-button color="primary"
+                [disabled]="projectArchived"
+                (click)="openNewIssueDialog()">New Issue</button>
+      </div>
 
       @if (loading) {
         <mat-spinner diameter="40" />
@@ -82,47 +84,6 @@ export const STATUSES: IssueStatus[] = ['open', 'in_progress', 'done', 'closed']
             }
           </div>
         }
-
-        <div class="create-section">
-          <h3>Create Issue</h3>
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Title *</mat-label>
-            <input matInput [value]="newTitle" (input)="onNewTitleChange($event)" />
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Description</mat-label>
-            <textarea matInput [value]="newDescription" (input)="onNewDescriptionChange($event)" rows="3"></textarea>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Priority</mat-label>
-            <mat-select [value]="newPriority" (selectionChange)="newPriority = $event.value">
-              @for (p of priorities; track p) {
-                <mat-option [value]="p">{{ p }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Assignee</mat-label>
-            <input matInput [value]="newAssignee" (input)="onNewAssigneeChange($event)" />
-          </mat-form-field>
-          @if (projectArchived) {
-            <p class="error">Project is archived — cannot create issues</p>
-          }
-          @if (successMessage) {
-            <p class="success">{{ successMessage }}</p>
-          }
-          <button
-            mat-raised-button
-            color="primary"
-            [disabled]="!newTitle.trim() || projectArchived"
-            (click)="submitCreate()"
-          >
-            Create Issue
-          </button>
-          @if (createError) {
-            <p class="create-error">{{ createError }}</p>
-          }
-        </div>
       }
     </div>
   `,
@@ -132,11 +93,14 @@ export const STATUSES: IssueStatus[] = ['open', 'in_progress', 'done', 'closed']
         padding: 16px;
         max-width: 1200px;
       }
+      .header-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
       .error {
         color: #c00;
-      }
-      .success {
-        color: #0a0;
       }
       .drop-error {
         color: #c00;
@@ -215,18 +179,6 @@ export const STATUSES: IssueStatus[] = ['open', 'in_progress', 'done', 'closed']
         text-align: center;
         padding: 8px 0;
       }
-      .create-section {
-        margin-top: 24px;
-      }
-      .form-field {
-        display: block;
-        width: 100%;
-        margin-top: 8px;
-      }
-      .create-error {
-        color: #c00;
-        margin-top: 8px;
-      }
     `,
   ],
 })
@@ -234,6 +186,7 @@ export class ProjectIssuesComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly route = inject(ActivatedRoute);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly dialog = inject(MatDialog);
 
   readonly statuses: IssueStatus[] = STATUSES;
 
@@ -247,18 +200,9 @@ export class ProjectIssuesComponent implements OnInit {
   loading = true;
   error: string | null = null;
   dropError: string | null = null;
-  createError: string | null = null;
   projectName = '';
-
   projectId = '';
-  newTitle = '';
-  newDescription = '';
-  newPriority = 'medium';
-  newAssignee = '';
   projectArchived = false;
-  successMessage = '';
-
-  readonly priorities = ['low', 'medium', 'high', 'critical'];
 
   ngOnInit(): void {
     this.projectId = this.route.snapshot.paramMap.get('projectId') ?? '';
@@ -270,6 +214,7 @@ export class ProjectIssuesComponent implements OnInit {
     this.api.getProject(this.projectId).subscribe({
       next: (project) => {
         this.projectName = project.name;
+        this.projectArchived = project.archived;
         this.cdr.markForCheck();
       },
       error: () => {
@@ -278,7 +223,7 @@ export class ProjectIssuesComponent implements OnInit {
     });
   }
 
-  private loadIssues(): void {
+  loadIssues(): void {
     this.api.getIssues(this.projectId).subscribe({
       next: (issues) => {
         this.distributeIssues(issues);
@@ -351,47 +296,14 @@ export class ProjectIssuesComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
-  submitCreate(): void {
-    this.successMessage = '';
-    this.createError = null;
-    const dto: { title: string; description?: string; priority?: string; assignee?: string } = {
-      title: this.newTitle,
-      priority: this.newPriority,
-    };
-    if (this.newDescription.trim()) dto.description = this.newDescription;
-    if (this.newAssignee.trim()) dto.assignee = this.newAssignee;
-
-    this.api.createIssue(this.projectId, dto).subscribe({
-      next: () => {
-        this.successMessage = 'Issue created';
-        this.newTitle = '';
-        this.newDescription = '';
-        this.newPriority = 'medium';
-        this.newAssignee = '';
-        this.loadIssues();
-        this.cdr.markForCheck();
-      },
-      error: (err: HttpErrorResponse) => {
-        if (err.status === 409) {
-          this.projectArchived = true;
-          this.successMessage = '';
-        } else {
-          this.createError = err.message ?? 'Failed to create issue';
-        }
-        this.cdr.markForCheck();
-      },
+  openNewIssueDialog(): void {
+    const ref = this.dialog.open(CreateIssueDialogComponent, {
+      data: { projectId: this.projectId } satisfies CreateIssueDialogData,
     });
-  }
-
-  onNewTitleChange(event: Event): void {
-    this.newTitle = (event.target as HTMLInputElement).value;
-  }
-
-  onNewDescriptionChange(event: Event): void {
-    this.newDescription = (event.target as HTMLTextAreaElement).value;
-  }
-
-  onNewAssigneeChange(event: Event): void {
-    this.newAssignee = (event.target as HTMLInputElement).value;
+    ref.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadIssues();
+      }
+    });
   }
 }
