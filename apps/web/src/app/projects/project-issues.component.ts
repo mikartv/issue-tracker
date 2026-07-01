@@ -48,7 +48,7 @@ export const STATUSES: IssueStatus[] = ['open', 'in_progress', 'done', 'closed']
           @if (dropError) {
             <p class="drop-error">{{ dropError }}</p>
           }
-          <div class="board" [cdkDropListGroup]>
+          <div class="board" cdkDropListGroup>
             @for (status of statuses; track status) {
               <div class="board-column">
                 <div class="column-header">
