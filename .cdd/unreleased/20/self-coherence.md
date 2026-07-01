@@ -1,6 +1,6 @@
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills]
+completed: [Gap, Skills, ACs]
 -->
 
 # Self-coherence — Cycle 20
@@ -68,3 +68,32 @@ Time:        1.995 s, estimated 2 s
 ```
 
 61 tests pass across 6 suites. No regressions. **PASS.**
+
+## §Self-check
+
+**Did α's work push ambiguity onto β?**
+
+No. The fix is a mechanical 2-character removal (`[` and `]`). The error message is explicit; the corrected form is standard Angular directive usage. Both ACs have concrete runner output as evidence. Nothing is left for β to discover.
+
+**Is every claim backed by evidence in the diff?**
+
+Yes.
+- The fix: `git diff origin/main -- apps/web/src/app/projects/project-issues.component.ts` shows exactly one line changed (`-          <div class="board" [cdkDropListGroup]>` → `+          <div class="board" cdkDropListGroup>`).
+- AC1 evidence: ng build output pasted verbatim above, exit 0.
+- AC2 evidence: jest runner output pasted verbatim above, 61/61 pass.
+
+**Peer enumeration:**
+
+γ scaffold confirmed via grep: `[cdkDropListGroup]` appears exactly once in the codebase. No other occurrences in templates or TS files. Peer set = {one occurrence at line 51}. Fixed. No peers exempt.
+
+**Harness audit:**
+
+No schema-bearing contract changed. No harness audit required.
+
+**Implementation contract compliance:**
+
+- Language: TypeScript (strict) — unchanged file, bracket removal only.
+- Package scoping: `apps/web/` only — one file touched.
+- Runtime dependencies: no changes to imports or dependencies.
+- JSON/wire contract: no API changes.
+- Backward-compat: 61 existing tests pass.
