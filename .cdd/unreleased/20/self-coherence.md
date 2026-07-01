@@ -1,6 +1,6 @@
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills, ACs, Self-check]
+completed: [Gap, Skills, ACs, Self-check, Debt]
 -->
 
 # Self-coherence — Cycle 20
@@ -109,3 +109,28 @@ No schema-bearing contract changed. No harness audit required.
 3. **Provisional α close-out** — α exits after signaling review-readiness per bounded dispatch model. `alpha-closeout.md` will be written on re-dispatch after β merge.
 
 No loaded skill would have prevented the known debt items — they are architectural gaps in CI coverage, not authoring failures.
+
+## §CDD Trace
+
+| Step | Role | Artifact | SHA / evidence |
+|------|------|----------|----------------|
+| 1 — Receive | α | Read issue gh #14, γ-scaffold, PROJECT.md, STACK.md, CDD.md, alpha/SKILL.md | branch `cycle/20`; base `8992715` |
+| 2 — Gap identified | α | Gap: NG8002 from `[cdkDropListGroup]` bracket syntax; fix: remove brackets | — |
+| 3 — Peer enumeration | α | `grep -rn 'cdkDropListGroup' apps/web/` → 1 occurrence; no peers exempt | γ-scaffold §Peer enumeration |
+| 4 — Implementation | α | `apps/web/src/app/projects/project-issues.component.ts` line 51: `[cdkDropListGroup]` → `cdkDropListGroup` | commit `73e65bf` |
+| 5 — AC1 oracle | α | `cd apps/web && npx ng build --configuration=production` → exit 0, no NG8002 | output in §ACs |
+| 6 — AC2 oracle | α | `npm run test:web` → 61/61 pass, 6 suites | output in §ACs |
+| 7 — Self-coherence | α | `.cdd/unreleased/20/self-coherence.md` (this file) | commits `0f5323f` → `aa2bd1a` |
+
+**Diff scope (from `git diff origin/main -- apps/web/src/app/projects/project-issues.component.ts | grep -c '^[+-]'`):** 4 lines (2 hunk-header `---`/`+++` lines + 1 removed + 1 added)
+
+**Files touched (`git diff origin/main --stat HEAD`):**
+- `apps/web/src/app/projects/project-issues.component.ts` — 1 line changed (implementation)
+- `.cdd/unreleased/20/self-coherence.md` — this file (α artifact)
+- `.cdd/unreleased/20/alpha-prompt.md`, `beta-prompt.md`, `gamma-scaffold.md` — γ-authored; present on branch, not α-modified
+
+**Caller-path trace:** `cdkDropListGroup` is a directive applied to a host element in the template; it has no TS caller path to enumerate — Angular's template compiler binds it at AOT time. The directive usage is consumed by the board UI (visible in the component template; tested implicitly by the project-issues component spec).
+
+**Git identity:** `git log -1 --format='%ae' HEAD` → `alpha@issue-tracker.cdd.cnos` ✓
+
+**γ-artifact:** `.cdd/unreleased/20/gamma-scaffold.md` present on `origin/cycle/20` — canonical §5.1 path ✓
