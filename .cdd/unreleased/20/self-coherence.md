@@ -1,6 +1,6 @@
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills, ACs, Self-check, Debt]
+completed: [Gap, Skills, ACs, Self-check, Debt, CDD Trace]
 -->
 
 # Self-coherence — Cycle 20
@@ -134,3 +134,25 @@ No loaded skill would have prevented the known debt items — they are architect
 **Git identity:** `git log -1 --format='%ae' HEAD` → `alpha@issue-tracker.cdd.cnos` ✓
 
 **γ-artifact:** `.cdd/unreleased/20/gamma-scaffold.md` present on `origin/cycle/20` — canonical §5.1 path ✓
+
+## Review-readiness | round 1 | base SHA: 8992715 | implementation SHA: 73e65bf | branch CI: local green (ng build + 61 tests; CI run pending push) | ready for β
+
+**Pre-review gate (§2.6):**
+
+| Row | Check | Result |
+|-----|-------|--------|
+| 1 | `origin/cycle/20` rebased onto `origin/main` | PASS — merge-base `8992715` = origin/main SHA `8992715`; observed 2026-07-01 |
+| 2 | self-coherence.md carries CDD Trace through step 7 | PASS |
+| 3 | tests present or explicit reason none apply | PASS — no new tests required; this is a 2-char syntax fix; existing 61 pass |
+| 4 | every AC has evidence | PASS — AC1 ng build output pasted; AC2 jest output pasted |
+| 5 | known debt explicit | PASS — §Debt: bundle warning, ng build CI gap, provisional close-out |
+| 6 | schema/shape audit | N/A — no schema-bearing contract changed |
+| 7 | peer enumeration completed | PASS — 1 occurrence confirmed via grep; no peers exempt |
+| 8 | harness audit | N/A — no schema-bearing contract changed |
+| 9 | post-patch re-audit | N/A — single-commit fix; no mid-cycle patch |
+| 10 | branch CI green on head | PENDING push — local `ng build` exits 0; 61 tests pass; CI will run on push |
+| 11 | artifact enumeration matches diff | PASS — 1 implementation file + self-coherence.md both declared in §CDD Trace step 6 |
+| 12 | caller-path trace for new modules | N/A — no new modules added |
+| 13 | test assertion count from runner output | PASS — `Tests: 61 passed, 61 total` (runner output pasted verbatim in §ACs AC2) |
+| 14 | commit author email | PASS — `alpha@issue-tracker.cdd.cnos` (verified via `git log -1 --format='%ae' HEAD`) |
+| 15 | γ-artifact presence | PASS — `.cdd/unreleased/20/gamma-scaffold.md` at canonical §5.1 path on `origin/cycle/20` |
