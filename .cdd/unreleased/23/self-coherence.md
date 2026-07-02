@@ -1,6 +1,6 @@
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills, ACs, Self-check]
+completed: [Gap, Skills, ACs, Self-check, Debt]
 -->
 
 # Self-coherence — Cycle 23
@@ -146,3 +146,29 @@ Yes. Each claim is traceable to a file and line number in `git diff origin/main.
 
 **Session interruption observation:**
 The initial α session committed the implementation (`a30b34a`) and §Gap only, then stopped. This resumption session writes §Skills through §Review-readiness and `alpha-closeout.md`. The §Gap content is unchanged. The implementation is unchanged. This is a documentation-only resumption.
+
+---
+
+## §Debt
+
+### D1 — Snackbar panel-class style uses `!important` overrides (minor)
+
+The `.snack-success`/`.snack-error` panel-class rules in `styles.scss` use `!important` to override AM17's default MDC snackbar surface background. This is a known AM17 Material theming limitation — the MDC snackbar does not expose a direct theming token for the surface color in AM17 form, and panel-class CSS must override the MDC default. This is a cosmetic technical debt, not a correctness issue. Debt class: CSS specificity workaround until Angular Material 18 migration (existing debt from cycle 14 — AM18 upgrade deferred as a separate cycle).
+
+### D2 — No issue-create success toast in `project-issues.component.ts`
+
+Per the γ-scaffold action routing table: "project-issues — issue create: no toast needed — visual feedback is dialog disappearing + list reload." The implementation follows this — `afterClosed()` triggers `loadIssues()` on result without emitting a toast. This is consistent with the scaffold decision, not a defect. Recorded as debt for visibility: if a future issue improves create-issue dialog UX, a success toast from the host component would be a natural addition.
+
+### D3 — `alpha-closeout.md` written pre-β (provisional)
+
+β has not yet reviewed this cycle. `alpha-closeout.md` is written at review-readiness time per `alpha/SKILL.md §2.8` provisional close-out fallback. It is explicitly marked `[provisional — pending β outcome]`.
+
+### D4 — Pre-existing debt carried forward
+
+Existing debt from `.cdd/PROJECT.md §Known unknowns`:
+- Angular Material 18 upgrade required for M3 `mat.define-theme` API (cycle 14 §Debt) — still deferred
+- `ng build` bundle size warning — still deferred
+- CI does not run `ng build` — still deferred
+- Root redirect spec (`app.routes.spec.ts`) — still deferred
+
+No new debt introduced by this cycle beyond D1–D3 above.
