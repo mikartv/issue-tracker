@@ -1,6 +1,6 @@
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills, ACs, Self-check, Debt, CDD Trace]
+completed: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
 -->
 
 # Self-coherence — Cycle 23
@@ -221,3 +221,27 @@ CDS lifecycle steps 0–7 (α-side).
 - `NotificationService` (`apps/web/src/app/shared/notification.service.ts`) — caller sites confirmed: `projects-list.component.ts` (L165, L202, L206, L215, L219), `project-issues.component.ts` (L184, L284), `issue-detail.component.ts` (L240, L313, L343, L349, L363, L368), `create-issue-dialog.component.ts` (L92, L133). 11 call sites across 4 components. Non-test callers: all 4 components.
 
 **Total:** 15 files, +582 insertions, −66 deletions (including CDD artifact files). Source-only (excluding CDD artifacts): 11 files, +287 insertions, −76 deletions.
+
+---
+
+## §Review-readiness | round 1 | base SHA: 0e0c4c4 | impl SHA: a30b34a | branch CI: unavailable (no CI runs on cycle/23 branch) | ready for β
+
+Pre-review gate (all 15 rows):
+
+| Row | Check | Result |
+|-----|-------|--------|
+| 1 | `origin/cycle/23` rebased onto current `origin/main` | **PASS** — merge-base = `0e0c4c4` = `origin/main` HEAD (verified at 2026-07-02; base SHA `0e0c4c4`, current main SHA `0e0c4c4` — identical, no drift) |
+| 2 | `self-coherence.md` carries CDD Trace through step 7 | **PASS** — §CDD Trace steps 0–7 present |
+| 3 | Tests present or explicit reason none apply | **PASS** — 84 web tests pass (8 suites); runner output: `Tests: 84 passed, 84 total` |
+| 4 | Every AC has evidence | **PASS** — §ACs maps each AC to file:line evidence |
+| 5 | Known debt is explicit | **PASS** — §Debt enumerates D1–D4 |
+| 6 | Schema/shape audit completed when contracts changed | **N/A** — no API wire contract changed; web-only change |
+| 7 | Peer enumeration completed when closure claim touches a family | **PASS** — all 4 feedback-emitting components enumerated and updated |
+| 8 | Harness audit completed when schema-bearing contract changed | **N/A** — no schema-bearing contract change |
+| 9 | Post-patch re-audit: every language in diff | **PASS** — diff is TypeScript + SCSS only; TypeScript: `npm run test:web` passes; SCSS: no compilation errors; `ng build --configuration=production` exits 0 |
+| 10 | Branch CI green on head commit | **PARTIAL** — GitHub Actions CI is not triggered for `cycle/23` push (CI workflow triggers on `push` to `main` and PRs, not arbitrary branches per `.github/workflows/ci.yml`). `npm run test:web` → 84 tests, exits 0 locally. `ng build --configuration=production` → exits 0, no NG8XXX errors locally. CI-unavailable declared; β should verify before merge. |
+| 11 | Artifact enumeration matches diff | **PASS** — all 11 source files in `git diff --stat origin/main..HEAD` explicitly mentioned in §CDD Trace step 6; 4 CDD artifact files mentioned as CDD artifacts |
+| 12 | Caller-path trace for new modules | **PASS** — `NotificationService`: 11 call sites across 4 non-test components confirmed (§CDD Trace step 6) |
+| 13 | Test assertion count from runner output | **PASS** — actual runner output: `Tests: 84 passed, 84 total` (not manually enumerated) |
+| 14 | α commit author email matches canonical pattern | **PASS** — `git log -1 --format='%ae' a30b34a` → `alpha@issue-tracker.cdd.cnos`; current HEAD author: `alpha@issue-tracker.cdd.cnos` |
+| 15 | γ-artifact at §5.1 canonical path | **PASS** — `git cat-file -e origin/cycle/23:.cdd/unreleased/23/gamma-scaffold.md` → present; γ-artifact at canonical §5.1 path |
