@@ -81,6 +81,39 @@ $theme: mat.define-light-theme((
 }
 
 // ============================================================
+// MatSnackBar panel-class overrides (AM17 MDC selectors)
+// ============================================================
+
+.snack-success .mdc-snackbar__surface {
+  background-color: var(--it-status-done) !important;
+  color: #fff !important;
+}
+
+.snack-success .mdc-button__label {
+  color: #fff !important;
+}
+
+.snack-error .mdc-snackbar__surface {
+  background-color: var(--it-priority-critical) !important;
+  color: #fff !important;
+}
+
+.snack-error .mdc-button__label {
+  color: #fff !important;
+}
+
+// ============================================================
+// Shared empty-state pattern
+// ============================================================
+
+.app-empty {
+  color: rgba(0, 0, 0, 0.5);
+  font-style: italic;
+  text-align: center;
+  padding: var(--it-space-2) 0;
+}
+
+// ============================================================
 // Global reset
 // ============================================================
 

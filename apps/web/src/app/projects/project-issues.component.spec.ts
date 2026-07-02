@@ -10,6 +10,7 @@ import { ProjectIssuesComponent } from './project-issues.component';
 import { ApiService } from '../api/api.service';
 import type { Issue, Project } from '../api/api.service';
 import { CreateIssueDialogComponent } from './create-issue-dialog.component';
+import { NotificationService } from '../shared/notification.service';
 
 const BASE = 'http://localhost:3000/api/v1';
 const PROJECT_ID = 'proj-1';
@@ -41,6 +42,7 @@ describe('ProjectIssuesComponent', () => {
   let fixture: ComponentFixture<ProjectIssuesComponent>;
   let component: ProjectIssuesComponent;
   let httpMock: HttpTestingController;
+  let notificationSpy: { success: jest.Mock; error: jest.Mock; info: jest.Mock };
 
   const mockIssues: Issue[] = [
     makeIssue({ id: 'i1', title: 'Fix bug', status: 'open', priority: 'high' }),
@@ -59,6 +61,8 @@ describe('ProjectIssuesComponent', () => {
   }
 
   beforeEach(async () => {
+    notificationSpy = { success: jest.fn(), error: jest.fn(), info: jest.fn() };
+
     await TestBed.configureTestingModule({
       imports: [ProjectIssuesComponent, HttpClientTestingModule, NoopAnimationsModule, RouterTestingModule, MatDialogModule],
       providers: [
@@ -72,6 +76,7 @@ describe('ProjectIssuesComponent', () => {
             },
           },
         },
+        { provide: NotificationService, useValue: notificationSpy },
       ],
     }).compileComponents();
 
@@ -251,7 +256,7 @@ describe('ProjectIssuesComponent', () => {
     expect(component.columns['done']).not.toContain(issue);
   });
 
-  it('AC4: on updateIssueStatus error, dropError message is shown', () => {
+  it('AC4: on updateIssueStatus error, notification.error is called with failure message', () => {
     const apiService = TestBed.inject(ApiService);
     jest.spyOn(apiService, 'updateIssueStatus').mockReturnValue(
       throwError(() => new Error('Server error')),
@@ -277,9 +282,8 @@ describe('ProjectIssuesComponent', () => {
     component.onDrop(event, 'done');
     fixture.detectChanges();
 
-    expect(component.dropError).toBeTruthy();
-    const errorEl = fixture.nativeElement.querySelector('.drop-error');
-    expect(errorEl).not.toBeNull();
+    expect(notificationSpy.error).toHaveBeenCalled();
+    expect(fixture.nativeElement.querySelector('.drop-error')).toBeNull();
   });
 
   // ── AC5: getProject called; heading shows project name ───────────────────────

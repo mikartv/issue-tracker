@@ -16,6 +16,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { ApiService, type Issue, type Comment } from '../api/api.service';
 import { ChipComponent } from '../shared/chip.component';
 import { STATUS_LABELS } from '../shared/issue-labels';
+import { NotificationService } from '../shared/notification.service';
 
 const NEXT_STATUS: Record<string, string | null> = {
   open: 'in_progress',
@@ -43,8 +44,11 @@ const NEXT_STATUS: Record<string, string | null> = {
       <mat-spinner diameter="40" />
     } @else if (notFound) {
       <p class="error">Issue not found</p>
-    } @else if (error) {
-      <p class="error">Error: {{ error }}</p>
+    } @else if (loadError) {
+      <div class="error-container">
+        <p class="error">Error: {{ loadError }}</p>
+        <a routerLink="/projects">Back to projects</a>
+      </div>
     } @else if (issue) {
       <div class="detail-layout">
         <!-- Main content area -->
@@ -79,7 +83,7 @@ const NEXT_STATUS: Record<string, string | null> = {
                   </div>
                 </div>
               } @empty {
-                <p class="comment-empty">No comments yet.</p>
+                <p class="comment-empty app-empty">No comments yet.</p>
               }
             </div>
 
@@ -144,9 +148,6 @@ const NEXT_STATUS: Record<string, string | null> = {
                 <button mat-button class="sidebar-btn" (click)="cancelEdit()">Cancel</button>
               }
 
-              @if (editSuccessMessage) {
-                <p class="success">{{ editSuccessMessage }}</p>
-              }
             </mat-card-content>
           </mat-card>
 
@@ -172,7 +173,12 @@ const NEXT_STATUS: Record<string, string | null> = {
       .issue-title { margin-top: 0; }
       .detail-description { color: rgba(0, 0, 0, 0.7); }
       .error { color: var(--it-priority-critical); }
-      .success { color: var(--it-status-done); }
+      .error-container {
+        padding: var(--it-space-4);
+        display: flex;
+        flex-direction: column;
+        gap: var(--it-space-2);
+      }
       .form-field { display: block; width: 100%; margin-top: var(--it-space-2); }
       .sidebar-field {
         display: flex;
@@ -231,12 +237,13 @@ export class IssueDetailComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly route = inject(ActivatedRoute);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly notification = inject(NotificationService);
 
   issue: Issue | null = null;
   comments: Comment[] = [];
   loading = true;
   notFound = false;
-  error: string | null = null;
+  loadError: string | null = null;
   commentBody = '';
   userEmail = '';
 
@@ -245,7 +252,6 @@ export class IssueDetailComponent implements OnInit {
   editDescription = '';
   editPriority = '';
   editAssignee = '';
-  editSuccessMessage = '';
 
   readonly priorities = ['low', 'medium', 'high', 'critical'];
 
@@ -281,7 +287,7 @@ export class IssueDetailComponent implements OnInit {
         if (err.status === 404) {
           this.notFound = true;
         } else {
-          this.error = err.message ?? 'Failed to load issue';
+          this.loadError = err.message ?? 'Failed to load issue';
         }
         this.cdr.markForCheck();
       },
@@ -303,12 +309,14 @@ export class IssueDetailComponent implements OnInit {
     const next = this.nextStatus;
     this.api.updateIssueStatus(issueId, next).subscribe({
       next: () => this.loadIssue(issueId),
+      error: (err: HttpErrorResponse) => {
+        this.notification.error(err.message ?? 'Failed to update status');
+      },
     });
   }
 
   enterEditMode(): void {
     if (!this.issue) return;
-    this.editSuccessMessage = '';
     this.editTitle = this.issue.title;
     this.editDescription = this.issue.description ?? '';
     this.editPriority = this.issue.priority;
@@ -332,13 +340,13 @@ export class IssueDetailComponent implements OnInit {
       assignee: this.editAssignee || undefined,
     }).subscribe({
       next: () => {
-        this.editSuccessMessage = 'Issue saved';
+        this.notification.success('Issue saved');
         this.editMode = false;
         this.cdr.markForCheck();
         this.loadIssue(issueId);
       },
       error: (err: HttpErrorResponse) => {
-        this.error = err.message ?? 'Failed to save issue';
+        this.notification.error(err.message ?? 'Failed to save issue');
         this.cdr.markForCheck();
       },
     });
@@ -352,7 +360,12 @@ export class IssueDetailComponent implements OnInit {
     this.api.addComment(issueId, body, email).subscribe({
       next: () => {
         this.commentBody = '';
+        this.notification.success('Comment added');
         this.loadComments(issueId);
+        this.cdr.markForCheck();
+      },
+      error: (err: HttpErrorResponse) => {
+        this.notification.error(err.message ?? 'Failed to add comment');
         this.cdr.markForCheck();
       },
     });

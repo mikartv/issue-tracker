@@ -11,6 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ApiService } from '../api/api.service';
+import { NotificationService } from '../shared/notification.service';
 
 export interface CreateIssueDialogData {
   projectId: string;
@@ -53,9 +54,6 @@ export interface CreateIssueDialogData {
       @if (archivedError) {
         <p class="archived-error">Project is archived — cannot create issues</p>
       }
-      @if (submitError) {
-        <p class="submit-error">{{ submitError }}</p>
-      }
     </mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-button (click)="cancel()">Cancel</button>
@@ -80,11 +78,7 @@ export interface CreateIssueDialogData {
         min-width: 360px;
       }
       .archived-error {
-        color: #c00;
-        margin-top: var(--it-space-2, 8px);
-      }
-      .submit-error {
-        color: #c00;
+        color: var(--it-priority-critical);
         margin-top: var(--it-space-2, 8px);
       }
     `,
@@ -95,13 +89,13 @@ export class CreateIssueDialogComponent {
   private readonly dialogRef = inject<MatDialogRef<CreateIssueDialogComponent>>(MatDialogRef);
   private readonly data = inject<CreateIssueDialogData>(MAT_DIALOG_DATA);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly notification = inject(NotificationService);
 
   title = '';
   description = '';
   priority = 'medium';
   assignee = '';
   archivedError = false;
-  submitError: string | null = null;
 
   readonly priorities = ['low', 'medium', 'high', 'critical'];
 
@@ -119,7 +113,6 @@ export class CreateIssueDialogComponent {
 
   submit(): void {
     this.archivedError = false;
-    this.submitError = null;
 
     const dto: { title: string; description?: string; priority?: string; assignee?: string } = {
       title: this.title,
@@ -135,10 +128,11 @@ export class CreateIssueDialogComponent {
       error: (err: HttpErrorResponse) => {
         if (err.status === 409) {
           this.archivedError = true;
+          this.cdr.markForCheck();
         } else {
-          this.submitError = err.message ?? 'Failed to create issue';
+          this.notification.error(err.message ?? 'Failed to create issue');
+          this.cdr.markForCheck();
         }
-        this.cdr.markForCheck();
       },
     });
   }
