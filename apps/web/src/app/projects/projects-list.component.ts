@@ -17,6 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiService, type Project } from '../api/api.service';
+import { NotificationService } from '../shared/notification.service';
 
 @Component({
   selector: 'app-projects-list',
@@ -65,9 +66,6 @@ import { ApiService, type Project } from '../api/api.service';
                   @if (!project.archived) {
                     <button mat-stroked-button (click)="archiveProject(project)">Archive</button>
                   }
-                  @if (archiveErrors[project.id]) {
-                    <span class="inline-error">{{ archiveErrors[project.id] }}</span>
-                  }
                 </mat-card-actions>
               </mat-card>
             }
@@ -89,9 +87,6 @@ import { ApiService, type Project } from '../api/api.service';
         >
           Create
         </button>
-        @if (createError) {
-          <p class="error">{{ createError }}</p>
-        }
       </div>
     </div>
   `,
@@ -123,11 +118,6 @@ import { ApiService, type Project } from '../api/api.service';
       }
       .error {
         color: var(--it-priority-critical);
-      }
-      .inline-error {
-        color: var(--it-priority-critical);
-        font-size: 0.875em;
-        margin-left: 8px;
       }
       .archived-badge {
         font-size: 0.75em;
@@ -172,13 +162,12 @@ export class ProjectsListComponent implements OnInit {
 
   private readonly api = inject(ApiService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly notification = inject(NotificationService);
 
   projects: Project[] = [];
   loading = true;
   error: string | null = null;
-  createError: string | null = null;
   newProjectName = '';
-  archiveErrors: Record<string, string> = {};
 
   ngOnInit(): void {
     this.loadProjects();
@@ -206,15 +195,15 @@ export class ProjectsListComponent implements OnInit {
   createProject(): void {
     const name = this.newProjectName.trim();
     if (!name) return;
-    this.createError = null;
 
     this.api.createProject(name).subscribe({
       next: () => {
         this.newProjectName = '';
+        this.notification.success('Project created');
         this.loadProjects();
       },
       error: (err: HttpErrorResponse) => {
-        this.createError = err.message ?? 'Failed to create project';
+        this.notification.error(err.message ?? 'Failed to create project');
         this.cdr.markForCheck();
       },
     });
@@ -223,12 +212,11 @@ export class ProjectsListComponent implements OnInit {
   archiveProject(project: Project): void {
     this.api.archiveProject(project.id).subscribe({
       next: () => {
-        this.archiveErrors[project.id] = '';
+        this.notification.success('Project archived');
         this.loadProjects();
       },
       error: (err: HttpErrorResponse) => {
-        this.archiveErrors[project.id] =
-          err.status === 409 ? 'Already archived' : (err.message ?? 'Archive failed');
+        this.notification.error(err.message ?? 'Failed to archive project');
         this.cdr.markForCheck();
       },
     });

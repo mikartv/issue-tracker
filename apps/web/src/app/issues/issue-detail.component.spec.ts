@@ -6,6 +6,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { IssueDetailComponent } from './issue-detail.component';
 import { ApiService, type Issue, type Comment } from '../api/api.service';
+import { NotificationService } from '../shared/notification.service';
 
 const ISSUE_ID = 'issue-1';
 const PROJECT_ID = 'proj-1';
@@ -69,10 +70,12 @@ describe('IssueDetailComponent', () => {
   let fixture: ComponentFixture<IssueDetailComponent>;
   let component: IssueDetailComponent;
   let apiMock: ApiMock;
+  let notificationSpy: { success: jest.Mock; error: jest.Mock; info: jest.Mock };
 
   beforeEach(() => {
     localStorage.clear();
     apiMock = buildApiMock();
+    notificationSpy = { success: jest.fn(), error: jest.fn(), info: jest.fn() };
   });
 
   async function setup(mock: ApiMock = apiMock): Promise<void> {
@@ -81,6 +84,7 @@ describe('IssueDetailComponent', () => {
       providers: [
         { provide: ApiService, useValue: mock },
         { provide: ActivatedRoute, useValue: mockRoute },
+        { provide: NotificationService, useValue: notificationSpy },
       ],
     }).compileComponents();
 
@@ -176,6 +180,37 @@ describe('IssueDetailComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Issue not found');
   });
 
+  it('AC2-loadError: non-404 load error shows error-container with back link', async () => {
+    const serverErrorMock: ApiMock = {
+      getIssue: jest
+        .fn()
+        .mockReturnValue(
+          throwError(() => new HttpErrorResponse({ status: 500, statusText: 'Server Error' })),
+        ),
+      getComments: jest.fn().mockReturnValue(of([])),
+      addComment: jest.fn(),
+      updateIssueStatus: jest.fn(),
+      updateIssue: jest.fn(),
+    };
+
+    await setup(serverErrorMock);
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    // Error container (not bare page-replacing paragraph)
+    const errorContainer = el.querySelector('.error-container');
+    expect(errorContainer).not.toBeNull();
+
+    // Back link is visible inside the error container
+    const backLink = errorContainer!.querySelector('a');
+    expect(backLink).not.toBeNull();
+    expect(backLink!.getAttribute('href')).toContain('projects');
+
+    // The full detail layout is NOT rendered
+    expect(el.querySelector('.detail-layout')).toBeNull();
+  });
+
   it('AC2a: edit button present in view mode; clicking it renders edit form fields', async () => {
     await setup();
     fixture.detectChanges();
@@ -225,7 +260,7 @@ describe('IssueDetailComponent', () => {
     expect(saveBtn?.disabled).toBe(true);
   });
 
-  it('AC6: edit — success message appears in view mode after successful save', async () => {
+  it('AC6: edit — notification.success called with "Issue saved" after successful save', async () => {
     await setup();
     fixture.detectChanges();
     fixture.detectChanges();
@@ -236,9 +271,8 @@ describe('IssueDetailComponent', () => {
 
     component.saveEdit();
     fixture.detectChanges();
-    fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Issue saved');
+    expect(notificationSpy.success).toHaveBeenCalledWith('Issue saved');
   });
 
   it('label-AC1: status in_progress renders as "In Progress" via chip (not raw key)', async () => {

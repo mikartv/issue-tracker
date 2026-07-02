@@ -4,6 +4,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ProjectsListComponent } from './projects-list.component';
 import type { Project } from '../api/api.service';
+import { NotificationService } from '../shared/notification.service';
 
 const BASE = 'http://localhost:3000/api/v1';
 
@@ -11,6 +12,7 @@ describe('ProjectsListComponent', () => {
   let fixture: ComponentFixture<ProjectsListComponent>;
   let component: ProjectsListComponent;
   let httpMock: HttpTestingController;
+  let notificationSpy: { success: jest.Mock; error: jest.Mock; info: jest.Mock };
 
   const mockProjects: Project[] = [
     { id: '1', name: 'Alpha', archived: false, created_at: '', updated_at: '' },
@@ -18,8 +20,13 @@ describe('ProjectsListComponent', () => {
   ];
 
   beforeEach(async () => {
+    notificationSpy = { success: jest.fn(), error: jest.fn(), info: jest.fn() };
+
     await TestBed.configureTestingModule({
       imports: [ProjectsListComponent, HttpClientTestingModule, NoopAnimationsModule, RouterTestingModule],
+      providers: [
+        { provide: NotificationService, useValue: notificationSpy },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProjectsListComponent);
@@ -107,7 +114,41 @@ describe('ProjectsListComponent', () => {
     expect(fixture.nativeElement.querySelector('table')).toBeNull();
   });
 
-  it('shows inline 409 error on archive conflict without navigating', () => {
+  it('AC1-notification: createProject success calls notification.success', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(`${BASE}/projects`).flush(mockProjects);
+    fixture.detectChanges();
+
+    component.newProjectName = 'Gamma';
+    component.createProject();
+
+    httpMock.expectOne(`${BASE}/projects`).flush(
+      { id: '3', name: 'Gamma', archived: false, created_at: '', updated_at: '' },
+    );
+    // reload after create
+    httpMock.expectOne(`${BASE}/projects`).flush(mockProjects);
+    fixture.detectChanges();
+
+    expect(notificationSpy.success).toHaveBeenCalledWith('Project created');
+  });
+
+  it('AC1-notification: createProject error calls notification.error', () => {
+    fixture.detectChanges();
+    httpMock.expectOne(`${BASE}/projects`).flush(mockProjects);
+    fixture.detectChanges();
+
+    component.newProjectName = 'Gamma';
+    component.createProject();
+
+    httpMock
+      .expectOne(`${BASE}/projects`)
+      .flush({ message: 'Server error' }, { status: 500, statusText: 'Internal Server Error' });
+    fixture.detectChanges();
+
+    expect(notificationSpy.error).toHaveBeenCalled();
+  });
+
+  it('AC1-notification: archiveProject error calls notification.error', () => {
     fixture.detectChanges();
     httpMock.expectOne(`${BASE}/projects`).flush(mockProjects);
     fixture.detectChanges();
@@ -119,6 +160,6 @@ describe('ProjectsListComponent', () => {
       .flush({ message: 'Already archived' }, { status: 409, statusText: 'Conflict' });
     fixture.detectChanges();
 
-    expect(component.archiveErrors['1']).toBe('Already archived');
+    expect(notificationSpy.error).toHaveBeenCalled();
   });
 });

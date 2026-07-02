@@ -15,6 +15,7 @@ import { ApiService, type Issue } from '../api/api.service';
 import { ChipComponent } from '../shared/chip.component';
 import { STATUS_LABELS } from '../shared/issue-labels';
 import { CreateIssueDialogComponent, CreateIssueDialogData } from './create-issue-dialog.component';
+import { NotificationService } from '../shared/notification.service';
 
 export type IssueStatus = 'open' | 'in_progress' | 'done' | 'closed';
 
@@ -47,9 +48,6 @@ export const STATUSES: IssueStatus[] = ['open', 'in_progress', 'done', 'closed']
         @if (error) {
           <p class="error">{{ error }}</p>
         } @else {
-          @if (dropError) {
-            <p class="drop-error">{{ dropError }}</p>
-          }
           <div class="board" cdkDropListGroup>
             @for (status of statuses; track status) {
               <div class="board-column">
@@ -66,7 +64,7 @@ export const STATUSES: IssueStatus[] = ['open', 'in_progress', 'done', 'closed']
                   (cdkDropListDropped)="onDrop($event, status)"
                 >
                   @if (columns[status].length === 0) {
-                    <p class="empty-col">No issues</p>
+                    <p class="empty-col app-empty">No issues</p>
                   }
                   @for (issue of columns[status]; track issue.id) {
                     <div class="issue-card" cdkDrag [cdkDragData]="issue">
@@ -100,11 +98,7 @@ export const STATUSES: IssueStatus[] = ['open', 'in_progress', 'done', 'closed']
         margin-bottom: 16px;
       }
       .error {
-        color: #c00;
-      }
-      .drop-error {
-        color: #c00;
-        margin-bottom: 8px;
+        color: var(--it-priority-critical);
       }
       .board {
         display: flex;
@@ -187,6 +181,7 @@ export class ProjectIssuesComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly dialog = inject(MatDialog);
+  private readonly notification = inject(NotificationService);
 
   readonly statuses: IssueStatus[] = STATUSES;
 
@@ -199,7 +194,6 @@ export class ProjectIssuesComponent implements OnInit {
 
   loading = true;
   error: string | null = null;
-  dropError: string | null = null;
   projectName = '';
   projectId = '';
   projectArchived = false;
@@ -277,7 +271,6 @@ export class ProjectIssuesComponent implements OnInit {
     this.api.updateIssueStatus(issue.id, targetStatus).subscribe({
       next: () => {
         issue.status = targetStatus;
-        this.dropError = null;
         this.cdr.markForCheck();
       },
       error: () => {
@@ -288,7 +281,7 @@ export class ProjectIssuesComponent implements OnInit {
           event.currentIndex,
           event.previousIndex,
         );
-        this.dropError = `Failed to move issue to ${STATUS_LABELS[targetStatus] ?? targetStatus}`;
+        this.notification.error(`Failed to move issue to ${STATUS_LABELS[targetStatus] ?? targetStatus}`);
         this.cdr.markForCheck();
       },
     });

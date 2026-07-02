@@ -5,6 +5,7 @@ import { of, throwError } from 'rxjs';
 import { CreateIssueDialogComponent } from './create-issue-dialog.component';
 import { ApiService } from '../api/api.service';
 import type { Issue } from '../api/api.service';
+import { NotificationService } from '../shared/notification.service';
 
 const PROJECT_ID = 'proj-1';
 
@@ -28,12 +29,14 @@ describe('CreateIssueDialogComponent', () => {
   let component: CreateIssueDialogComponent;
   let dialogRefSpy: { close: jest.Mock };
   let apiServiceMock: Partial<ApiService>;
+  let notificationSpy: { success: jest.Mock; error: jest.Mock; info: jest.Mock };
 
   beforeEach(async () => {
     dialogRefSpy = { close: jest.fn() };
     apiServiceMock = {
       createIssue: jest.fn(),
     };
+    notificationSpy = { success: jest.fn(), error: jest.fn(), info: jest.fn() };
 
     await TestBed.configureTestingModule({
       imports: [CreateIssueDialogComponent, NoopAnimationsModule],
@@ -41,6 +44,7 @@ describe('CreateIssueDialogComponent', () => {
         { provide: MatDialogRef, useValue: dialogRefSpy },
         { provide: MAT_DIALOG_DATA, useValue: { projectId: PROJECT_ID } },
         { provide: ApiService, useValue: apiServiceMock },
+        { provide: NotificationService, useValue: notificationSpy },
       ],
     }).compileComponents();
 
@@ -159,7 +163,7 @@ describe('CreateIssueDialogComponent', () => {
     expect(dialogRefSpy.close).not.toHaveBeenCalled();
   });
 
-  it('AC4-archived: non-409 error sets submitError, not archivedError', () => {
+  it('AC4-archived: non-409 error calls notification.error, not archivedError', () => {
     (apiServiceMock.createIssue as jest.Mock).mockReturnValue(
       throwError(() => Object.assign(new Error('Server error'), { status: 500 })),
     );
@@ -169,7 +173,7 @@ describe('CreateIssueDialogComponent', () => {
     fixture.detectChanges();
 
     expect(component.archivedError).toBe(false);
-    expect(component.submitError).toBeTruthy();
+    expect(notificationSpy.error).toHaveBeenCalled();
     expect(dialogRefSpy.close).not.toHaveBeenCalled();
   });
 });
