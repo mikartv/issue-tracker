@@ -1,6 +1,6 @@
 # Project MCP — issue-tracker
 
-**Last verified:** 2026-07-01 (cycle 22 — gh #12 issue-detail redesign sidebar; `npm run test:web` 76 web tests pass; 76 api unchanged = 152 total; `ng build` exits 0)  
+**Last verified:** 2026-07-02 (cycle 23 — gh #13 global feedback NotificationService toasts; `npm run test:web` 84 web tests pass; 76 api unchanged = 160 total; `ng build` exits 0)  
 **Verify with:** `npm run test:all` (from repo root)
 
 ## Build / run / test
@@ -166,6 +166,10 @@ See `.cdd/STACK.md`. Branch per cycle: `cycle/N`. Cycle artifacts: `.cdd/unrelea
 ## Decisions (append-only, short) — cycle 22
 
 - 2026-07-01: Cycle 22 — enhancement: gh #12 `IssueDetailComponent` redesigned. Two-area CSS grid layout (`1fr + 280px` sidebar; single-column at ≤767px). `<aside class="detail-sidebar">` with `<mat-card>` containing status chip, priority chip, assignee, "Move to next status" button, Edit/Save/Cancel controls, back link. Comments `<section>` unconditionally rendered outside all `@if (editMode)` blocks. Inline edit: only title/description toggle in main area; status chip always visible in sidebar. Styled comment thread: `.comment-avatar` (initials), `.comment-author`, `.comment-timestamp`, `.comment-body` divs; no `<ul>/<li>`. R1 token replacements: `#c00` → `var(--it-priority-critical)`, `#0a0` → `var(--it-status-done)`, `#eee` → `rgba(0,0,0,0.08)`. New `getInitials(author)` method. +4 web tests (76 total). gh #12 closed. 0 findings, 1 review round.
+
+## Decisions (append-only, short) — cycle 23
+
+- 2026-07-02: Cycle 23 — enhancement: gh #13 global feedback via `NotificationService`. New `NotificationService` (`apps/web/src/app/shared/notification.service.ts`) — thin `providedIn: 'root'` wrapper around `MatSnackBar` with `success/error/info` methods, AM17 MDC panel-class styles. All four feedback-emitting components updated: `projects-list` (create/archive), `project-issues` (drag-drop error), `issue-detail` (save/status-move/comment/load-error), `create-issue-dialog` (non-409 submit error). Per-component inline feedback fields removed; action outcomes route through `NotificationService`. `issue-detail` load error renamed `loadError` + wrapped in `error-container` with back link. `.app-empty` shared empty-state class added to `styles.scss`; applied to board-column and comment empty states. Hardcoded `#c00`/`#0a0` feedback hex eliminated. +8 web tests (84 total). gh #13 closed. 0 findings, 1 review round.
 
 ## Known unknowns / debt
 
