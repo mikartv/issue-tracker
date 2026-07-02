@@ -1,6 +1,6 @@
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills, ACs]
+completed: [Gap, Skills, ACs, Self-check]
 -->
 
 # Self-coherence — Cycle 23
@@ -119,3 +119,30 @@ Error is now wrapped in a `<div class="error-container">` with a back link. The 
 **Partial note on AC3:** `projects-list.component.ts` uses a pre-existing full-design empty state (`<div class="empty-state">` with `mat-icon`, text, and CTA button from cycle 15 redesign). This does not use `.app-empty`. The γ-scaffold oracle scoped `.app-empty` to board column empty state and comment empty state only — cycle 15's projects-list empty state is a richer designed component, not a bare string. The scaffold AC3 oracle does not require projects-list to adopt `.app-empty`. The two bare strings called out by the scaffold (board column + comment section) are both covered.
 
 **AC3 verdict: MET (scoped to bare-string empty states per scaffold oracle)**
+
+---
+
+## §Self-check
+
+**Did α push ambiguity onto β?**
+
+No. Each AC is mapped to concrete grep-verifiable evidence. The two partial notes (AC2 load error scope, AC3 projects-list exempt) are explicitly stated with reasoning, not left for β to discover.
+
+**Is every claim backed by evidence in the diff?**
+
+Yes. Each claim is traceable to a file and line number in `git diff origin/main..HEAD`.
+
+**Peer enumeration check:**
+- Feedback-emitting surfaces: 4 components touched — `projects-list`, `project-issues`, `issue-detail`, `create-issue-dialog`. All 4 enumerated and updated. No other component in `apps/web/src/` emits user-facing action feedback (verified by grep for `createError`, `archiveError`, `dropError`, `submitError` — 0 hits in remaining component files).
+- `NotificationService` as new module: single non-test caller verification required per pre-review gate row 12. Multiple call sites confirmed above (11 call sites across 4 components). Caller path is sound.
+
+**Harness audit:**
+- No schema-bearing contract change. `NotificationService` is an Angular injectable wrapping `MatSnackBar`; it does not change any API wire format, URL, or JSON shape. Harness audit (row 8) does not apply.
+
+**Inline error fields correctly retained vs routed:**
+- Load errors (`projects-list.error`, `project-issues.error`, `issue-detail.loadError`) remain inline — correct: these are blocking states, not transient outcomes.
+- `create-issue-dialog.archivedError` remains inline — correct: blocking state (cannot create; the dialog stays open with the error).
+- All action outcome errors (create project, archive project, move status, create issue, save issue, add comment) route to `notification.error()` — correct per γ-scaffold action routing table.
+
+**Session interruption observation:**
+The initial α session committed the implementation (`a30b34a`) and §Gap only, then stopped. This resumption session writes §Skills through §Review-readiness and `alpha-closeout.md`. The §Gap content is unchanged. The implementation is unchanged. This is a documentation-only resumption.
