@@ -1,6 +1,6 @@
 <!-- section-manifest
 planned: [Gap, Skills, ACs, Self-check, Debt, CDD Trace, Review-readiness]
-completed: [Gap, Skills, ACs, Self-check, Debt]
+completed: [Gap, Skills, ACs, Self-check, Debt, CDD Trace]
 -->
 
 # Self-coherence — Cycle 23
@@ -172,3 +172,52 @@ Existing debt from `.cdd/PROJECT.md §Known unknowns`:
 - Root redirect spec (`app.routes.spec.ts`) — still deferred
 
 No new debt introduced by this cycle beyond D1–D3 above.
+
+---
+
+## §CDD Trace
+
+CDS lifecycle steps 0–7 (α-side).
+
+| Step | Description | Evidence |
+|------|-------------|---------|
+| 0 | Issue selected | gh #13 selected as P2 enhancement; mode design-and-build |
+| 1 | Branch exists | `cycle/23` created by γ from `origin/main` at `0e0c4c4` |
+| 2 | Tier 1a skills loaded | `CDD.md`, `alpha/SKILL.md` loaded at session start |
+| 3 | Issue read in full | gh #13 body: Problem, Impact, Scope, ACs (3), Proof plan |
+| 4 | Gap identified | `self-coherence.md §Gap` — feedback scattered, page-replacing error, bare empty strings |
+| 5 | Mode: design-and-build | γ-scaffold exists at `.cdd/unreleased/23/gamma-scaffold.md` |
+| 6 | Artifacts produced | See diff scope below |
+| 7 | Self-coherence | This document — §Gap, §Skills, §ACs, §Self-check, §Debt, §CDD Trace |
+
+### Step 6 — Diff scope
+
+**New files:**
+
+| File | +lines | −lines | Note |
+|------|--------|--------|------|
+| `apps/web/src/app/shared/notification.service.ts` | +36 | −1 | New service (the `−1` is the diff header line) |
+| `apps/web/src/app/shared/notification.service.spec.ts` | +72 | −1 | New spec |
+
+**Modified files:**
+
+| File | +lines | −lines | Net | Note |
+|------|--------|--------|-----|------|
+| `apps/web/src/app/projects/projects-list.component.ts` | +7 | −19 | −12 | Inject NotificationService; remove createError/archiveError inline fields |
+| `apps/web/src/app/projects/projects-list.component.spec.ts` | +44 | −3 | +41 | Provide notification spy; update assertions |
+| `apps/web/src/app/projects/project-issues.component.ts` | +6 | −13 | −7 | Inject NotificationService; remove dropError inline; remove hardcoded #c00 |
+| `apps/web/src/app/projects/project-issues.component.spec.ts` | +9 | −5 | +4 | Provide notification spy; update drop-error assertion |
+| `apps/web/src/app/issues/issue-detail.component.ts` | +27 | −14 | +13 | Inject NotificationService; rename error→loadError; wrap in error-container; add action toasts |
+| `apps/web/src/app/issues/issue-detail.component.spec.ts` | +38 | −4 | +34 | Provide notification spy; update save/load-error assertions |
+| `apps/web/src/app/projects/create-issue-dialog.component.ts` | +7 | −13 | −6 | Inject NotificationService; remove submitError inline field |
+| `apps/web/src/app/projects/create-issue-dialog.component.spec.ts` | +7 | −3 | +4 | Provide notification spy; update submit-error assertion |
+| `apps/web/src/styles.scss` | +34 | −1 | +33 | Snackbar panel-class styles; .app-empty rule |
+| `.cdd/unreleased/23/self-coherence.md` | (this file) | — | — | CDD artifact |
+| `.cdd/unreleased/23/gamma-scaffold.md` | γ artifact | — | — | CDD artifact |
+| `.cdd/unreleased/23/alpha-prompt.md` | γ artifact | — | — | CDD artifact |
+| `.cdd/unreleased/23/beta-prompt.md` | γ artifact | — | — | CDD artifact |
+
+**Caller path for new modules (pre-review gate row 12):**
+- `NotificationService` (`apps/web/src/app/shared/notification.service.ts`) — caller sites confirmed: `projects-list.component.ts` (L165, L202, L206, L215, L219), `project-issues.component.ts` (L184, L284), `issue-detail.component.ts` (L240, L313, L343, L349, L363, L368), `create-issue-dialog.component.ts` (L92, L133). 11 call sites across 4 components. Non-test callers: all 4 components.
+
+**Total:** 15 files, +582 insertions, −66 deletions (including CDD artifact files). Source-only (excluding CDD artifacts): 11 files, +287 insertions, −76 deletions.
