@@ -5,19 +5,23 @@ metadata:
   type: project
 ---
 
-Cycle 22 (gh #12 — issue-detail redesign sidebar) is CLOSED as of 2026-07-01. All close-out artifacts on main.
+Cycle 23 (gh #13 — global feedback: NotificationService toasts + empty/error states) is CLOSED as of 2026-07-02. All close-out artifacts on main.
 
-**Why:** γ close-out written at `84bb79e` (main). Merge SHA `0263f2f`. 1 review round, 0 findings. All cycle-22 artifacts at `.cdd/unreleased/22/`. Batch release (cycles 15/17/18/19/20/21/22) pending δ action.
+**Why:** γ close-out written at `475c504` (main). Merge SHA `5ef5197`. 1 review round, 0 findings. All cycle-23 artifacts at `.cdd/unreleased/23/`. Batch release (cycles 15/17/18/19/20/21/22/23) pending δ action.
 
-**How to apply:** Next dispatch is cycle/23 — gh #13 (global feedback — MatSnackBar toasts + empty/error states). Wave continues (gh #11 → #12 → #13).
+**How to apply:** Next dispatch is cycle/24 — gh #8 (Kanban board tracking for project issues). Design wave (gh #11 → #12 → #13) complete; #8 is the next open P2 enhancement.
 
-Test counts after cycle 22 merge: 76 api + 76 web = 152 total (baseline for cycle 23).
+Test counts after cycle 23 merge: 76 api + 84 web = 160 total (baseline for cycle 24).
+
+Notable cycle 23 pattern: α mid-session stop required γ resumption re-dispatch before β. Resumption protocol (alpha/SKILL.md §4 section-manifest) handled correctly. No implementation changes during resumption.
 
 Known structural gaps (unchanged):
-- O1: CI does not trigger on `cycle/*` branches — tests verified locally only.
+- O1: CI does not trigger on `cycle/*` branches — tests verified locally only. Third consecutive deferral — elevated priority.
 - O2: CI does not run `ng build` — AOT errors escape to main (deferred since cycle 20).
 
-Batch release pending: cycles 15, 17, 18, 19, 20, 21, 22. RELEASE.md + directory move + δ preflight + PRAs all deferred to batch release.
+Batch release pending: cycles 15, 17, 18, 19, 20, 21, 22, 23. RELEASE.md + directory move + δ preflight + PRAs all deferred to batch release.
+
+Open issues: gh #8 (Kanban board tracking — selected next MCA), gh #6 (modern app shell — investigate open state; cycle 16 delivered it).
 
 Skill patches in effect (STACK.md):
 - β-rule: Angular ng build — β must run `ng build` for Angular template changes (D-severity RC); landed cycle 19
